@@ -767,7 +767,8 @@
     }
     root.requestAnimationFrame(frame);
 
-    if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    // tek dosyalık sürümde (silik.html) service worker kaydedilmez
+    if (!root.SILIK_STANDALONE && 'serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
       root.addEventListener('load', function () {
         navigator.serviceWorker.register('sw.js').catch(function () {});
       });
