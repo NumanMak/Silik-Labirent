@@ -199,6 +199,22 @@
           return { c: c, s: 0 };
         });
     }
+    if (!keyCands.length) {
+      // kapı tek çıkmaz sokaksa: başlangıçtan en uzak zemin hücresini anahtar yap
+      var far = -1;
+      for (var fi = 0; fi < N; fi++) {
+        if (tiles[fi] === 0 && fi !== door && fi !== start && (far < 0 || dS[fi] > dS[far])) far = fi;
+      }
+      keyCands = [{ c: far, s: 0 }];
+    }
+    // anahtar kapıdan yalnızca yürüyüş yoluyla değil, düz mesafeyle de uzak olsun
+    var minSep = 0.4 * Math.max(w, h);
+    var dx0 = door % w;
+    var dy0 = (door / w) | 0;
+    var sepOk = keyCands.filter(function (k) {
+      return Math.abs((k.c % w) - dx0) + Math.abs(((k.c / w) | 0) - dy0) >= minSep;
+    });
+    if (sepOk.length) keyCands = sepOk;
     var key = keyCands[Math.floor(rand() * Math.min(3, keyCands.length))].c;
 
     /* 4) Ana güzergâh: başlangıç -> anahtar -> kapı */
@@ -310,16 +326,17 @@
     var windRects = [];
     var zones = p.wind || 0;
     for (var z = 0; z < zones; z++) {
-      for (var attempt = 0; attempt < 30; attempt++) {
+      for (var attempt = 0; attempt < 120; attempt++) {
         var zw = Math.round(w * (0.26 + rand() * 0.14));
         var zh = Math.round(h * (0.26 + rand() * 0.14));
         var zx = 1 + Math.floor(rand() * Math.max(1, w - 2 - zw));
         var zy = 1 + Math.floor(rand() * Math.max(1, h - 2 - zh));
-        var zcx = zx + zw / 2;
-        var zcy = zy + zh / 2;
-        var farFromStart = Math.abs(zcx - sc[0]) + Math.abs(zcy - sc[1]) > 7;
+        // başlangıç görüş alanına girmesin: dikdörtgene olan en yakın mesafe > 5 kare
+        var ddx = Math.max(zx - sc[0], 0, sc[0] - (zx + zw - 1));
+        var ddy = Math.max(zy - sc[1], 0, sc[1] - (zy + zh - 1));
+        var farFromStart = Math.hypot(ddx, ddy) > 5;
         var overlaps = windRects.some(function (r) {
-          return Math.abs(r.x + r.w / 2 - zcx) < (r.w + zw) / 2 * 0.8 && Math.abs(r.y + r.h / 2 - zcy) < (r.h + zh) / 2 * 0.8;
+          return !(zx + zw <= r.x || r.x + r.w <= zx || zy + zh <= r.y || r.y + r.h <= zy);
         });
         if (farFromStart && !overlaps) {
           windRects.push({ x: zx, y: zy, w: zw, h: zh });

@@ -15,18 +15,37 @@
     };
   }
 
+  function plain(o) {
+    return o && typeof o === 'object' && !Array.isArray(o);
+  }
+
+  /** Kayıtları temizle: yalnızca sonlu sayılı süre/yıldız taşıyan kayıtlar kalır. */
+  function cleanRecords(src) {
+    var out = {};
+    if (!plain(src)) return out;
+    for (var k in src) {
+      var r = src[k];
+      if (plain(r) && isFinite(r.time) && r.time >= 0 && isFinite(r.stars)) {
+        out[k] = { time: +r.time, stars: Math.max(1, Math.min(3, r.stars | 0)), steps: isFinite(r.steps) ? +r.steps : 0 };
+      }
+    }
+    return out;
+  }
+
   function load() {
     var d = defaults();
     try {
       var raw = root.localStorage.getItem(KEY);
       if (raw) {
         var p = JSON.parse(raw);
-        if (p && typeof p === 'object') {
-          d.unlocked = Math.max(1, p.unlocked | 0);
-          d.best = p.best || {};
-          d.daily = p.daily || {};
-          d.seen = p.seen || {};
-          for (var k in d.settings) if (p.settings && typeof p.settings[k] === 'boolean') d.settings[k] = p.settings[k];
+        // elle düzenlenmiş / bozuk kayıtlara karşı: her alanın türü doğrulanır
+        if (plain(p)) {
+          var u = Number(p.unlocked);
+          d.unlocked = isFinite(u) ? Math.max(1, Math.min(999, Math.floor(u))) : 1;
+          d.best = cleanRecords(p.best);
+          d.daily = cleanRecords(p.daily);
+          d.seen = plain(p.seen) ? p.seen : {};
+          if (plain(p.settings)) for (var k in d.settings) if (typeof p.settings[k] === 'boolean') d.settings[k] = p.settings[k];
         }
       }
     } catch (e) {

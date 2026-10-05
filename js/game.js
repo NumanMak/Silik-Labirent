@@ -177,8 +177,14 @@
         const d = c - p.y;
         if (Math.abs(d) > 1e-4) this.moveY(Math.sign(d) * Math.min(Math.abs(d), pull));
       }
-      const mx = this.moveX(ux * speed * dt);
-      const my = this.moveY(uy * speed * dt);
+      let mx = this.moveX(ux * speed * dt);
+      let my = this.moveY(uy * speed * dt);
+      if (ux && uy) {
+        // bir eksen duvara çarptıysa kalan hızı diğer eksene aktar (koridorda yavaşlama olmasın)
+        const want = speed * dt;
+        if (Math.abs(mx) < 1e-4) my += this.moveY(Math.sign(uy) * Math.max(0, want - Math.abs(my)));
+        else if (Math.abs(my) < 1e-4) mx += this.moveX(Math.sign(ux) * Math.max(0, want - Math.abs(mx)));
+      }
       const dist = Math.hypot(mx, my);
       p.moving = dist > 1e-4;
       if (dist > 1e-4) {
@@ -336,7 +342,7 @@
       if (age <= HOLD) return 1;
       const u = (age - HOLD) / (this.mem - HOLD);
       if (u >= 1) return 0;
-      return 1 - Util.smoothstep(u);
+      return 1 - (0.7 * u + 0.3 * Util.smoothstep(u));
     }
 
     updateMemory(dt) {
@@ -460,7 +466,7 @@
       const sx = s.cx + 0.5;
       const sy = s.cy + 0.5;
       const add = (i) => {
-        if (mask.has(i)) return;
+        if (mask.has(i) || !this.vis[i]) return; // oyuncunun görmediği hücre mürekkeplenmez
         mask.add(i);
         cells.push(i);
       };
@@ -516,7 +522,7 @@
         if (s.type !== 'sound') continue;
         const here = dist[s.cy * w + s.cx];
         s.dir = null;
-        s.atGoal = here === 0;
+        s.atGoal = here >= 0 && here <= 1; // hedefin üstünde ya da yanında
         if (here <= 0) continue;
         let best = -1;
         for (let d = 0; d < 4; d++) {
@@ -656,15 +662,13 @@
       this.buildDisplay();
 
       // iz silinmesi
-      for (let i = this.trail.length - 1; i >= 0; i--) {
+      let expired = false;
+      for (let i = 0; i < this.trail.length; i++) {
         const tp = this.trail[i];
-        const wind = this.wind[this.idx(Math.floor(tp.x), Math.floor(tp.y))] ? 2 : 1;
-        tp.age += dt * wind;
-        if (tp.age >= this.mem) {
-          this.trail.splice(0, i + 1);
-          break;
-        }
+        tp.age += dt * (this.wind[this.idx(Math.floor(tp.x), Math.floor(tp.y))] ? 2 : 1);
+        if (tp.age >= this.mem) expired = true;
       }
+      if (expired) this.trail = this.trail.filter((tp) => tp.age < this.mem);
       this.updateParticles(dt);
     }
 

@@ -138,7 +138,7 @@
     document.addEventListener(
       'touchmove',
       function (e) {
-        if (!e.target.closest || !e.target.closest('.scroll, .card')) e.preventDefault();
+        if (!e.target.closest || !e.target.closest('.scroll, .card, #s-title')) e.preventDefault();
       },
       { passive: false }
     );

@@ -6,7 +6,7 @@
   font-family: "Patrick Hand";
   font-style: normal;
   font-weight: 400;
-  font-display: swap;
+  font-display: block;
   src: url("../fonts/patrick-hand-latin-ext.woff2") format("woff2");
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
@@ -14,7 +14,7 @@
   font-family: "Patrick Hand";
   font-style: normal;
   font-weight: 400;
-  font-display: swap;
+  font-display: block;
   src: url("../fonts/patrick-hand-latin.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
@@ -26,7 +26,7 @@
   --pencil: #4a4743;
   --accent: #b4492f;
   --gold: #c58b1a;
-  --teal: #2f7f86;
+  --teal: #27707a;
   --rose: #c25b7a;
   --hand: "Patrick Hand", "Segoe Print", "Bradley Hand", "Marker Felt", "Comic Neue", "Comic Sans MS", "Chalkboard SE", "Noteworthy", cursive;
   --ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -140,7 +140,13 @@ svg {
   background: rgba(240, 232, 212, 0.5);
 }
 #s-title {
+  justify-content: flex-start;
+  overflow-y: auto;
+  touch-action: pan-y;
   background: radial-gradient(ellipse at 50% 46%, rgba(240, 232, 212, 0.92) 0%, rgba(240, 232, 212, 0.78) 50%, rgba(240, 232, 212, 0.3) 100%);
+}
+#s-title .title-wrap {
+  margin: auto 0; /* sığıyorsa ortala, sığmıyorsa üstten başla ve kaydır */
 }
 
 @keyframes fadein {
@@ -210,9 +216,11 @@ svg {
 .tag em {
   font-style: normal;
   font-family: var(--hand);
+  font-size: 1.2em;
   color: var(--accent);
 }
 .foot {
+  display: none;
   position: absolute;
   bottom: calc(var(--safe-b) + 12px);
   left: 0;
@@ -220,7 +228,12 @@ svg {
   text-align: center;
   font-size: 12.5px;
   color: var(--pencil);
-  opacity: 0.7;
+  opacity: 0.9;
+}
+@media (pointer: coarse) {
+  .foot {
+    display: block;
+  }
 }
 
 /* ---------- Düğmeler ---------- */
@@ -350,7 +363,7 @@ svg {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
   gap: 14px;
 }
 .lvl {
@@ -401,7 +414,7 @@ svg {
   fill: var(--gold);
 }
 .lvl.locked {
-  opacity: 0.5;
+  opacity: 0.65;
   cursor: default;
   background: transparent;
   box-shadow: none;
@@ -426,8 +439,11 @@ svg {
   box-shadow: 3px 4px 0 rgba(180, 73, 47, 0.25);
 }
 .lvl.daily .num {
-  font-size: 22px;
+  font-size: 21px;
   color: var(--accent);
+}
+.lvl.daily .nm {
+  white-space: nowrap;
 }
 .lvl.daily .st {
   margin: 0 0 0 auto;
@@ -635,9 +651,9 @@ svg {
   color: var(--pencil);
 }
 .hm b {
-  flex: none;
-  min-width: 78px;
-  padding: 3px 8px;
+  flex: 0 0 104px;
+  white-space: nowrap;
+  padding: 3px 4px;
   text-align: center;
   font-family: var(--hand);
   font-weight: 400;
@@ -720,6 +736,11 @@ svg {
 }
 #hud[hidden] {
   display: none;
+}
+#hud.overlay .hud-inv,
+#hud.overlay .hud-controls,
+#hud.overlay .hint {
+  visibility: hidden;
 }
 .hud-top {
   position: absolute;
@@ -825,7 +846,7 @@ svg {
   animation: pop 0.4s cubic-bezier(0.2, 1.4, 0.4, 1);
 }
 .chip.flower {
-  color: var(--rose);
+  color: #a23d5f;
 }
 .chip.wind {
   color: #46698a;
@@ -1013,6 +1034,28 @@ svg {
   opacity: 1;
   transform: translateX(-50%);
 }
+/* dar dikey ekranlarda çipler ikinci satıra sarabilir: toast ikisinin de altında kalsın */
+@media (max-width: 560px) and (min-height: 521px) {
+  #toast {
+    top: calc(var(--safe-t) + 154px);
+  }
+}
+@media (max-width: 420px) {
+  .hud-inv {
+    gap: 6px;
+    padding: 0 8px;
+  }
+  .pebble {
+    width: 19px;
+    height: 19px;
+  }
+  .chip {
+    padding: 5px 8px;
+  }
+  .chip.wind span {
+    display: none;
+  }
+}
 #toast.good {
   background: #2f6b4a;
 }
@@ -1027,29 +1070,35 @@ svg {
 
 @media (max-height: 520px) {
   .card {
-    padding: 14px 18px 14px;
+    padding: 12px 18px;
   }
   .card h2 {
     font-size: 26px;
+    margin-bottom: 4px;
   }
   .btn {
-    min-height: 42px;
+    min-height: 44px;
     padding: 9px 18px;
     font-size: 18px;
+  }
+  .btn.small {
+    min-height: 44px;
+  }
+  #btn-start {
+    min-width: 140px;
   }
   .menu {
     gap: 8px;
   }
+  .stars {
+    margin: 2px 0;
+  }
   .stars svg {
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
   }
   .stats {
     margin: 6px 0 2px;
-  }
-  .tag {
-    margin-bottom: 12px;
-    font-size: 14px;
   }
   .foot {
     display: none;
@@ -1057,13 +1106,103 @@ svg {
   .hud-inv {
     top: calc(var(--safe-t) + 58px);
   }
+  #toast {
+    top: calc(var(--safe-t) + 100px);
+  }
   .round.big {
     width: 76px;
     height: 76px;
   }
   .hint {
     bottom: calc(var(--safe-b) + 16px);
-    left: 42%;
+    left: 40%;
+    max-width: min(calc(100vw - 210px), 440px);
+  }
+
+  /* başlık ekranı: solda logo ve yazı, sağda menü */
+  #s-title .title-wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 230px;
+    column-gap: 28px;
+    align-items: center;
+    width: min(720px, 100%);
+    text-align: left;
+  }
+  #s-title .logo {
+    grid-column: 1;
+    justify-content: flex-start;
+    font-size: clamp(44px, 17vh, 84px);
+  }
+  #s-title .pencil-line {
+    grid-column: 1;
+    width: min(240px, 100%);
+    margin: 2px 0 8px;
+  }
+  #s-title .tag {
+    grid-column: 1;
+    max-width: none;
+    margin: 0;
+    font-size: 14px;
+    text-align: left;
+  }
+  #s-title .menu {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    width: 230px;
+  }
+
+  /* tanıtım ve bitiş kartları: solda bilgi, sağda düğmeler */
+  #s-intro .card,
+  #s-win .card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 210px;
+    column-gap: 22px;
+    align-items: start;
+    width: min(700px, 100%);
+    text-align: left;
+  }
+  #s-intro .card > *,
+  #s-win .card > * {
+    grid-column: 1;
+  }
+  #s-intro .card > .menu,
+  #s-win .card > .menu {
+    grid-column: 2;
+    grid-row: 1 / span 8;
+    align-self: center;
+    margin: 0;
+    width: 100%;
+  }
+  #s-win .stars {
+    justify-content: flex-start;
+  }
+  #s-win .stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .newbox {
+    margin-bottom: 8px;
+    padding: 8px 10px;
+  }
+  .newbox h3 {
+    font-size: 16px;
+  }
+  .newbox p {
+    font-size: 13px;
+    line-height: 1.35;
+  }
+  .newbox svg {
+    width: 26px;
+    height: 26px;
+  }
+  .sub {
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  .how-mini {
+    margin-bottom: 0;
+  }
+  .hm {
+    margin: 4px 0;
   }
 }
 @media (max-width: 380px) {

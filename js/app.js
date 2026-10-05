@@ -36,6 +36,7 @@
   var lastTimeText = '';
   var wake = null;
   var installEvent = null;
+  var resetTimer = null;
 
   /* ---------- yardımcılar ---------- */
 
@@ -79,6 +80,8 @@
 
   function lockScreen() {
     try {
+      var pp = document.permissionsPolicy || document.featurePolicy;
+      if (pp && pp.allowsFeature && !pp.allowsFeature('screen-wake-lock')) return; // gömülü sayfada izin yok
       if ('wakeLock' in navigator && !wake) {
         navigator.wakeLock.request('screen').then(function (l) {
           wake = l;
@@ -109,6 +112,14 @@
     });
     var inLevel = App.mode === 'intro' || App.mode === 'play' || App.mode === 'pause' || App.mode === 'win';
     hud.root.hidden = !inLevel;
+    hud.root.classList.toggle('overlay', App.mode === 'intro' || App.mode === 'win');
+    if (name === 'intro' || name === 'win') hud.toast.className = '';
+    if (name) {
+      // kartlar ve listeler her açılışta en üstten başlasın
+      $$('#s-' + name + ', #s-' + name + ' .card, #s-' + name + ' .scroll').forEach(function (e) {
+        e.scrollTop = 0;
+      });
+    }
     if (name === 'levels') buildLevels();
     if (name === 'settings') syncSettings();
     if (name === 'title') syncTitle();
@@ -282,7 +293,7 @@
     setScreen(null);
     Input.setEnabled(true);
     lockScreen();
-    if (App.world.inWind) Audio.setWind(1);
+    if (App.world.inWind && App.world.state === 'play') Audio.setWind(1);
   }
 
   function exitToMenu() {
@@ -400,14 +411,20 @@
     unlockScreen();
     clearHint();
     hud.btnStone.classList.remove('pulse');
+    Audio.setWind(0);
     Audio.sfx('win');
     vib([40, 60, 40, 60, 140]);
     var time = w.time;
     var stars = Game.stars(w.maze, time);
-    var res = Save.record(def, time, stars, Math.round(w.steps));
+    var res;
+    try {
+      res = Save.record(def, time, stars, Math.round(w.steps));
+    } catch (err) {
+      res = { record: false, best: { time: time, stars: stars } }; // kayıt yazılamasa da bitiş ekranı açılsın
+    }
     App.mode = 'win';
 
-    $('#win-kicker').textContent = def.daily ? 'Günlük labirent' : 'Bölüm ' + def.id + ' · ' + def.name;
+    $('#win-kicker').textContent = def.daily ? 'Günlük Labirent' : 'Bölüm ' + def.id + ' · ' + def.name;
     $('#win-title').textContent = stars === 3 ? 'Kusursuz hafıza!' : stars === 2 ? 'Çıkışı buldun!' : 'Çıktın!';
     $$('#win-stars svg').forEach(function (s, i) {
       s.classList.toggle('on', i < stars);
@@ -424,6 +441,7 @@
     ep.hidden = !finished;
     if (finished) ep.textContent = 'Silik’ten çıktın. Hatırladıkların seni buraya getirdi; unuttukların ise zaten yolun bir parçasıydı.';
     $('#btn-next').textContent = nx ? 'Sonraki Bölüm' : 'Bölümler';
+    $('#btn-win-levels').hidden = !nx && !def.daily; // son bölümde aynı düğme iki kez görünmesin
     $('#btn-share').hidden = !(navigator.share || (navigator.clipboard && navigator.clipboard.writeText));
     setScreen('win');
   }
@@ -540,10 +558,11 @@
     $('#set-sfx').checked = s.sfx;
     $('#set-music').checked = s.music;
     $('#set-vib').checked = s.vib;
-    $('#row-vib').hidden = !navigator.vibrate;
+    $('#row-vib').hidden = !(navigator.vibrate && root.matchMedia && root.matchMedia('(pointer: coarse)').matches);
     $('#set-fs').hidden = !(document.fullscreenEnabled || document.webkitFullscreenEnabled);
     $('#set-install').hidden = !installEvent;
     var r = $('#set-reset');
+    clearTimeout(resetTimer);
     r.querySelector('span').textContent = 'İlerlemeyi sıfırla';
     r.dataset.armed = '';
   }
@@ -576,7 +595,10 @@
         if (App.mode === 'play') w.switchType();
       } else if (a === 'pause') {
         if (App.mode === 'play') pause();
-        else if (App.mode === 'pause') resume();
+        else if (App.mode === 'pause') {
+          if (App.screen === 'settings') back(); // duraklatma menüsünden açılan ayarlardan menüye dön
+          else resume();
+        } else if (App.mode === 'intro') openLevels();
         else if (App.screen === 'levels' || App.screen === 'howto' || App.screen === 'settings') back();
       } else if (a === 'mute') {
         var s = Save.data.settings;
@@ -584,6 +606,7 @@
         s.sfx = s.music = on;
         Save.save();
         applySettings();
+        if (App.screen === 'settings') syncSettings();
         toast(on ? 'Ses açık' : 'Ses kapalı', '', 1200);
       }
     };
@@ -616,6 +639,7 @@
       startLevel(Levels.daily(Util.todayKey()));
     });
     $('#btn-start').addEventListener('click', begin);
+    $('#btn-intro-back').addEventListener('click', openLevels);
     $('#btn-resume').addEventListener('click', resume);
     $('#btn-restart').addEventListener('click', function () {
       startLevel(App.def, true);
@@ -638,10 +662,11 @@
       var d = App.def;
       var st = $$('#win-stars svg.on').length;
       var text = 'Silik · ' + (d.daily ? 'Günlük Labirent ' + d.dateKey : 'Bölüm ' + d.id + ' ' + d.name) + ' ' + $('#win-time').textContent + ' ' + '★'.repeat(st) + '☆'.repeat(3 - st);
+      var url = /^https?:$/.test(location.protocol) ? location.href : ''; // file:// yolu paylaşılmaz
       if (navigator.share) {
-        navigator.share({ title: 'Silik', text: text, url: location.href }).catch(function () {});
+        navigator.share(url ? { title: 'Silik', text: text, url: url } : { title: 'Silik', text: text }).catch(function () {});
       } else if (navigator.clipboard) {
-        navigator.clipboard.writeText(text + ' ' + location.href).then(function () {
+        navigator.clipboard.writeText(url ? text + ' ' + url : text).then(function () {
           toast('Panoya kopyalandı', 'good', 1500);
         });
       }
@@ -681,6 +706,7 @@
     $('#set-reset').addEventListener('click', function () {
       var b = $('#set-reset');
       if (b.dataset.armed === '1') {
+        clearTimeout(resetTimer);
         Save.reset();
         b.dataset.armed = '';
         b.querySelector('span').textContent = 'İlerlemeyi sıfırla';
@@ -689,7 +715,8 @@
       } else {
         b.dataset.armed = '1';
         b.querySelector('span').textContent = 'Emin misin? Silmek için tekrar dokun';
-        setTimeout(function () {
+        clearTimeout(resetTimer);
+        resetTimer = setTimeout(function () {
           if (b.dataset.armed === '1') {
             b.dataset.armed = '';
             b.querySelector('span').textContent = 'İlerlemeyi sıfırla';
@@ -709,6 +736,15 @@
     document.addEventListener('click', function (e) {
       if (e.target.closest && e.target.closest('.btn, .lvl:not(.locked), .icon-btn, .row')) Audio.sfx('click');
     });
+
+    // basılı tutulan Enter, yeni ekrandaki düğmeyi de tetikleyip ekranları atlamasın
+    root.addEventListener(
+      'keydown',
+      function (e) {
+        if (e.key === 'Enter' && e.repeat) e.preventDefault();
+      },
+      true
+    );
 
     // Enter: ekrandaki ana düğmeye bas
     root.addEventListener('keydown', function (e) {
@@ -755,10 +791,20 @@
       var w = App.world;
       if (!w) return;
       if (App.mode === 'play') {
-        w.update(dt, Input.vector());
-        updateHud(w, false);
+        // yavaş cihazda süre ve hafıza yavaşlamasın: kareyi en çok 1/30 sn'lik adımlara böl
+        var vec = Input.vector();
+        var rem = dt;
+        while (rem > 1e-6) {
+          var step = Math.min(rem, 1 / 30);
+          w.update(step, vec);
+          rem -= step;
+          if (App.mode !== 'play' || App.world !== w) break;
+        }
+        if (App.mode === 'play' && App.world === w) updateHud(w, false);
       } else if (App.mode === 'menu') {
-        w.update(dt, demoVec(w));
+        var dv = demoVec(w);
+        if (App.world !== w) return; // demo yeniden başladı; eski dünyayı çizme
+        w.update(dt, dv);
       } else if (App.mode === 'win') {
         w.update(dt, { x: 0, y: 0 });
       }

@@ -563,9 +563,9 @@
 
   /** Çok yavaş cihazlarda çözünürlüğü otomatik düşür. */
   Renderer.prototype.adapt = function (dt) {
-    if (dt > 0.028) this.slowFrames++;
+    if (dt > 0.038) this.slowFrames++;
     else this.slowFrames = Math.max(0, this.slowFrames - 2);
-    if (this.slowFrames > 120 && this.quality > 0.55) {
+    if (this.slowFrames > 45 && this.quality > 0.55) {
       this.quality = Math.max(0.55, this.quality - 0.2);
       this.slowFrames = 0;
       this.resize();
@@ -764,13 +764,13 @@
       drawStone(ctx, scx, scy, Tp, st.type, t, st.born);
       if (st.type === 'sound') {
         if (st.dir) drawArrow(ctx, scx, scy, Tp, st.dir, t);
-        else if (st.atGoal) drawGoalMark(ctx, scx, scy, Tp, t);
+        if (st.atGoal) drawGoalMark(ctx, scx, scy, Tp, t);
       }
       ctx.globalAlpha = 1;
     }
 
     // oyuncu
-    drawPlayer(ctx, psx, psy, Tp, p, t, world.state === 'exiting' ? Math.max(0, 1 - world.exitT * 0.9) : 1);
+    drawPlayer(ctx, psx, psy, Tp, p, t, world.state === 'play' ? 1 : Math.max(0, 1 - world.exitT * 0.9));
 
     // parçacıklar
     var parts = world.particles;

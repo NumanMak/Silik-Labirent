@@ -60,5 +60,36 @@ defs.forEach(function (def) {
   console.log('      zemin=' + m.stats.floor + ' başlangıç→anahtar=' + m.stats.toKey + ' anahtar→kapı=' + m.stats.keyToDoor + ' çıkmaz=' + m.stats.deadEnds);
 });
 
+console.log('\n[süpürme] rastgele tohum/boyut/parametreler');
+check('kapı tek çıkmaz sokak olsa bile üretim çökmez (bilinen tohum)', () => {
+  const m = Maze.generate({ seed: 926374139, w: 15, h: 15, braid: 0.05, branch: 0.1, straight: 0.9 });
+  assert.notEqual(m.key.x + ',' + m.key.y, m.door.x + ',' + m.door.y);
+});
+check('1500 rastgele labirent: çökme yok, anahtar/kapı/çiçek erişilebilir, rüzgâr başlangıçta değil, bölgeler çakışmıyor', () => {
+  const R = require('../js/util.js').rng(777);
+  for (let i = 0; i < 1500; i++) {
+    const size = 15 + 2 * Math.floor(R() * 14);
+    const def = { seed: Math.floor(R() * 1e9), w: size, h: size, braid: R() * 0.3, branch: R(), straight: R(), flowers: Math.floor(R() * 4), mirrors: Math.floor(R() * 8), wind: Math.floor(R() * 4) };
+    const m = Maze.generate(def);
+    const d = Maze.bfs(m.tiles, m.w, m.h, m.start.x, m.start.y);
+    const at = (p) => p.y * m.w + p.x;
+    assert.ok(d[at(m.key)] > 0 && d[at(m.door)] > 0, 'ulaşılamıyor ' + JSON.stringify(def));
+    assert.notEqual(at(m.key), at(m.door));
+    m.flowers.forEach((f) => assert.ok(d[at(f)] > 0));
+    assert.equal(m.wind[at(m.start)], 0, 'başlangıç rüzgârda ' + JSON.stringify(def));
+    for (let a = 0; a < m.windRects.length; a++) for (let b = a + 1; b < m.windRects.length; b++) {
+      const p = m.windRects[a], q = m.windRects[b];
+      assert.ok(p.x + p.w <= q.x || q.x + q.w <= p.x || p.y + p.h <= q.y || q.y + q.h <= p.y, 'rüzgâr bölgeleri çakışıyor');
+    }
+  }
+});
+check('anahtar ile kapı düz mesafeyle de uzak (12 bölüm)', () => {
+  Levels.LIST.forEach((def) => {
+    const m = Maze.generate(def);
+    const sep = Math.abs(m.key.x - m.door.x) + Math.abs(m.key.y - m.door.y);
+    assert.ok(sep >= 0.4 * Math.max(m.w, m.h) - 1e-9, 'bölüm ' + def.id + ' ayrım=' + sep);
+  });
+});
+
 if (failed) { console.log('\n' + failed + ' test başarısız'); process.exit(1); }
 console.log('\nHepsi geçti.');

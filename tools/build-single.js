@@ -34,6 +34,11 @@ html = html.replace(/<script src="(js\/[^"]+)"><\/script>/g, (_, f) => {
 });
 if (scripts !== 9) throw new Error('beklenen 9 betik, gömülen: ' + scripts);
 
+// 3b) Tek dosyada ana ekrana ekleme/manifest yok: altbilgi metni buna uygun olsun
+const foot = '<footer class="foot">Telefonda ana ekrana ekleyerek tam ekran oynayabilirsin.</footer>';
+if (!html.includes(foot)) throw new Error('altbilgi bulunamadı');
+html = html.replace(foot, '<footer class="foot">Silik · kâğıt, kurşun kalem ve biraz unutkanlık.</footer>');
+
 // 4) Tek dosya bayrağı (service worker kaydı atlanır) — betiklerden önce
 html = html.replace('<script>\n/* Silik — küçük yardımcılar', () => '<script>window.SILIK_STANDALONE = true;</script>\n<script>\n/* Silik — küçük yardımcılar');
 if (!html.includes('SILIK_STANDALONE')) throw new Error('bayrak eklenemedi');

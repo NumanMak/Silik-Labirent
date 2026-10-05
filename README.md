@@ -41,6 +41,16 @@ Küçük bir karakter sisli bir labirentte uyanır. Etrafında küçük bir gör
 - Sesler (adım, taş, anahtar, rüzgâr, fısıltı…) ve hafif üretken müzik WebAudio ile üretilir; ses dosyası yoktur.
 - Performans: karo görselleri açılışta bir atlas tuvaline çizilir; cihaz yavaşsa çözünürlük kendiliğinden düşer.
 
+## Tek dosya olarak oynamak
+
+`silik.html`, oyunun tamamını (HTML, CSS, JS, yazı tipi ve simgeler) tek dosyada taşır. İndirip çift tıklamak ya da herhangi bir yere yüklemek yeterlidir; internet ya da başka dosya gerekmez. İstediğin adla (ör. `Silik Labirent.html`) kaydedebilirsin.
+
+```bash
+npm run build:single   # kaynaklardan silik.html'i yeniden üretir (elle düzenleme)
+```
+
+Not: Tek dosyada service worker ve "yükle" desteği yoktur; bunlar için klasör sürümünü bir `https` adresinden yayınla. Telefonda yerel dosya açmak (özellikle iPhone'da) güvenilir değildir; telefon için bir adrese yüklemek daha iyidir.
+
 ## Çalıştırma
 
 Dosyaları herhangi bir statik sunucudan açmak yeterli:
@@ -98,7 +108,7 @@ L({ id: 13, name: 'Yeni Bölüm', sub: 'Alt başlık', w: 31, h: 31, seed: 13579
 ## Testler
 
 ```bash
-npm test             # labirent üretimi + oyun mantığı (bot ile tüm bölümler çözülür)
+npm test             # labirent üretimi, oyun mantığı (bot ile tüm bölümler çözülür), kayıt dayanıklılığı
 npm run test:e2e     # gerçek tarayıcıda dokunmatik/klavye/çevrimdışı (playwright gerekir)
 ```
 

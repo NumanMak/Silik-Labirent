@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "start": "python3 -m http.server 8000",
-    "test": "node tests/maze.test.js && node tests/game.test.js",
+    "test": "node tests/maze.test.js && node tests/game.test.js && node tests/storage.test.js",
     "test:e2e": "node tests/e2e.test.js",
     "icons": "node tools/make-icons.js",
     "build:single": "node tools/build-single.js"
