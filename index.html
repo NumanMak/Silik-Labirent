@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Silik — Hafızanı Seç</title>
+  <meta name="description" content="Silik: gördüğün her yer hafızandan siliniyor. Çıkışı bulmak için neyi hatırlayacağını sen seç. 24 bölüm, iki sezon: sisli bir orman ve fener ışığında bir yer altı mağarası. Telefonda ve bilgisayarda oynanır.">
+  <meta name="theme-color" content="#f0e8d4">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Silik">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- Simge takımı -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-stone" viewBox="0 0 24 24"><path d="M4.5 14.2C4.2 9.6 8 5.8 12.6 5.8c4 0 7 2.6 6.9 6.4-.1 4.2-3.8 6.4-8 6.1-3.9-.3-6.8-1.5-7-4.1z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8.6 10.2c.8-1.2 2-1.8 3.3-1.9" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><circle cx="7.5" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M11.5 12H21M17.5 12v3.5M20.8 12v2.4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-flower" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="2.4"/><circle cx="7.8" cy="11" r="2.4"/><circle cx="9.4" cy="15.6" r="2.4"/><circle cx="14.6" cy="15.6" r="2.4"/><circle cx="16.2" cy="11" r="2.4"/><path d="M12 18v4" /></g></symbol>
+    <symbol id="i-wind" viewBox="0 0 24 24"><path d="M3 9h11a3 3 0 1 0-3-3M3 14h15a3 3 0 1 1-3 3M3 19h7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-mirror" viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M9 16l6-8M9 12l3-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 14.2c-.2-3.4 2.6-6.2 6-6.2 3 0 5.2 1.9 5.1 4.7-.1 3.1-2.8 4.7-5.8 4.5-2.9-.2-5.1-1.2-5.3-3z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M17.5 8.2a5.5 5.5 0 0 1 0 8M20.2 5.6a9 9 0 0 1 0 13.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20l1-4.5L16.5 4a2 2 0 0 1 2.8 0l.7.7a2 2 0 0 1 0 2.8L8.5 19 4 20zM14.5 6l3.5 3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.2l2.6 5.5 6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.4 9.5l6-.8L12 3.2z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2" fill="currentColor"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-swap" viewBox="0 0 24 24"><path d="M4 8h14l-3-3M20 16H6l3 3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-mushroom" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12.5C3.5 7.5 7.2 4 12 4s8.5 3.5 8.5 8.5z"/><path d="M9.3 12.5v5.2a2.7 2.7 0 0 0 5.4 0v-5.2"/><circle cx="8.6" cy="9" r=".9" fill="currentColor"/><circle cx="13.2" cy="7.6" r="1" fill="currentColor"/><circle cx="16.4" cy="10.4" r=".8" fill="currentColor"/></g></symbol>
+    <symbol id="i-crystal" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l4.2 6.3-1.2 12.7H9L7.8 8.8z"/><path d="M7.8 8.8h8.4M12 2.5l-1.1 19"/></g></symbol>
+    <symbol id="i-lantern" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9.2 5a2.8 2.8 0 0 1 5.6 0"/><path d="M8 5.2h8l1.2 3.2v8.4l-1.5 2.2H8.3l-1.5-2.2V8.4z"/><path d="M12 9.5c1.3 1.4 1.8 2.4 1.2 3.7-.3.7-1 1.1-1.2 1.1s-.9-.4-1.2-1.1c-.6-1.3-.1-2.3 1.2-3.7z" fill="currentColor"/></g></symbol>
+    <symbol id="art-forest" viewBox="0 0 64 64"><g fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M32 6c6 4 11 10 7 16 5 1 8 6 5 10-2 3-6 4-12 4s-10-1-12-4c-3-4 0-9 5-10-4-6 1-12 7-16z" fill="currentColor" fill-opacity=".16"/><path d="M32 36v16M32 45l-6-4M32 42l5-4"/><path d="M13 30c5 3 7 7 4 11-2 2-6 2-9 0-3-3-1-8 5-11z" fill="currentColor" fill-opacity=".12"/><path d="M13 41v11"/><path d="M51 28c5 3 7 8 4 12-2 2-6 2-9 0-3-3-1-9 5-12z" fill="currentColor" fill-opacity=".12"/><path d="M51 40v12"/><path d="M4 54h56M19 54c1-3 3-4 5-4M42 54c1-2 3-3 5-3"/></g></symbol>
+    <symbol id="art-cave" viewBox="0 0 64 64"><g fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h56"/><path d="M8 8l5 16 5-16M22 8l4 12 4-12M36 8l5 18 5-18M50 8l3 10 3-10" fill="currentColor" fill-opacity=".14"/><path d="M14 56l5-18 5 6 5-16 6 16 5-8 6 20z" fill="currentColor" fill-opacity=".16"/><path d="M29 40l2 6M38 46l-2 5"/><path d="M4 56h56"/></g></symbol>
+    <symbol id="i-controls" viewBox="0 0 24 24"><circle cx="8" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8" cy="12" r="1.8" fill="currentColor"/><circle cx="18" cy="14" r="3" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  </defs>
+</svg>
+
+<canvas id="game" aria-label="Oyun alanı"></canvas>
+
+<!-- Dokunmatik joystick (parmağın bastığı yerde belirir) -->
+<div id="stick" aria-hidden="true"><div class="base"></div><div class="knob"></div></div>
+
+<!-- Oyun içi arayüz -->
+<div id="hud" hidden>
+  <div class="hud-top">
+    <button id="btn-pause" class="icon-btn" tabindex="-1" aria-label="Duraklat"><svg><use href="#i-pause"/></svg></button>
+    <div class="chip hud-title"><b id="hud-num">1</b><span id="hud-name">Uyanış</span></div>
+    <div class="chip hud-time" id="hud-time">00:00</div>
+  </div>
+  <div class="hud-inv">
+    <div class="chip slots" id="slots-memory" aria-label="Hatıra taşları"></div>
+    <div class="chip slots sound" id="slots-sound" aria-label="Ses taşları" hidden></div>
+    <div class="chip item" id="chip-key" title="Anahtar"><svg><use href="#i-key"/></svg></div>
+    <div class="chip item flower" id="chip-flower" hidden title="Çiçekler"><svg><use href="#i-flower"/></svg><span id="flower-count">0/0</span></div>
+    <div class="chip item wind" id="chip-wind" hidden><svg><use href="#i-wind"/></svg><span id="wind-label">Rüzgâr</span></div>
+  </div>
+  <div id="hint" class="hint" role="status" aria-live="polite"></div>
+  <div class="hud-controls">
+    <button id="btn-switch" class="round small" tabindex="-1" hidden aria-label="Taş türünü değiştir">
+      <svg class="ic"><use href="#i-stone"/></svg><svg class="sw"><use href="#i-swap"/></svg>
+      <span class="kbd">Q</span>
+    </button>
+    <button id="btn-stone" class="round big" tabindex="-1" aria-label="Hatıra taşı bırak veya geri al">
+      <svg class="ic"><use href="#i-stone"/></svg>
+      <span class="lbl" id="stone-lbl">Bırak</span>
+      <span class="badge" id="stone-count">3</span>
+      <span class="kbd">Boşluk</span>
+    </button>
+  </div>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="curtain" aria-hidden="true"></div>
+
+<main id="screens">
+
+  <!-- Ana menü -->
+  <section class="screen" id="s-title" aria-label="Ana menü">
+    <div class="title-wrap">
+      <h1 class="logo" aria-label="Silik"><span>S</span><span>i</span><span>l</span><span>i</span><span>k</span></h1>
+      <div class="pencil-line"></div>
+      <p class="season-tag" id="title-season"><svg><use href="#art-forest"/></svg><span>1. Sezon · Orman</span></p>
+      <p class="tag">Gördüğün her yer bir süre sonra hafızandan siliniyor.<br>Çıkışı bulmak için neyi hatırlayacağını <em>sen</em> seç.</p>
+      <div class="menu">
+        <button class="btn primary" id="btn-play">Oyna</button>
+        <button class="btn" data-go="levels">Bölümler</button>
+        <button class="btn" id="btn-daily">Günlük Labirent</button>
+        <div class="menu-row">
+          <button class="btn small" data-go="howto">Nasıl Oynanır</button>
+          <button class="btn small" data-go="settings">Ayarlar</button>
+        </div>
+      </div>
+    </div>
+    <footer class="foot">Telefonda ana ekrana ekleyerek tam ekran oynayabilirsin.</footer>
+  </section>
+
+  <!-- Bölümler -->
+  <section class="screen paper" id="s-levels" aria-label="Bölümler">
+    <header class="bar">
+      <button class="icon-btn" data-back aria-label="Geri"><svg><use href="#i-back"/></svg></button>
+      <h2>Bölümler</h2>
+      <span class="bar-note" id="levels-note"></span>
+    </header>
+    <div class="scroll"><div id="level-grid"></div></div>
+  </section>
+
+  <!-- Nasıl oynanır -->
+  <section class="screen paper" id="s-howto" aria-label="Nasıl oynanır">
+    <header class="bar">
+      <button class="icon-btn" data-back aria-label="Geri"><svg><use href="#i-back"/></svg></button>
+      <h2>Nasıl Oynanır</h2>
+    </header>
+    <div class="scroll">
+      <ul class="rules">
+        <li><svg><use href="#i-pencil"/></svg><div><h3>Silinen harita</h3><p>Yürüdüğün yerler kâğıda kurşun kalemle çizilir. Yaklaşık 15 saniye sonra silgi izi gibi soluklaşıp kaybolur. Görüş alanın küçük; gerisini hatırlamak sana kalmış.</p></div></li>
+        <li><svg><use href="#i-stone"/></svg><div><h3>Hatıra taşı</h3><p>Her bölümde sınırlı sayıda taşın var. Bir taşı bıraktığında çevresindeki küçük alan mürekkeple çizilir ve kalıcı olur. Taşın üstündeyken tekrar basarsan geri alırsın.</p></div></li>
+        <li><svg><use href="#i-key"/></svg><div><h3>Anahtar ve kapı</h3><p>Önce anahtarı, sonra kapıyı bul. İkisi genelde birbirinden uzaktır. Taşlarını nereye koyacağın oyunun asıl kararı.</p></div></li>
+        <li><svg><use href="#i-flower"/></svg><div><h3>Çiçekler ve mantarlar</h3><p>Ormandaki çiçekler ve mağaradaki parlayan mantarlar sana birer taş daha kazandırır. Ama onlara ulaşmak için ana yoldan sapman gerekir.</p></div></li>
+        <li><svg><use href="#i-wind"/></svg><div><h3>Rüzgâr ve cereyan</h3><p>Ormandaki rüzgârlı, mağaradaki cereyanlı bölgelerde harita iki kat hızlı silinir.</p></div></li>
+        <li><svg><use href="#i-mirror"/></svg><div><h3>Göletler ve kristaller</h3><p>Ormandaki göletlerin ve mağaradaki kristal duvarların yansıması haritana yanlış yönü gösteren sahte izler bırakır. Mürekkeple çizilmiş alan ise her zaman doğruyu söyler.</p></div></li>
+        <li><svg><use href="#i-sound"/></svg><div><h3>Ses taşı</h3><p>Bırakıldığında yakındaki yolun yönünü fısıldar ve bir ok gösterir. Önce anahtarı, anahtar sende olunca kapıyı işaret eder.</p></div></li>
+        <li class="seasons"><svg><use href="#i-lantern"/></svg><div><h3>İki sezon</h3><p>Oyun 12’şer bölümlük iki sezondur: önce sisli bir <b>Orman</b>, sonra kara kâğıt ve tebeşirle çizilmiş bir <b>Mağara</b>. Mağarada fener ışığın daha küçüktür ve hafıza daha kısa sürer.</p></div></li>
+        <li class="controls"><svg><use href="#i-controls"/></svg><div><h3>Kontroller</h3>
+          <p><b>Dokunmatik:</b> ekranın herhangi bir yerine basıp sürükle, sağ alttaki düğmeyle taş bırak ya da geri al. Ses taşı varsa yanındaki küçük düğmeyle taş türünü değiştir.</p>
+          <p><b>Klavye:</b> WASD veya yön tuşları ile yürü · Boşluk: taş bırak / geri al · Q: taş türü · P veya Esc: duraklat · M: sesi kapat.</p></div></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Ayarlar -->
+  <section class="screen paper" id="s-settings" aria-label="Ayarlar">
+    <header class="bar">
+      <button class="icon-btn" data-back aria-label="Geri"><svg><use href="#i-back"/></svg></button>
+      <h2>Ayarlar</h2>
+    </header>
+    <div class="scroll">
+      <div class="settings">
+        <label class="row"><span>Ses efektleri</span><input type="checkbox" id="set-sfx"><i class="sw-ui"></i></label>
+        <label class="row"><span>Müzik</span><input type="checkbox" id="set-music"><i class="sw-ui"></i></label>
+        <label class="row" id="row-vib"><span>Titreşim</span><input type="checkbox" id="set-vib"><i class="sw-ui"></i></label>
+        <label class="row"><span>Tüm bölümleri aç</span><input type="checkbox" id="set-open"><i class="sw-ui"></i></label>
+        <button class="row action" id="set-fs" hidden><span>Tam ekran</span><em>aç / kapat</em></button>
+        <button class="row action" id="set-install" hidden><span>Uygulamayı yükle</span><em>ana ekrana ekle</em></button>
+        <button class="row action danger" id="set-reset"><span>İlerlemeyi sıfırla</span><em>geri alınamaz</em></button>
+      </div>
+      <p class="credit">Silik · kâğıt, kurşun kalem ve biraz unutkanlık.</p>
+    </div>
+  </section>
+
+  <!-- Bölüm tanıtımı -->
+  <section class="screen dim" id="s-intro" aria-label="Bölüm tanıtımı">
+    <div class="card">
+      <p class="kicker" id="intro-kicker">Bölüm 1</p>
+      <h2 id="intro-name">Uyanış</h2>
+      <p class="sub" id="intro-sub"></p>
+      <div class="season-banner" id="intro-season" hidden>
+        <svg class="art"><use href="#art-forest"/></svg>
+        <div><p class="s-kicker" id="intro-season-kicker">1. Sezon</p><h3 id="intro-season-name">Orman</h3><p class="s-story" id="intro-season-story"></p></div>
+      </div>
+      <div class="newbox" id="intro-new" hidden>
+        <svg><use href="#i-pencil"/></svg>
+        <div><h3 id="intro-new-title"></h3><p id="intro-new-text"></p></div>
+      </div>
+      <div class="how-mini" id="intro-how"></div>
+      <div class="menu">
+        <button class="btn primary" id="btn-start">Başla</button>
+        <button class="btn small ghost" id="btn-intro-back">Bölümler</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Duraklat -->
+  <section class="screen dim" id="s-pause" aria-label="Duraklatıldı">
+    <div class="card">
+      <h2>Duraklatıldı</h2>
+      <div class="menu">
+        <button class="btn primary" id="btn-resume">Devam Et</button>
+        <button class="btn" id="btn-restart">Yeniden Başla</button>
+        <button class="btn" id="btn-hint" hidden>İpucu iste · en çok ★★</button>
+        <div class="menu-row">
+          <button class="btn small" id="btn-pause-settings">Ayarlar</button>
+          <button class="btn small" id="btn-pause-levels">Bölümler</button>
+        </div>
+        <button class="btn small ghost" id="btn-pause-menu">Ana Menü</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bölüm sonu -->
+  <section class="screen dim" id="s-win" aria-label="Bölüm tamamlandı">
+    <div class="card">
+      <p class="kicker" id="win-kicker">Bölüm 1</p>
+      <h2 id="win-title">Çıkışı buldun!</h2>
+      <div class="stars" id="win-stars">
+        <svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg>
+      </div>
+      <p class="record" id="win-record" hidden>Yeni rekor!</p>
+      <dl class="stats">
+        <div><dt>Süre</dt><dd id="win-time">00:00</dd></div>
+        <div><dt>Mesafe</dt><dd id="win-steps">0</dd></div>
+        <div><dt>Taş</dt><dd id="win-stones">0</dd></div>
+        <div><dt>En iyi</dt><dd id="win-best">00:00</dd></div>
+      </dl>
+      <p class="epilogue" id="win-epilogue" hidden></p>
+      <div class="menu">
+        <button class="btn primary" id="btn-next">Sonraki Bölüm</button>
+        <div class="menu-row">
+          <button class="btn small" id="btn-again">Tekrar Dene</button>
+          <button class="btn small" id="btn-win-levels">Bölümler</button>
+        </div>
+        <button class="btn small ghost" id="btn-share" hidden>Paylaş</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<noscript><p style="padding:2rem;font-family:sans-serif">Silik'i oynamak için JavaScript gerekir.</p></noscript>
+
+<script src="js/util.js"></script>
+<script src="js/maze.js"></script>
+<script src="js/levels.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/input.js"></script>
+<script src="js/game.js"></script>
+<script src="js/theme-common.js"></script>
+<script src="js/theme-forest.js"></script>
+<script src="js/theme-cave.js"></script>
+<script src="js/renderer.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

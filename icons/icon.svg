@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <pattern id="h" width="18" height="18" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="18" stroke="#4a4743" stroke-width="3.5" opacity=".6"/>
+    </pattern>
+    <linearGradient id="fade" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset=".45" stop-color="#fff"/>
+      <stop offset="1" stop-color="#fff" stop-opacity=".05"/>
+    </linearGradient>
+    <mask id="m"><rect width="512" height="512" fill="url(#fade)"/></mask>
+    <radialGradient id="glow" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#fffbe9" stop-opacity=".9"/>
+      <stop offset="1" stop-color="#fffbe9" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="#f0e8d4"/>
+  <g stroke="#6a8caa" stroke-opacity=".2" stroke-width="2">
+    <path d="M64 0v512M128 0v512M192 0v512M256 0v512M320 0v512M384 0v512M448 0v512M0 64h512M0 128h512M0 192h512M0 256h512M0 320h512M0 384h512M0 448h512"/>
+  </g>
+  <circle cx="196" cy="214" r="190" fill="url(#glow)"/>
+  <g mask="url(#m)" stroke="#33302c" stroke-width="9" stroke-linejoin="round">
+    <rect x="96" y="96" width="320" height="64" fill="url(#h)"/>
+    <rect x="96" y="96" width="64" height="256" fill="url(#h)"/>
+    <rect x="224" y="256" width="192" height="64" fill="url(#h)"/>
+    <rect x="352" y="256" width="64" height="160" fill="url(#h)"/>
+    <rect x="96" y="352" width="192" height="64" fill="url(#h)"/>
+  </g>
+  <g transform="translate(196 214)">
+    <ellipse cx="0" cy="58" rx="46" ry="14" fill="#3a2a10" opacity=".22"/>
+    <path d="M0-62C22-38 48-14 46 18 44 42 22 52 0 52S-44 42-46 18C-48-14-22-38 0-62Z" fill="#2b3358" stroke="#141a33" stroke-width="9" stroke-linejoin="round"/>
+    <ellipse cx="6" cy="4" rx="27" ry="22" fill="#f6efdc"/>
+    <circle cx="-4" cy="4" r="5" fill="#1b2140"/>
+    <circle cx="16" cy="4" r="5" fill="#1b2140"/>
+  </g>
+</svg>

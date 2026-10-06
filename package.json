@@ -1,0 +1,13 @@
+{
+  "name": "silik",
+  "version": "1.0.0",
+  "description": "Silik — hafızanın silindiği sisli bir labirent. 2D yukarıdan bakış keşif ve bulmaca oyunu; telefonda ve bilgisayarda oynanır.",
+  "private": true,
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "test": "node tests/maze.test.js && node tests/game.test.js && node tests/storage.test.js && node tests/sw.test.js",
+    "test:e2e": "node tests/e2e.test.js",
+    "icons": "node tools/make-icons.js",
+    "build:single": "node tools/build-single.js"
+  }
+}

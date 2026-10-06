@@ -1,0 +1,8 @@
+Patrick Hand — Copyright 2010 The Patrick Hand Project Authors (https://github.com/google/fonts)
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+This license is available with a FAQ at: https://openfontlicense.org
+
+The font files in this folder (patrick-hand-latin.woff2, patrick-hand-latin-ext.woff2) are
+unmodified subsets served by Google Fonts. They are bundled so the game renders the same on
+every device and works offline.
