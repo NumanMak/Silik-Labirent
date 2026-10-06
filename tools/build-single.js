@@ -32,7 +32,7 @@ html = html.replace(/<script src="(js\/[^"]+)"><\/script>/g, (_, f) => {
   scripts++;
   return `<script>\n${js}\n</script>`;
 });
-if (scripts !== 9) throw new Error('beklenen 9 betik, gömülen: ' + scripts);
+if (scripts !== 12) throw new Error('beklenen 12 betik, gömülen: ' + scripts);
 
 // 3b) Tek dosyada ana ekrana ekleme/manifest yok: altbilgi metni buna uygun olsun
 const foot = '<footer class="foot">Telefonda ana ekrana ekleyerek tam ekran oynayabilirsin.</footer>';

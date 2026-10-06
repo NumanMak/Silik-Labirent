@@ -1,5 +1,5 @@
 /* Silik — çevrimdışı çalışma: uygulama kabuğunu önbelleğe alır, arka planda günceller. */
-const CACHE = 'silik-v1';
+const CACHE = 'silik-v3';
 const ASSETS = [
   './',
   'index.html',
@@ -11,6 +11,9 @@ const ASSETS = [
   'js/audio.js',
   'js/input.js',
   'js/game.js',
+  'js/theme-common.js',
+  'js/theme-forest.js',
+  'js/theme-cave.js',
   'js/renderer.js',
   'js/app.js',
   'fonts/patrick-hand-latin.woff2',

@@ -134,6 +134,112 @@ function serve() {
   assert.equal(await p.textContent('#intro-name'), 'Sis');
   ok('sonraki bölüm tanıtımı');
 
+  /* ---------- sezonlar: orman -> mağara geçişi ---------- */
+  await p.evaluate(() => { localStorage.setItem('silik.v1', JSON.stringify({ v: 2, unlocked: 12, best: {}, daily: {}, settings: { sfx: true, music: true, vib: true }, seen: { move: 1, fade: 1, drop: 1 } })); });
+  await p.reload();
+  await p.waitForTimeout(500);
+  assert.equal(await p.evaluate(() => document.documentElement.getAttribute('data-theme')), 'forest');
+  await p.evaluate(() => Silik.App.debug.startLevel(Silik.Levels.byId(12), true));
+  await p.waitForTimeout(300);
+  assert.equal(await p.evaluate(() => Silik.App.renderer.theme.key), 'forest');
+  assert.equal(await p.textContent('#wind-label'), 'Rüzgâr');
+  const win = async () => {
+    await p.evaluate(() => { const w = Silik.App.world; w.hasKey = true; const d = w.maze.door; w.player.x = d.x + 0.5; w.player.y = d.y + 0.5; });
+    await p.waitForFunction(() => Silik.App.mode === 'win', null, { timeout: 15000 });
+    await p.waitForTimeout(300);
+  };
+  await win();
+  assert.equal(await p.textContent('#btn-next'), '2. Sezon’a Geç');
+  assert.ok(!(await p.evaluate(() => document.querySelector('#win-epilogue').hidden)), 'sezon sonu kapanış yazısı görünmeli');
+  assert.equal(await p.evaluate(() => JSON.parse(localStorage.getItem('silik.v1')).unlocked), 13);
+  ok('1. sezon bitişi: epilog + "2. Sezon’a Geç", mağara kilidi açıldı');
+  await p.tap('#btn-next');
+  await p.waitForTimeout(900);
+  assert.equal(await p.textContent('#intro-name'), 'Mağara Ağzı');
+  assert.ok(!(await p.evaluate(() => document.querySelector('#intro-season').hidden)), 'sezon başlığı görünmeli');
+  assert.equal(await p.evaluate(() => document.documentElement.getAttribute('data-theme')), 'cave');
+  assert.equal(await p.evaluate(() => Silik.App.renderer.theme.key), 'cave');
+  assert.equal(await p.evaluate(() => Silik.App.world.theme), 'cave');
+  assert.equal(await p.textContent('#wind-label'), 'Cereyan');
+  assert.equal(await p.evaluate(() => document.querySelector('#chip-flower use').getAttribute('href')), '#i-mushroom');
+  await p.tap('#btn-start');
+  await p.waitForTimeout(400);
+  assert.equal(await p.evaluate(() => Silik.App.mode), 'play');
+  assert.ok(await p.evaluate(() => Silik.App.world.visR < 3.6), 'mağarada görüş alanı daha küçük');
+  ok('2. sezon: tema (arayüz+çizim+metinler), sezon başlığı, küçük görüş alanı');
+  // bölüm listesi: iki sezon paneli
+  await p.evaluate(() => Silik.App.debug.pause());
+  await p.tap('#btn-pause-levels');
+  await p.waitForTimeout(400);
+  assert.equal(await p.evaluate(() => document.querySelectorAll('#level-grid .season').length), 2);
+  assert.equal(await p.evaluate(() => document.querySelectorAll('#level-grid .season .lvl').length), 24);
+  assert.equal(await p.evaluate(() => document.querySelector('#level-grid .season[data-theme="cave"]').classList.contains('locked')), false);
+  ok('bölüm listesi: 2 sezon paneli, 24 bölüm, mağara açık');
+  // 24. bölüm: final kapanışı
+  await p.evaluate(() => Silik.App.debug.startLevel(Silik.Levels.byId(24), true));
+  await p.waitForTimeout(300);
+  await win();
+  assert.equal(await p.textContent('#btn-next'), 'Bölümler');
+  assert.ok(await p.evaluate(() => document.querySelector('#btn-win-levels').hidden), 'son bölümde çift Bölümler olmamalı');
+  assert.ok(!(await p.evaluate(() => document.querySelector('#win-epilogue').hidden)));
+  ok('24. bölüm: final kapanışı, tek "Bölümler" düğmesi');
+
+  /* ---------- "Tüm bölümleri aç": yeni oyuncu mağarayı ilerlemeyi bozmadan deneyebilir ---------- */
+  await p.evaluate(() => { localStorage.setItem('silik.v1', JSON.stringify({ v: 2, unlocked: 1, best: {}, daily: {}, settings: { sfx: true, music: true, vib: true }, seen: { move: 1, fade: 1, drop: 1 } })); });
+  await p.reload();
+  await p.waitForTimeout(500);
+  await p.tap('[data-go="levels"]');
+  await p.waitForTimeout(300);
+  assert.equal(await p.evaluate(() => document.querySelector('#level-grid .season[data-theme="cave"]').classList.contains('locked')), true);
+  await p.tap('#s-levels [data-back]');
+  await p.tap('[data-go="settings"]');
+  await p.waitForTimeout(300);
+  await p.tap('#set-open ~ .sw-ui');
+  await p.tap('#s-settings [data-back]');
+  await p.tap('[data-go="levels"]');
+  await p.waitForTimeout(300);
+  assert.equal(await p.evaluate(() => document.querySelector('#level-grid .season[data-theme="cave"]').classList.contains('locked')), false);
+  assert.equal(await p.evaluate(() => document.querySelectorAll('#level-grid .lvl.locked').length), 0);
+  assert.equal(await p.evaluate(() => JSON.parse(localStorage.getItem('silik.v1')).unlocked), 1, 'gerçek ilerleme değişmemeli');
+  await p.evaluate(() => [...document.querySelectorAll('#level-grid .season[data-theme="cave"] .lvl')][0].click());
+  await p.waitForTimeout(900);
+  assert.equal(await p.textContent('#intro-name'), 'Mağara Ağzı');
+  ok('"Tüm bölümleri aç": mağara listede açılır, gerçek ilerleme korunur');
+
+  /* ---------- ipucu: takılan oyuncu duraklat menüsünden ses taşı ister (en çok 2 yıldız) ---------- */
+  await p.evaluate(() => Silik.App.debug.startLevel(Silik.Levels.byId(7), true));
+  await p.waitForTimeout(300);
+  await p.evaluate(() => Silik.App.debug.pause());
+  await p.waitForTimeout(250);
+  assert.equal(await p.evaluate(() => document.querySelector('#btn-hint').hidden), false, 'ses taşı olmayan bölümde ipucu düğmesi görünmeli');
+  await p.tap('#btn-hint');
+  await p.waitForTimeout(300);
+  assert.equal(await p.evaluate(() => Silik.App.mode), 'play');
+  assert.equal(await p.evaluate(() => Silik.App.world.hinted), true);
+  assert.equal(await p.evaluate(() => document.querySelector('#slots-sound').hidden), false, 'ses taşı yuvası görünmeli');
+  await p.evaluate(() => Silik.App.debug.pause());
+  await p.waitForTimeout(250);
+  assert.equal(await p.evaluate(() => document.querySelector('#btn-hint').hidden), true, 'ipucu alındıktan sonra düğme gizlenmeli');
+  await p.evaluate(() => Silik.App.debug.resume());
+  await win();
+  assert.ok((await p.evaluate(() => JSON.parse(localStorage.getItem('silik.v1')).best[7].stars)) <= 2, 'ipuculu bitişte en çok 2 yıldız');
+  ok('ipucu: ses taşı verilir, düğme gizlenir, yıldız en çok 2');
+
+  /* ---------- duraklat -> ayarlar -> ilerlemeyi sıfırla: oynanan bölüm demo ile değişmemeli ---------- */
+  await p.evaluate(() => Silik.App.debug.startLevel(Silik.Levels.byId(3), true));
+  await p.waitForTimeout(300);
+  await p.evaluate(() => Silik.App.debug.pause());
+  await p.waitForTimeout(250);
+  await p.tap('#btn-pause-settings');
+  await p.waitForTimeout(250);
+  await p.tap('#set-reset');
+  await p.tap('#set-reset');
+  await p.waitForTimeout(500);
+  assert.equal(await p.evaluate(() => Silik.App.mode), 'menu', 'sıfırlayınca oyun menüye dönmeli');
+  assert.equal(await p.evaluate(() => Silik.App.screen), 'title');
+  assert.equal(await p.evaluate(() => !!(Silik.App.world && Silik.App.world.demo)), true);
+  ok('duraklatılmış bölümden sıfırlama: menüye döner, ölü bölüm kalmaz');
+
   /* ---------- masaüstü: klavye + çevrimdışı ---------- */
   const dctx = await browser.newContext({ viewport: { width: 1280, height: 720 }, serviceWorkers: 'allow' });
   const d = await dctx.newPage();
@@ -142,7 +248,10 @@ function serve() {
   await d.mouse.click(640, 360);
   await d.evaluate(async () => {
     Silik.Audio.unlock(); Silik.Audio.startMusic();
-    for (const n of ['step', 'drop', 'pick', 'key', 'flower', 'locked', 'door', 'whisper', 'mirror', 'win', 'click', 'erase']) Silik.Audio.sfx(n);
+    for (const n of ['step', 'drop', 'pick', 'key', 'flower', 'locked', 'door', 'whisper', 'mirror', 'win', 'click', 'erase', 'chirp']) Silik.Audio.sfx(n);
+    Silik.Audio.setTheme('cave');
+    for (const n of ['step', 'drip', 'drop']) Silik.Audio.sfx(n);
+    Silik.Audio.setWind(1); Silik.Audio.setTheme('forest');
     Silik.Audio.setWind(1);
     await navigator.serviceWorker.ready;
   });

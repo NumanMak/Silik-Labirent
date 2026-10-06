@@ -202,8 +202,14 @@
     if (!keyCands.length) {
       // kapı tek çıkmaz sokaksa: başlangıçtan en uzak zemin hücresini anahtar yap
       var far = -1;
+      var farScore = -1;
       for (var fi = 0; fi < N; fi++) {
-        if (tiles[fi] === 0 && fi !== door && fi !== start && (far < 0 || dS[fi] > dS[far])) far = fi;
+        if (tiles[fi] !== 0 || fi === door || fi === start) continue;
+        var sc2 = Math.min(dS[fi], dD[fi]); // başlangıçtan da kapıdan da uzak
+        if (sc2 > farScore) {
+          farScore = sc2;
+          far = fi;
+        }
       }
       keyCands = [{ c: far, s: 0 }];
     }
@@ -326,7 +332,7 @@
     var windRects = [];
     var zones = p.wind || 0;
     for (var z = 0; z < zones; z++) {
-      for (var attempt = 0; attempt < 120; attempt++) {
+      for (var attempt = 0; attempt < 400; attempt++) {
         var zw = Math.round(w * (0.26 + rand() * 0.14));
         var zh = Math.round(h * (0.26 + rand() * 0.14));
         var zx = 1 + Math.floor(rand() * Math.max(1, w - 2 - zw));

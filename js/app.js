@@ -137,15 +137,61 @@
     setScreen(prev);
   }
 
+  /* ---------- tema (orman / mağara) ---------- */
+
+  var THEME_COLOR = { forest: '#efe8ce', cave: '#1f232a' };
+
+  /** Sezon değişirken eski temanın rengi perde gibi örtülür, sonra yeni sahneye açılır. */
+  function seasonCurtain(prev) {
+    var c = $('#curtain');
+    if (!c) return;
+    c.style.transition = 'none';
+    c.style.background = THEME_COLOR[prev];
+    c.style.opacity = '1';
+    void c.offsetWidth;
+    root.requestAnimationFrame(function () {
+      c.style.transition = 'opacity 0.8s ease';
+      c.style.opacity = '0';
+    });
+  }
+
+  /** Tüm arayüzü, çizimi ve sesi seçili temaya geçirir. */
+  function applyTheme(key) {
+    key = THEME_COLOR[key] ? key : 'forest';
+    if (App.theme === key) return;
+    var prev = App.theme;
+    App.theme = key;
+    if (prev) seasonCurtain(prev);
+    document.documentElement.setAttribute('data-theme', key);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', THEME_COLOR[key]);
+    var tx = Levels.TEXT[key];
+    if (hud.chipFlower) {
+      hud.chipFlower.querySelector('use').setAttribute('href', '#i-' + tx.pickupIcon);
+      hud.chipFlower.title = tx.pickups;
+    }
+    if (hud.windLabel) hud.windLabel.textContent = tx.wind;
+    App.renderer.setTheme(key);
+    Audio.setTheme(key);
+  }
+
+  /** Oyuncunun kaldığı bölümün sezonu: ana menü ve demo bu temada açılır. */
+  function progressDef() {
+    return Levels.byId(Math.min(Save.data.unlocked, Levels.LIST.length));
+  }
+
   /* ---------- demo (ana menü arkasında kendi kendine gezen karakter) ---------- */
 
   var ai = { path: [], nextDrop: 6, born: 0 };
 
   function startDemo() {
     var seed = ((Date.now() / 1000) | 0) % 100000;
+    var theme = progressDef().theme;
+    applyTheme(theme);
     var def = {
       id: 'demo', name: 'Demo', w: 25, h: 25, seed: seed, stones: 3, sound: 0, flowers: 0,
       wind: 2, mirrors: 3, mem: 15, braid: 0.1, straight: 0.5, branch: 0.3,
+      theme: theme, vision: theme === 'cave' ? 3.3 : 0,
     };
     var w = new Game.World(def, { demo: true });
     w.maze.key = { x: -9, y: -9 }; // demoda anahtar alınmasın
@@ -199,6 +245,7 @@
   function startLevel(def, skipIntro) {
     App.def = def;
     App.stack = [];
+    applyTheme(def.theme);
     var w = new Game.World(def);
     w.onEvent = onEvent;
     App.world = w;
@@ -229,7 +276,17 @@
   }
 
   function fillIntro(def) {
-    $('#intro-kicker').textContent = def.daily ? 'Günlük · ' + def.dateKey : 'Bölüm ' + def.id;
+    var season = Levels.seasonOf(def);
+    $('#intro-kicker').textContent = def.daily ? 'Günlük · ' + def.dateKey + ' · ' + season.name : season.title + ' · Bölüm ' + def.id;
+    // sezonun ilk bölümünde sezon başlığı ve hikâyesi
+    var sb = $('#intro-season');
+    sb.hidden = !def.seasonStart;
+    if (def.seasonStart) {
+      sb.querySelector('use').setAttribute('href', '#art-' + season.key);
+      $('#intro-season-kicker').textContent = season.title;
+      $('#intro-season-name').textContent = season.name;
+      $('#intro-season-story').textContent = season.story;
+    }
     $('#intro-name').textContent = def.name;
     $('#intro-sub').textContent = def.daily ? 'Bugünün labirenti herkes için aynı.' : def.sub;
     var nb = $('#intro-new');
@@ -273,6 +330,10 @@
       hint(isTouch() ? 'Yürümek için ekranda parmağını sürükle.' : 'WASD veya yön tuşlarıyla yürü.', 7000);
     }
     updateHud(w, true);
+    // yıldız hesabındaki par süresini oyun sırasında hazırla: bitiş ekranında takılma olmasın
+    setTimeout(function () {
+      if (App.world === w) Game.parTime(w.maze);
+    }, 2500);
   }
 
   function pause() {
@@ -283,6 +344,7 @@
     hud.btnStone.classList.remove('pulse');
     Audio.setWind(0);
     unlockScreen();
+    $('#btn-hint').hidden = App.world.hasSoundType; // ses taşı zaten varsa ipucu düğmesi gerekmez
     setScreen('pause');
   }
 
@@ -294,6 +356,14 @@
     Input.setEnabled(true);
     lockScreen();
     if (App.world.inWind && App.world.state === 'play') Audio.setWind(1);
+  }
+
+  /** Anahtarı uzun süre bulamayan oyuncuya, duraklat menüsündeki ipucunu bir kez hatırlat. */
+  function nudgeStuck(w) {
+    if (w.stuckShown || w.hasKey || w.hasSoundType) return;
+    if (w.time < Math.min(240, Math.max(120, 2 * Game.parTime(w.maze)))) return;
+    w.stuckShown = true;
+    toast('Takıldın mı? Duraklat menüsünde ipucu var.', 'teal', 5200);
   }
 
   function exitToMenu() {
@@ -392,7 +462,9 @@
         Audio.setWind(data ? 1 : 0);
         break;
       case 'mirror':
-        if (Save.markSeen('mirror')) toast('Ayna duvar! Haritana sahte izler bırakabilir.', 'teal', 3200);
+        if (Save.markSeen('mirror-' + App.theme)) {
+          toast((App.theme === 'cave' ? 'Kristal duvar! ' : 'Göl! ') + 'Yansıması haritana sahte izler bırakabilir.', 'teal', 3400);
+        }
         break;
       case 'phantom':
         Audio.sfx('mirror');
@@ -416,6 +488,7 @@
     vib([40, 60, 40, 60, 140]);
     var time = w.time;
     var stars = Game.stars(w.maze, time);
+    if (w.hinted) stars = Math.min(stars, 2); // ipucu alınan bölümde en çok 2 yıldız
     var res;
     try {
       res = Save.record(def, time, stars, Math.round(w.steps));
@@ -424,7 +497,7 @@
     }
     App.mode = 'win';
 
-    $('#win-kicker').textContent = def.daily ? 'Günlük Labirent' : 'Bölüm ' + def.id + ' · ' + def.name;
+    $('#win-kicker').textContent = def.daily ? 'Günlük Labirent' : Levels.seasonOf(def).title + ' · Bölüm ' + def.id + ' · ' + def.name;
     $('#win-title').textContent = stars === 3 ? 'Kusursuz hafıza!' : stars === 2 ? 'Çıkışı buldun!' : 'Çıktın!';
     $$('#win-stars svg').forEach(function (s, i) {
       s.classList.toggle('on', i < stars);
@@ -436,12 +509,11 @@
     $('#win-best').textContent = Util.fmtTime(res.best.time);
 
     var nx = nextDef();
-    var finished = !def.daily && !nx;
     var ep = $('#win-epilogue');
-    ep.hidden = !finished;
-    if (finished) ep.textContent = 'Silik’ten çıktın. Hatırladıkların seni buraya getirdi; unuttukların ise zaten yolun bir parçasıydı.';
-    $('#btn-next').textContent = nx ? 'Sonraki Bölüm' : 'Bölümler';
-    $('#btn-win-levels').hidden = !nx && !def.daily; // son bölümde aynı düğme iki kez görünmesin
+    ep.hidden = !def.epilogue;
+    if (def.epilogue) ep.textContent = def.epilogue;
+    $('#btn-next').textContent = nx ? (nx.seasonStart ? nx.season + '. Sezon’a Geç' : 'Sonraki Bölüm') : 'Bölümler';
+    $('#btn-win-levels').hidden = !nx; // son bölümde / günlükte aynı düğme iki kez görünmesin
     $('#btn-share').hidden = !(navigator.share || (navigator.clipboard && navigator.clipboard.writeText));
     setScreen('win');
   }
@@ -511,13 +583,17 @@
   }
 
   function buildLevels() {
-    var grid = $('#level-grid');
-    grid.innerHTML = '';
-    var unlocked = Save.data.unlocked;
-    var total = 0;
+    var wrap = $('#level-grid');
+    wrap.innerHTML = '';
+    var unlocked = Save.data.settings.openAll || App.forceOpen ? Levels.LIST.length : Save.data.unlocked;
+    var allStars = 0;
 
+    // günlük labirent
     var dKey = Util.todayKey();
     var dRec = Save.data.daily[dKey];
+    var dGrid = document.createElement('div');
+    dGrid.className = 'grid';
+    dGrid.style.marginBottom = '18px';
     var d = document.createElement('button');
     d.className = 'lvl daily';
     d.innerHTML =
@@ -525,32 +601,68 @@
     d.addEventListener('click', function () {
       startLevel(Levels.daily(dKey));
     });
-    grid.appendChild(d);
+    dGrid.appendChild(d);
+    wrap.appendChild(dGrid);
 
-    Levels.LIST.forEach(function (def) {
-      var rec = Save.data.best[def.id];
-      var locked = def.id > unlocked;
-      if (rec) total += rec.stars;
-      var b = document.createElement('button');
-      b.className = 'lvl' + (locked ? ' locked' : '');
-      b.setAttribute('aria-label', 'Bölüm ' + def.id + ' ' + def.name + (locked ? ' (kilitli)' : ''));
-      b.innerHTML =
-        '<span class="num">' + def.id + '</span><span class="nm">' + def.name + '</span>' +
-        '<span class="st">' + starsHtml(rec ? rec.stars : 0) + '</span>' +
-        (locked ? '<svg class="lock"><use href="#i-lock"/></svg>' : '');
-      if (!locked) {
-        b.addEventListener('click', function () {
-          startLevel(def);
-        });
+    // sezon panelleri: her biri kendi paletiyle (orman açık, mağara koyu)
+    Levels.SEASONS.forEach(function (se) {
+      var sec = document.createElement('section');
+      var seasonLocked = se.first > unlocked;
+      sec.className = 'season' + (seasonLocked ? ' locked' : '');
+      sec.setAttribute('data-theme', se.theme);
+      var seStars = 0;
+      var cards = [];
+      Levels.LIST.forEach(function (def) {
+        if (def.season !== se.id) return;
+        var rec = Save.data.best[def.id];
+        var locked = def.id > unlocked;
+        if (rec) seStars += rec.stars;
+        var b = document.createElement('button');
+        b.className = 'lvl' + (locked ? ' locked' : '');
+        b.setAttribute('aria-label', se.title + ' Bölüm ' + def.id + ' ' + def.name + (locked ? ' (kilitli)' : ''));
+        b.innerHTML =
+          '<span class="num">' + def.id + '</span><span class="nm">' + def.name + '</span>' +
+          '<span class="st">' + starsHtml(rec ? rec.stars : 0) + '</span>' +
+          (locked ? '<svg class="lock"><use href="#i-lock"/></svg>' : '');
+        if (!locked) {
+          b.addEventListener('click', function () {
+            startLevel(def);
+          });
+        }
+        cards.push(b);
+      });
+      allStars += seStars;
+      var head = document.createElement('div');
+      head.className = 'season-head';
+      head.innerHTML =
+        '<svg class="art"><use href="#art-' + se.key + '"/></svg>' +
+        '<div><h3>' + se.title + ' · ' + se.name + '</h3><p>' + se.tagline + '</p></div>' +
+        '<span class="prog">' + seStars + ' / ' + Levels.PER_SEASON * 3 + ' ★</span>';
+      sec.appendChild(head);
+      if (seasonLocked) {
+        var lk = document.createElement('p');
+        lk.className = 'season-lock';
+        lk.innerHTML = '<svg><use href="#i-lock"/></svg><span>' + (se.id > 1 ? Levels.SEASONS[se.id - 2].name + ' sezonunu bitirince açılır.' : '') + '</span>';
+        sec.appendChild(lk);
       }
-      grid.appendChild(b);
+      var grid = document.createElement('div');
+      grid.className = 'grid';
+      cards.forEach(function (c) {
+        grid.appendChild(c);
+      });
+      sec.appendChild(grid);
+      wrap.appendChild(sec);
     });
-    $('#levels-note').textContent = total + ' / ' + Levels.LIST.length * 3 + ' ★';
+    $('#levels-note').textContent = allStars + ' / ' + Levels.LIST.length * 3 + ' ★';
   }
 
   function syncTitle() {
     var u = Save.data.unlocked;
-    $('#btn-play').textContent = u > 1 ? 'Devam Et · Bölüm ' + Math.min(u, Levels.LIST.length) : 'Oyna';
+    var cur = progressDef();
+    var se = Levels.seasonOf(cur);
+    $('#btn-play').textContent = u > Levels.LIST.length ? 'Tekrar Oyna · Bölüm ' + cur.id : u > 1 ? 'Devam Et · Bölüm ' + cur.id : 'Oyna';
+    $('#title-season').querySelector('use').setAttribute('href', '#art-' + se.key);
+    $('#title-season').querySelector('span').textContent = se.title + ' · ' + se.name;
   }
 
   function syncSettings() {
@@ -558,6 +670,7 @@
     $('#set-sfx').checked = s.sfx;
     $('#set-music').checked = s.music;
     $('#set-vib').checked = s.vib;
+    $('#set-open').checked = s.openAll;
     $('#row-vib').hidden = !(navigator.vibrate && root.matchMedia && root.matchMedia('(pointer: coarse)').matches);
     $('#set-fs').hidden = !(document.fullscreenEnabled || document.webkitFullscreenEnabled);
     $('#set-install').hidden = !installEvent;
@@ -582,7 +695,7 @@
     hud = {
       root: $('#hud'), toast: $('#toast'), hint: $('#hint'), time: $('#hud-time'), num: $('#hud-num'), name: $('#hud-name'),
       slotsMemory: $('#slots-memory'), slotsSound: $('#slots-sound'), chipKey: $('#chip-key'), chipFlower: $('#chip-flower'),
-      chipWind: $('#chip-wind'), flowerCount: $('#flower-count'), btnStone: $('#btn-stone'), btnSwitch: $('#btn-switch'),
+      chipWind: $('#chip-wind'), windLabel: $('#wind-label'), flowerCount: $('#flower-count'), btnStone: $('#btn-stone'), btnSwitch: $('#btn-switch'),
       stoneLbl: $('#stone-lbl'), stoneCount: $('#stone-count'),
     };
 
@@ -641,6 +754,14 @@
     $('#btn-start').addEventListener('click', begin);
     $('#btn-intro-back').addEventListener('click', openLevels);
     $('#btn-resume').addEventListener('click', resume);
+    $('#btn-hint').addEventListener('click', function () {
+      var w = App.world;
+      if (!w || !w.grantHint()) return;
+      resume();
+      Audio.sfx('whisper');
+      hint('Ses taşı hazır. Taş düğmesiyle bırak, oku izle. Bu bölümde en çok ★★.', 8000);
+      updateHud(w, true);
+    });
     $('#btn-restart').addEventListener('click', function () {
       startLevel(App.def, true);
     });
@@ -661,7 +782,7 @@
     $('#btn-share').addEventListener('click', function () {
       var d = App.def;
       var st = $$('#win-stars svg.on').length;
-      var text = 'Silik · ' + (d.daily ? 'Günlük Labirent ' + d.dateKey : 'Bölüm ' + d.id + ' ' + d.name) + ' ' + $('#win-time').textContent + ' ' + '★'.repeat(st) + '☆'.repeat(3 - st);
+      var text = 'Silik · ' + (d.daily ? 'Günlük Labirent ' + d.dateKey : Levels.seasonOf(d).title + ' Bölüm ' + d.id + ' ' + d.name) + ' ' + $('#win-time').textContent + ' ' + '★'.repeat(st) + '☆'.repeat(3 - st);
       var url = /^https?:$/.test(location.protocol) ? location.href : ''; // file:// yolu paylaşılmaz
       if (navigator.share) {
         navigator.share(url ? { title: 'Silik', text: text, url: url } : { title: 'Silik', text: text }).catch(function () {});
@@ -692,6 +813,11 @@
       Save.save();
       vib(30);
     });
+    $('#set-open').addEventListener('change', function (e) {
+      Save.data.settings.openAll = e.target.checked;
+      Save.save();
+      toast(e.target.checked ? 'Tüm bölümler açık' : 'Bölümler sırayla açılır', '', 1400);
+    });
     $('#set-fs').addEventListener('click', function () {
       var d = document;
       if (d.fullscreenElement || d.webkitFullscreenElement) (d.exitFullscreen || d.webkitExitFullscreen).call(d);
@@ -711,6 +837,9 @@
         b.dataset.armed = '';
         b.querySelector('span').textContent = 'İlerlemeyi sıfırla';
         toast('İlerleme sıfırlandı', 'warn', 1600);
+        // duraklatılmış bölümün içinden sıfırlanırsa oyun menüye döner (demo dünyası oynanan bölümün yerini almasın)
+        if (App.mode === 'menu') startDemo();
+        else exitToMenu();
         syncTitle();
       } else {
         b.dataset.armed = '1';
@@ -748,7 +877,7 @@
 
     // Enter: ekrandaki ana düğmeye bas
     root.addEventListener('keydown', function (e) {
-      if (e.key !== 'Enter' || document.activeElement !== document.body) return;
+      if (e.key !== 'Enter' || e.repeat || document.activeElement !== document.body) return;
       var b = App.screen && $('#s-' + App.screen + ' .btn.primary');
       if (b) {
         e.preventDefault();
@@ -779,6 +908,9 @@
       installEvent = e;
     });
 
+    // ?unlock (ya da #unlock) ile açılırsa bölümlerin hepsi listede açık gelir (deneme)
+    if (/[?&#]unlock\b/.test(String(root.location.search) + String(root.location.hash))) App.forceOpen = true; // yalnızca bu oturum
+
     applySettings();
     startDemo();
     setScreen('title');
@@ -800,7 +932,10 @@
           rem -= step;
           if (App.mode !== 'play' || App.world !== w) break;
         }
-        if (App.mode === 'play' && App.world === w) updateHud(w, false);
+        if (App.mode === 'play' && App.world === w) {
+          updateHud(w, false);
+          nudgeStuck(w);
+        }
       } else if (App.mode === 'menu') {
         var dv = demoVec(w);
         if (App.world !== w) return; // demo yeniden başladı; eski dünyayı çizme

@@ -6,11 +6,11 @@
 
   function defaults() {
     return {
-      v: 1,
+      v: 2,
       unlocked: 1, // açık olan en yüksek bölüm
       best: {}, // { bölümId: { time, stars, steps } }
       daily: {}, // { 'YYYY-AA-GG': { time, stars } }
-      settings: { sfx: true, music: true, vib: true },
+      settings: { sfx: true, music: true, vib: true, openAll: false }, // openAll: tüm bölümleri listede aç (deneme)
       seen: {}, // bir kez gösterilen ipuçları
     };
   }
@@ -24,8 +24,9 @@
     var out = {};
     if (!plain(src)) return out;
     for (var k in src) {
+      if (k === '__proto__' || !Object.prototype.hasOwnProperty.call(src, k)) continue;
       var r = src[k];
-      if (plain(r) && isFinite(r.time) && r.time >= 0 && isFinite(r.stars)) {
+      if (plain(r) && typeof r.time === 'number' && isFinite(r.time) && r.time > 0 && typeof r.stars === 'number' && isFinite(r.stars)) {
         out[k] = { time: +r.time, stars: Math.max(1, Math.min(3, r.stars | 0)), steps: isFinite(r.steps) ? +r.steps : 0 };
       }
     }
@@ -42,9 +43,13 @@
         if (plain(p)) {
           var u = Number(p.unlocked);
           d.unlocked = isFinite(u) ? Math.max(1, Math.min(999, Math.floor(u))) : 1;
-          d.best = cleanRecords(p.best);
-          d.daily = cleanRecords(p.daily);
+          // v1 kayıtlarındaki süre/yıldızlar bölümlerin eski hâline aittir (2 sezonlu sürümde bölümler yeniden dengelendi):
+          // ilerleme (açık bölümler) ve ayarlar korunur, rekorlar sıfırlanır.
+          var old = !(p.v >= 2);
+          d.best = old ? {} : cleanRecords(p.best);
+          d.daily = old ? {} : cleanRecords(p.daily);
           d.seen = plain(p.seen) ? p.seen : {};
+          if (d.seen.mirror) d.seen['mirror-forest'] = 1; // v1'de tek 'mirror' ipucu vardı: orman göl ipucu olarak sayılır
           if (plain(p.settings)) for (var k in d.settings) if (typeof p.settings[k] === 'boolean') d.settings[k] = p.settings[k];
         }
       }
@@ -82,7 +87,8 @@
         rec = prev && prev.time <= time ? prev : { time: time, stars: stars, steps: steps };
         if (prev && prev.stars > rec.stars) rec.stars = prev.stars;
         data.best[def.id] = rec;
-        if (def.id + 1 > data.unlocked) data.unlocked = def.id + 1;
+        // yalnızca normal yoldan ulaşılabilen bölüm ilerlemeyi açar ("Tüm bölümleri aç" gerçek ilerlemeyi bozmasın)
+        if (def.id <= data.unlocked && def.id + 1 > data.unlocked) data.unlocked = def.id + 1;
       }
       save();
       return { record: !prev || time < prev.time, best: rec };

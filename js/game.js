@@ -21,6 +21,7 @@
   const SPEED = 3.9; // kare / sn
   const PR = 0.27; // oyuncu yarıçapı
   const HOLD = 1.5; // silinmeden önceki tam görünürlük süresi (sn)
+  const GHOST_AGE = 2; // ayna hayaletleri gerçek hafızadan 2 kat hızlı silinir (oyuncuyu uzun süre yanıltmasın)
   const DIRS = Maze.DIRS;
 
   class World {
@@ -37,6 +38,12 @@
       this.wind = m.wind;
       this.mirrors = m.mirrors;
       this.mem = def.mem;
+      this.theme = def.theme || 'forest';
+      // bölüm başına görüş: mağarada fener ışığı daha küçüktür
+      this.visR = def.vision || VIS_R;
+      this.stoneR = Math.min(STONE_R, this.visR - 0.4);
+      m.vision = this.visR; // par süresi hesabı da aynı görüşü kullanır
+      m.season = def.season || 1; // yıldız eşikleri sezona göre
       this.doorIdx = m.door.y * m.w + m.door.x;
 
       this.known = new Uint8Array(N);
@@ -50,10 +57,13 @@
       this.visList = [];
       this.dtype = new Uint8Array(N); // 0 yok, 1 zemin, 2 duvar, 3 ayna
       this.dalpha = new Float32Array(N);
+      this.dghost = new Uint8Array(N); // 1: bu hücre bir ayna hayaleti (gerçek nesneleri göstermemeli)
       this.dink = new Uint8Array(N);
 
       this.player = { x: m.start.x + 0.5, y: m.start.y + 0.5, face: Math.PI / 2, moving: false, walk: 0 };
       this.hasKey = false;
+      this.hinted = false; // ipucu istendi: bu bölümde en çok 2 yıldız
+      this.stuckShown = false; // "takıldın mı?" notu en çok bir kez gösterilir
       this.flowers = m.flowers.map((f) => ({ x: f.x, y: f.y, taken: false }));
       this.flowersTaken = 0;
       this.inv = { memory: def.stones, sound: def.sound || 0 };
@@ -268,7 +278,7 @@
       const vis = this.vis;
       for (let k = 0; k < this.visList.length; k++) vis[this.visList[k]] = 0;
       const list = (this.visList = []);
-      this.los(this.player.x, this.player.y, VIS_R, (i) => {
+      this.los(this.player.x, this.player.y, this.visR, (i) => {
         if (!vis[i]) {
           vis[i] = 1;
           list.push(i);
@@ -366,7 +376,7 @@
             this.ptype[i] = 0;
             continue;
           }
-          this.page[i] += dt * (this.wind[i] ? 2 : 1);
+          this.page[i] += dt * (this.wind[i] ? 2 : 1) * GHOST_AGE;
           this.pap[i] = Math.min(1, this.pap[i] + dt * 5);
           if (this.page[i] >= this.mem) {
             this.ptype[i] = 0;
@@ -392,15 +402,18 @@
           this.dtype[i] = this.tiles[i] === 0 ? 1 : this.mirrorMap[i] ? 3 : 2;
           this.dalpha[i] = real * app;
           this.dink[i] = locked ? 1 : 0;
+          this.dghost[i] = 0;
           if (!locked && !this.vis[i] && real < minS) minS = real;
         } else if (ph > 0) {
           this.dtype[i] = this.ptype[i];
           this.dalpha[i] = ph * Math.min(1, this.pap[i]);
           this.dink[i] = 0;
+          this.dghost[i] = 1;
         } else {
           this.dtype[i] = 0;
           this.dalpha[i] = 0;
           this.dink[i] = 0;
+          this.dghost[i] = 0;
         }
       }
       if (!this.fadeSeen && minS < 0.8) {
@@ -424,6 +437,16 @@
 
     get hasSoundType() {
       return this.total.sound > 0;
+    }
+
+    /** Takılan oyuncuya yardım: ses taşı olmayan bölümde 1 ses taşı verir (yön okunu fısıldar). */
+    grantHint() {
+      if (this.state !== 'play' || this.hasSoundType) return false;
+      this.total.sound = 1;
+      this.inv.sound = 1;
+      this.hinted = true;
+      this.cur = 'sound';
+      return true;
     }
 
     switchType() {
@@ -470,7 +493,7 @@
         mask.add(i);
         cells.push(i);
       };
-      this.los(sx, sy, STONE_R, add);
+      this.los(sx, sy, this.stoneR, add);
       // görülen zeminlerin komşu duvarları
       const tmp = cells.slice();
       for (let k = 0; k < tmp.length; k++) {
@@ -557,7 +580,9 @@
     }
 
     confetti(x, y, n) {
-      const colors = ['#b4492f', '#c58b1a', '#2f7f86', '#1e2b4d', '#c25b7a'];
+      const colors = this.theme === 'cave'
+        ? ['#f0a24a', '#5ec3c9', '#e58ab0', '#efe6cf', '#9b8cf0']
+        : ['#b4492f', '#c58b1a', '#6a9a54', '#1d3a2e', '#c25b7a'];
       for (let i = 0; i < n; i++) {
         const a = Math.random() * Math.PI * 2;
         const v = 1.5 + Math.random() * 3.2;
@@ -602,7 +627,7 @@
           if (this.dtype[i] && !this.vis[i] && !this.lock[i] && a > 0.05 && a < 0.7 && Math.random() < 0.3) {
             this.particles.push({
               kind: 'crumb', x: tx + Math.random(), y: ty + Math.random(), vx: 0.25 + Math.random() * 0.4, vy: 0.1,
-              life: 0, max: 1.2 + Math.random(), size: 0.018 + Math.random() * 0.02, color: this.dink[i] ? '#1e2b4d' : '#4a4743',
+              life: 0, max: 1.2 + Math.random(), size: 0.018 + Math.random() * 0.02, color: this.theme === 'cave' ? (this.dink[i] ? '#f0a24a' : '#cfc9b8') : this.dink[i] ? '#1d3a2e' : '#4a4f43',
             });
           }
         }
@@ -723,7 +748,7 @@
     let pos = at(maze.start);
     let cost = 0;
 
-    const see = (i) => World.prototype.los.call(ctx, (i % w) + 0.5, ((i / w) | 0) + 0.5, VIS_R, (j) => { seen[j] = 1; });
+    const see = (i) => World.prototype.los.call(ctx, (i % w) + 0.5, ((i / w) | 0) + 0.5, maze.vision || VIS_R, (j) => { seen[j] = 1; });
     const walk = (to, stopWhen) => {
       const p = Maze.path(tiles, w, h, pos, to);
       for (let k = 1; k < p.length; k++) {
@@ -769,11 +794,12 @@
     return maze._par;
   }
 
-  /** 3 yıldız: ideal gezginin 1.8 katı içinde; 2 yıldız: 3.2 katı içinde. */
+  /** 3 yıldız: ideal gezginin 1.8 katı içinde; 2 yıldız: 3.2 katı içinde (mağarada 2.2 / 3.8: karanlıkta unutmak daha çok zaman alır). */
   function stars(maze, time) {
     const par = parTime(maze);
-    if (time <= par * 1.8) return 3;
-    if (time <= par * 3.2) return 2;
+    const cave = maze.season === 2;
+    if (time <= par * (cave ? 2.2 : 1.8)) return 3;
+    if (time <= par * (cave ? 3.8 : 3.2)) return 2;
     return 1;
   }
 

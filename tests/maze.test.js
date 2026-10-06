@@ -60,6 +60,46 @@ defs.forEach(function (def) {
   console.log('      zemin=' + m.stats.floor + ' başlangıç→anahtar=' + m.stats.toKey + ' anahtar→kapı=' + m.stats.keyToDoor + ' çıkmaz=' + m.stats.deadEnds);
 });
 
+console.log('\n[sezonlar]');
+check('24 bölüm, kimlikler 1..24, iki sezon x 12, tema ve görüş alanları', () => {
+  assert.equal(Levels.LIST.length, 24);
+  Levels.LIST.forEach((d, i) => {
+    assert.equal(d.id, i + 1);
+    assert.equal(d.season, i < 12 ? 1 : 2, 'sezon ' + d.id);
+    assert.equal(d.theme, i < 12 ? 'forest' : 'cave', 'tema ' + d.id);
+    assert.equal(d.seasonStart, i === 0 || i === 12);
+    if (d.season === 2) assert.ok(d.vision >= 2.5 && d.vision <= 3.6, 'görüş ' + d.id);
+    else assert.equal(d.vision, 0);
+  });
+  assert.equal(Levels.SEASONS.length, 2);
+  assert.equal(Levels.seasonOf(Levels.byId(13)).key, 'cave');
+  assert.ok(Levels.byId(12).epilogue && Levels.byId(24).epilogue, 'sezon sonu kapanış yazıları');
+});
+check('günlük labirent iki temadan de gelir, aynı tarih aynı tema', () => {
+  const themes = {};
+  for (let d = 1; d <= 60; d++) {
+    const key = '2026-' + String(1 + Math.floor((d - 1) / 28)).padStart(2, '0') + '-' + String(1 + ((d - 1) % 28)).padStart(2, '0');
+    const a = Levels.daily(key), b = Levels.daily(key);
+    assert.equal(a.theme, b.theme); assert.equal(a.seed, b.seed);
+    assert.equal(a.season, a.theme === 'cave' ? 2 : 1);
+    themes[a.theme] = (themes[a.theme] || 0) + 1;
+  }
+  assert.ok(themes.forest > 10 && themes.cave > 10, JSON.stringify(themes));
+});
+check('zorluk eğrisi: ideal gezgin süresi (par) iki sezonda da genel olarak artar', () => {
+  const Game = require('../js/game.js');
+  const par = Levels.LIST.map((d) => {
+    const m = Maze.generate(d);
+    m.vision = d.vision || 3.6; // oyundaki gibi: mağarada görüş daha küçük
+    return Game.parTime(m);
+  });
+  [[0, 12], [12, 24]].forEach(([a, b]) => {
+    for (let i = a + 1; i < b; i++) assert.ok(par[i] > par[i - 1] * 0.92, 'bölüm ' + (i + 1) + ' par=' + par[i].toFixed(0) + ' önceki=' + par[i - 1].toFixed(0));
+  });
+  assert.ok(par[12] > par[11] * 0.45 && par[12] < par[11], 'S2 başlangıcı S1 sonundan daha kolay ama çok da kolay olmamalı');
+  assert.ok(par[23] > par[11] * 1.4, 'son bölüm ilk sezonun sonundan belirgin zor olmalı');
+});
+
 console.log('\n[süpürme] rastgele tohum/boyut/parametreler');
 check('kapı tek çıkmaz sokak olsa bile üretim çökmez (bilinen tohum)', () => {
   const m = Maze.generate({ seed: 926374139, w: 15, h: 15, braid: 0.05, branch: 0.1, straight: 0.9 });

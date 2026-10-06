@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>Silik — Hafızanı Seç</title>
-  <meta name="description" content="Silik: sisli bir labirentte gördüğün her yer hafızandan siliniyor. Çıkışı bulmak için neyi hatırlayacağını sen seç. Telefonda ve bilgisayarda oynanır.">
+  <meta name="description" content="Silik: gördüğün her yer hafızandan siliniyor. Çıkışı bulmak için neyi hatırlayacağını sen seç. 24 bölüm, iki sezon: sisli bir orman ve fener ışığında bir yer altı mağarası. Telefonda ve bilgisayarda oynanır.">
   <meta name="theme-color" content="#f0e8d4">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -36,15 +36,60 @@
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-:root {
-  --paper: #f0e8d4;
-  --paper-2: #f7f1e1;
-  --ink: #1e2b4d;
-  --pencil: #4a4743;
-  --accent: #b4492f;
+/* Tema değişkenleri. Varsayılan = Orman (açık kâğıt, yeşil mürekkep). Mağara = kara kâğıt, tebeşir, kehribar.
+   [data-theme] herhangi bir öğeye konabilir: örn. bölüm listesindeki mağara paneli kendi paletiyle çizilir. */
+:root,
+[data-theme="forest"] {
+  --paper: #efe8ce;
+  --paper-rgb: 239 232 206;
+  --paper-2: #f8f3df;
+  --paper2-rgb: 248 243 223;
+  --ink: #17382a;
+  --ink-rgb: 23 56 42;
+  --ink-hover: #245a42;
+  --on-ink: #f8f3df;
+  --pencil: #4b5244;
+  --pencil-rgb: 58 66 52;
+  --accent: #a8402a;
+  --accent-rgb: 168 64 42;
+  --on-accent: #fff;
   --gold: #c58b1a;
+  --gold-dark: #7a5a10;
   --teal: #27707a;
   --rose: #c25b7a;
+  --flower: #a23d5f;
+  --wind: #357059;
+  --hover: #fffbea;
+  --key-bg: rgb(255 233 170 / 0.96);
+  --pickup-bg: #fff3c9;
+  --star-off: #857b62;
+}
+[data-theme="cave"] {
+  --paper: #1f232a;
+  --paper-rgb: 31 35 42;
+  --paper-2: #2b3039;
+  --paper2-rgb: 43 48 57;
+  --ink: #efe6cf;
+  --ink-rgb: 239 230 207;
+  --ink-hover: #fff7de;
+  --on-ink: #1b1f26;
+  --pencil: #b9b5a6;
+  --pencil-rgb: 200 196 182;
+  --accent: #f0a24a;
+  --accent-rgb: 240 162 74;
+  --on-accent: #1b1f26;
+  --gold: #e8b64a;
+  --gold-dark: #f6d27a;
+  --teal: #5ec3c9;
+  --rose: #e58ab0;
+  --flower: #ee93b8;
+  --wind: #8fb8e0;
+  --hover: #363c47;
+  --key-bg: rgb(98 76 24 / 0.9);
+  --pickup-bg: #4a4026;
+  --star-off: #808a9c;
+}
+:root {
   --hand: "Patrick Hand", "Segoe Print", "Bradley Hand", "Marker Felt", "Comic Neue", "Comic Sans MS", "Chalkboard SE", "Noteworthy", cursive;
   --ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --sk: 16px 7px 18px 9px / 9px 18px 7px 16px; /* elle çizilmiş gibi köşeler */
@@ -119,8 +164,8 @@ svg {
   height: 112px;
   margin: -56px 0 0 -56px;
   border-radius: 50%;
-  border: 2px dashed rgba(30, 43, 77, 0.5);
-  background: rgba(247, 241, 225, 0.4);
+  border: 2px dashed rgb(var(--ink-rgb) / 0.5);
+  background: rgb(var(--paper2-rgb) / 0.4);
 }
 #stick .knob {
   position: absolute;
@@ -150,17 +195,17 @@ svg {
   animation: fadein 0.3s ease both;
 }
 .screen.paper {
-  background: rgba(240, 232, 212, 0.95);
+  background: rgb(var(--paper-rgb) / 0.95);
   justify-content: flex-start;
 }
 .screen.dim {
-  background: rgba(240, 232, 212, 0.5);
+  background: rgb(var(--paper-rgb) / 0.5);
 }
 #s-title {
   justify-content: flex-start;
   overflow-y: auto;
   touch-action: pan-y;
-  background: radial-gradient(ellipse at 50% 46%, rgba(240, 232, 212, 0.92) 0%, rgba(240, 232, 212, 0.78) 50%, rgba(240, 232, 212, 0.3) 100%);
+  background: radial-gradient(ellipse at 50% 46%, rgb(var(--paper-rgb) / 0.92) 0%, rgb(var(--paper-rgb) / 0.78) 50%, rgb(var(--paper-rgb) / 0.3) 100%);
 }
 #s-title .title-wrap {
   margin: auto 0; /* sığıyorsa ortala, sığmıyorsa üstten başla ve kaydır */
@@ -243,9 +288,8 @@ svg {
   left: 0;
   right: 0;
   text-align: center;
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--pencil);
-  opacity: 0.9;
 }
 @media (pointer: coarse) {
   .foot {
@@ -278,24 +322,24 @@ svg {
   border-radius: var(--sk);
   padding: 13px 22px;
   min-height: 50px;
-  box-shadow: 3px 4px 0 rgba(30, 43, 77, 0.28);
+  box-shadow: 3px 4px 0 rgb(var(--ink-rgb) / 0.28);
   cursor: pointer;
   touch-action: manipulation;
   transition: transform 0.08s, box-shadow 0.08s;
 }
 .btn:hover {
-  background: #fffaf0;
+  background: var(--hover);
 }
 .btn:active {
   transform: translate(2px, 3px);
-  box-shadow: 1px 1px 0 rgba(30, 43, 77, 0.28);
+  box-shadow: 1px 1px 0 rgb(var(--ink-rgb) / 0.28);
 }
 .btn.primary {
   background: var(--ink);
-  color: var(--paper-2);
+  color: var(--on-ink);
 }
 .btn.primary:hover {
-  background: #2a3a66;
+  background: var(--ink-hover);
 }
 .btn.small {
   font-size: 17px;
@@ -326,11 +370,11 @@ svg {
   display: grid;
   place-items: center;
   padding: 0;
-  background: rgba(247, 241, 225, 0.92);
+  background: rgb(var(--paper2-rgb) / 0.92);
   color: var(--ink);
   border: 2px solid var(--ink);
   border-radius: var(--sk);
-  box-shadow: 2px 3px 0 rgba(30, 43, 77, 0.25);
+  box-shadow: 2px 3px 0 rgb(var(--ink-rgb) / 0.25);
   cursor: pointer;
   touch-action: manipulation;
 }
@@ -395,13 +439,13 @@ svg {
   background: var(--paper-2);
   border: 2px solid var(--ink);
   border-radius: var(--sk);
-  box-shadow: 3px 4px 0 rgba(30, 43, 77, 0.22);
+  box-shadow: 3px 4px 0 rgb(var(--ink-rgb) / 0.22);
   cursor: pointer;
   touch-action: manipulation;
 }
 .lvl:active:not(.locked) {
   transform: translate(2px, 3px);
-  box-shadow: 1px 1px 0 rgba(30, 43, 77, 0.22);
+  box-shadow: 1px 1px 0 rgb(var(--ink-rgb) / 0.22);
 }
 .lvl .num {
   font-family: var(--hand);
@@ -423,11 +467,11 @@ svg {
 .stars svg {
   width: 19px;
   height: 19px;
-  color: #aaa088;
+  color: var(--star-off);
   fill: transparent;
 }
 .lvl .st svg.on {
-  color: #8a5d0c;
+  color: var(--gold-dark);
   fill: var(--gold);
 }
 .lvl.locked {
@@ -451,9 +495,9 @@ svg {
   align-items: center;
   gap: 14px;
   min-height: 0;
-  background: rgba(180, 73, 47, 0.1);
+  background: rgb(var(--accent-rgb) / 0.1);
   border-color: var(--accent);
-  box-shadow: 3px 4px 0 rgba(180, 73, 47, 0.25);
+  box-shadow: 3px 4px 0 rgb(var(--accent-rgb) / 0.25);
 }
 .lvl.daily .num {
   font-size: 21px;
@@ -490,10 +534,10 @@ svg {
   fill: var(--ink);
 }
 .rules li:nth-child(4) > svg { color: var(--rose); fill: none; }
-.rules li:nth-child(5) > svg { color: #46698a; fill: none; }
+.rules li:nth-child(5) > svg { color: var(--wind); fill: none; }
 .rules li:nth-child(6) > svg { color: var(--teal); fill: none; }
 .rules li:nth-child(7) > svg { color: var(--teal); fill: var(--teal); }
-.rules li:nth-child(3) > svg { color: #8a5d0c; fill: none; }
+.rules li:nth-child(3) > svg { color: var(--gold-dark); fill: none; }
 .rules li:nth-child(1) > svg { color: var(--pencil); fill: none; }
 .rules li.controls > svg { color: var(--accent); fill: none; }
 .rules h3 {
@@ -529,7 +573,7 @@ svg {
   color: var(--ink);
   background: none;
   border: 0;
-  border-bottom: 1.5px dashed rgba(30, 43, 77, 0.3);
+  border-bottom: 1.5px dashed rgb(var(--ink-rgb) / 0.3);
   cursor: pointer;
   touch-action: manipulation;
 }
@@ -584,21 +628,22 @@ svg {
   text-align: center;
   font-size: 13px;
   color: var(--pencil);
-  opacity: 0.8;
 }
 
 /* ---------- Kartlar (tanıtım, duraklat, bitiş) ---------- */
 
 .card {
+  --cpx: 22px;
+  --cpb: 20px;
   width: min(430px, 100%);
   max-height: 100%;
   overflow-y: auto;
-  padding: 22px 22px 20px;
+  padding: 22px var(--cpx) var(--cpb);
   text-align: center;
   background: var(--paper-2);
   border: 2px solid var(--ink);
   border-radius: var(--sk);
-  box-shadow: 5px 6px 0 rgba(30, 43, 77, 0.25);
+  box-shadow: 5px 6px 0 rgb(var(--ink-rgb) / 0.25);
   touch-action: pan-y;
   animation: pop 0.35s cubic-bezier(0.2, 1.3, 0.4, 1) both;
 }
@@ -631,7 +676,7 @@ svg {
   margin: 0 0 14px;
   padding: 12px;
   text-align: left;
-  background: rgba(180, 73, 47, 0.08);
+  background: rgb(var(--accent-rgb) / 0.08);
   border: 1.5px dashed var(--accent);
   border-radius: var(--sk);
 }
@@ -676,8 +721,8 @@ svg {
   font-weight: 400;
   font-size: 14px;
   color: var(--ink);
-  background: rgba(30, 43, 77, 0.08);
-  border: 1.5px solid rgba(30, 43, 77, 0.4);
+  background: rgb(var(--ink-rgb) / 0.08);
+  border: 1.5px solid rgb(var(--ink-rgb) / 0.4);
   border-radius: var(--sk);
 }
 
@@ -692,7 +737,7 @@ svg {
   height: 54px;
 }
 .stars svg.on {
-  color: #8a5d0c;
+  color: var(--gold-dark);
   fill: var(--gold);
   animation: starpop 0.55s both;
 }
@@ -724,10 +769,10 @@ svg {
 }
 .stats div {
   padding: 6px 4px;
-  border-bottom: 1.5px dashed rgba(30, 43, 77, 0.28);
+  border-bottom: 1.5px dashed rgb(var(--ink-rgb) / 0.28);
 }
 .stats dt {
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--pencil);
 }
 .stats dd {
@@ -775,10 +820,10 @@ svg {
   padding: 6px 10px;
   font-size: 14px;
   color: var(--ink);
-  background: rgba(247, 241, 225, 0.9);
-  border: 1.5px solid rgba(58, 54, 50, 0.75);
+  background: rgb(var(--paper2-rgb) / 0.9);
+  border: 1.5px solid rgb(var(--pencil-rgb) / 0.75);
   border-radius: var(--sk);
-  box-shadow: 2px 3px 0 rgba(58, 54, 50, 0.16);
+  box-shadow: 2px 3px 0 rgb(var(--pencil-rgb) / 0.16);
 }
 .hud-title {
   flex: 0 1 380px;
@@ -794,7 +839,7 @@ svg {
   display: grid;
   place-items: center;
   font: 600 13px var(--ui);
-  color: var(--paper-2);
+  color: var(--on-ink);
   background: var(--ink);
   border-radius: 50%;
 }
@@ -844,7 +889,7 @@ svg {
   filter: drop-shadow(0 0 0 transparent);
 }
 .slots.active {
-  background: #fffaf0;
+  background: var(--hover);
   border-color: var(--ink);
   border-width: 2px;
 }
@@ -858,15 +903,15 @@ svg {
 }
 #chip-key.has {
   opacity: 1;
-  color: #8a5d0c;
-  background: rgba(255, 233, 170, 0.96);
+  color: var(--gold-dark);
+  background: var(--key-bg);
   animation: pop 0.4s cubic-bezier(0.2, 1.4, 0.4, 1);
 }
 .chip.flower {
-  color: #a23d5f;
+  color: var(--flower);
 }
 .chip.wind {
-  color: #46698a;
+  color: var(--wind);
   animation: fadein 0.3s;
 }
 .chip.item span {
@@ -886,8 +931,8 @@ svg {
   text-align: center;
   font-size: 14.5px;
   line-height: 1.4;
-  color: var(--paper-2);
-  background: rgba(30, 43, 77, 0.92);
+  color: var(--on-ink);
+  background: rgb(var(--ink-rgb) / 0.92);
   border-radius: var(--sk);
   opacity: 0;
   pointer-events: none;
@@ -916,10 +961,10 @@ svg {
   padding: 0;
   font-family: var(--hand);
   color: var(--ink);
-  background: rgba(247, 241, 225, 0.93);
+  background: rgb(var(--paper2-rgb) / 0.93);
   border: 2.5px solid var(--ink);
   border-radius: 50%;
-  box-shadow: 3px 4px 0 rgba(30, 43, 77, 0.28);
+  box-shadow: 3px 4px 0 rgb(var(--ink-rgb) / 0.28);
   touch-action: none;
   cursor: pointer;
 }
@@ -934,7 +979,7 @@ svg {
 .round.down,
 .round:active {
   transform: translate(2px, 3px);
-  box-shadow: 1px 1px 0 rgba(30, 43, 77, 0.28);
+  box-shadow: 1px 1px 0 rgb(var(--ink-rgb) / 0.28);
 }
 .round .ic {
   width: 32px;
@@ -953,7 +998,7 @@ svg {
   width: 20px;
   height: 20px;
   padding: 2px;
-  color: var(--paper-2);
+  color: var(--on-ink);
   background: var(--ink);
   border-radius: 50%;
 }
@@ -978,7 +1023,7 @@ svg {
   padding: 0 6px;
   font: 700 14px/21px var(--ui);
   text-align: center;
-  color: #fff;
+  color: var(--on-accent);
   background: var(--accent);
   border: 2px solid var(--paper-2);
   border-radius: 13px;
@@ -987,17 +1032,17 @@ svg {
   background: var(--teal);
 }
 .round.pickup {
-  background: #fff3c9;
+  background: var(--pickup-bg);
 }
 .round.pulse {
   animation: pulse 1.25s ease-out infinite;
 }
 @keyframes pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(180, 73, 47, 0.6);
+    box-shadow: 0 0 0 0 rgb(var(--accent-rgb) / 0.6);
   }
   100% {
-    box-shadow: 0 0 0 20px rgba(180, 73, 47, 0);
+    box-shadow: 0 0 0 20px rgb(var(--accent-rgb) / 0);
   }
 }
 .kbd {
@@ -1009,8 +1054,8 @@ svg {
   padding: 1px 7px;
   font: 600 11px var(--ui);
   color: var(--pencil);
-  background: rgba(247, 241, 225, 0.9);
-  border: 1px solid rgba(58, 54, 50, 0.45);
+  background: rgb(var(--paper2-rgb) / 0.9);
+  border: 1px solid rgb(var(--pencil-rgb) / 0.45);
   border-radius: 6px;
   white-space: nowrap;
 }
@@ -1026,11 +1071,20 @@ svg {
   }
 }
 
+#curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: var(--paper);
+  opacity: 0;
+  pointer-events: none;
+}
+
 #toast {
   position: fixed;
   left: 50%;
   top: calc(var(--safe-t) + 112px);
-  z-index: 15;
+  z-index: 30; /* ekranların (20) üstünde, perdenin (40) altında: ayarlar/bitiş ekranındaki bildirimler görünsün */
   width: max-content;
   max-width: min(88vw, 440px);
   padding: 10px 16px;
@@ -1038,7 +1092,7 @@ svg {
   font-family: var(--hand);
   font-size: 16px;
   line-height: 1.35;
-  color: var(--paper-2);
+  color: var(--on-ink);
   background: var(--ink);
   border-radius: var(--sk);
   box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.18);
@@ -1073,14 +1127,176 @@ svg {
     display: none;
   }
 }
+#toast.good,
+#toast.warn,
+#toast.teal {
+  color: #fff;
+}
 #toast.good {
   background: #2f6b4a;
 }
 #toast.warn {
-  background: var(--accent);
+  background: #a8402a;
 }
 #toast.teal {
-  background: var(--teal);
+  background: #1f6c75;
+}
+
+/* ---------- Sezonlar ---------- */
+
+.season-tag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-family: var(--hand);
+  font-size: 19px;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+.season-tag svg {
+  width: 30px;
+  height: 30px;
+  color: var(--ink);
+}
+
+.season {
+  margin: 0 0 20px;
+  padding: 14px 14px 16px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 2px solid rgb(var(--ink-rgb) / 0.55);
+  border-radius: var(--sk);
+  box-shadow: 3px 4px 0 rgb(var(--ink-rgb) / 0.16);
+}
+.season[data-theme="cave"] {
+  border-color: rgb(var(--ink-rgb) / 0.35);
+  box-shadow: 3px 4px 0 rgb(0 0 0 / 0.35);
+}
+.season-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 12px;
+}
+.season-head .art {
+  flex: none;
+  width: 54px;
+  height: 54px;
+  color: var(--ink);
+}
+.season-head h3 {
+  margin: 0;
+  font-family: var(--hand);
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1.1;
+}
+.season-head p {
+  margin: 2px 0 0;
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--pencil);
+}
+.season-head .prog {
+  margin-left: auto;
+  padding-left: 8px;
+  font-family: var(--hand);
+  font-size: 18px;
+  white-space: nowrap;
+  color: var(--gold-dark);
+}
+.season-lock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -2px 0 12px;
+  font-size: 13px;
+  color: var(--pencil);
+}
+.season-lock svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--pencil);
+}
+.season.locked .grid {
+  opacity: 0.85;
+}
+
+.season-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  text-align: left;
+  background: rgb(var(--ink-rgb) / 0.07);
+  border: 1.5px solid rgb(var(--ink-rgb) / 0.35);
+  border-radius: var(--sk);
+}
+.season-banner .art {
+  flex: none;
+  width: 54px;
+  height: 54px;
+  color: var(--ink);
+}
+.season-banner .s-kicker {
+  margin: 0;
+  font-family: var(--hand);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.season-banner h3 {
+  margin: 0;
+  font-family: var(--hand);
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1.1;
+}
+.season-banner .s-story {
+  margin: 3px 0 0;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--pencil);
+}
+.rules li.seasons > svg {
+  color: var(--accent);
+  fill: none;
+}
+
+/* kısa dikey ekranlarda tanıtım/bitiş kartının ana düğmesi hep görünür kalsın */
+@media (max-height: 780px) {
+  #s-intro .card > .menu,
+  #s-win .card > .menu {
+    position: sticky;
+    bottom: calc(var(--cpb) * -1);
+    z-index: 2;
+    align-items: center;
+    width: auto;
+    margin: 10px calc(var(--cpx) * -1) calc(var(--cpb) * -1);
+    padding: 12px var(--cpx) var(--cpb);
+    background: var(--paper-2);
+    box-shadow: 0 -14px 14px -8px var(--paper-2);
+  }
+  #s-intro .card > .menu > .btn,
+  #s-intro .card > .menu .menu-row,
+  #s-win .card > .menu > .btn,
+  #s-win .card > .menu .menu-row {
+    width: min(320px, 100%);
+  }
+}
+@media (max-height: 620px) {
+  .foot {
+    display: none;
+  }
+}
+/* tanıtım/bitiş kartının arkasında üst çubuk (duraklat düğmesi, bölüm adı, süre) hayalet gibi görünmesin */
+#hud.overlay .hud-top {
+  visibility: hidden;
 }
 
 /* ---------- Küçük / yatay ekranlar ---------- */
@@ -1136,69 +1352,23 @@ svg {
     max-width: min(calc(100vw - 210px), 440px);
   }
 
-  /* başlık ekranı: solda logo ve yazı, sağda menü */
-  #s-title .title-wrap {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 230px;
-    column-gap: 28px;
-    align-items: center;
-    width: min(720px, 100%);
-    text-align: left;
-  }
-  #s-title .logo {
-    grid-column: 1;
-    justify-content: flex-start;
-    font-size: clamp(44px, 17vh, 84px);
-  }
-  #s-title .pencil-line {
-    grid-column: 1;
-    width: min(240px, 100%);
-    margin: 2px 0 8px;
-  }
-  #s-title .tag {
-    grid-column: 1;
-    max-width: none;
-    margin: 0;
-    font-size: 14px;
-    text-align: left;
-  }
-  #s-title .menu {
-    grid-column: 2;
-    grid-row: 1 / span 3;
-    width: 230px;
-  }
-
-  /* tanıtım ve bitiş kartları: solda bilgi, sağda düğmeler */
-  #s-intro .card,
-  #s-win .card {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 210px;
-    column-gap: 22px;
-    align-items: start;
-    width: min(700px, 100%);
-    text-align: left;
-  }
-  #s-intro .card > *,
-  #s-win .card > * {
-    grid-column: 1;
-  }
-  #s-intro .card > .menu,
-  #s-win .card > .menu {
-    grid-column: 2;
-    grid-row: 1 / span 8;
-    align-self: center;
-    margin: 0;
-    width: 100%;
-  }
-  #s-win .stars {
-    justify-content: flex-start;
-  }
-  #s-win .stats {
-    grid-template-columns: repeat(4, 1fr);
-  }
-  .newbox {
+  .season-banner {
     margin-bottom: 8px;
-    padding: 8px 10px;
+    padding: 6px 8px;
+    gap: 8px;
+  }
+  .season-banner .art {
+    width: 36px;
+    height: 36px;
+  }
+  .season-banner h3 {
+    font-size: 19px;
+  }
+  .season-banner .s-story {
+    display: none; /* kısa ekranda yer açmak için: sezon adı yeter */
+  }
+  .season-banner .s-kicker {
+    font-size: 11px;
   }
   .newbox h3 {
     font-size: 16px;
@@ -1222,8 +1392,129 @@ svg {
     margin: 4px 0;
   }
 }
+
+/* iki sütunlu düzen: yalnızca geniş ve kısa ekranlar (yatay telefon, kısa masaüstü penceresi) */
+@media (max-height: 600px) and (min-width: 560px) {
+  /* başlık ekranı: solda logo ve yazı, sağda menü */
+  #s-title .title-wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 256px;
+    column-gap: 28px;
+    align-items: center;
+    width: min(720px, 100%);
+    text-align: left;
+  }
+  #s-title .logo {
+    grid-column: 1;
+    justify-content: flex-start;
+    font-size: clamp(44px, 17vh, 84px);
+  }
+  #s-title .pencil-line {
+    grid-column: 1;
+    width: min(240px, 100%);
+    margin: 2px 0 8px;
+  }
+  #s-title .season-tag {
+    grid-column: 1;
+    justify-content: flex-start;
+    margin: 0 0 6px;
+    font-size: 17px;
+  }
+  #s-title .season-tag svg {
+    width: 24px;
+    height: 24px;
+  }
+  #s-title .tag {
+    grid-column: 1;
+    max-width: none;
+    margin: 0;
+    font-size: 14px;
+    text-align: left;
+  }
+  #s-title .menu {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+    width: 256px;
+  }
+
+  /* tanıtım ve bitiş kartları: solda bilgi, sağda düğmeler */
+  #s-intro .card,
+  #s-win .card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 240px;
+    column-gap: 22px;
+    align-items: start;
+    width: min(700px, 100%);
+    text-align: left;
+  }
+  #s-intro .card > *,
+  #s-win .card > * {
+    grid-column: 1;
+  }
+  #s-intro .card > .menu,
+  #s-win .card > .menu {
+    grid-column: 2;
+    grid-row: 1 / span 8;
+    align-self: start;
+    position: sticky; /* çok kısa yatay ekranda kart kayarken düğmeler yerinde kalsın */
+    top: 0;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    background: none;
+    box-shadow: none;
+  }
+  #s-intro .card > .menu > .btn,
+  #s-intro .card > .menu .menu-row,
+  #s-win .card > .menu > .btn,
+  #s-win .card > .menu .menu-row {
+    width: 100%;
+  }
+  #s-win .stars {
+    justify-content: flex-start;
+  }
+  #s-win .stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .newbox {
+    margin-bottom: 8px;
+    padding: 8px 10px;
+  }
+}
+
 @media (max-width: 380px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .season {
+    padding: 12px 8px 14px;
+  }
+  .season-head {
+    gap: 8px;
+  }
+  .season-head .art {
+    width: 38px;
+    height: 38px;
+  }
+  .season-head h3 {
+    font-size: 19px;
+  }
+  .season-head p {
+    display: none;
+  }
+  .season-head .prog {
+    font-size: 15px;
+  }
+  .lvl {
+    padding: 10px;
+  }
+  .lvl.daily .num {
+    font-size: 18px;
+  }
   .card {
+    --cpx: 16px;
+    --cpb: 16px;
     padding: 18px 16px 16px;
   }
   .btn {
@@ -1231,7 +1522,100 @@ svg {
   }
 }
 
+/* ---------- İnceleme düzeltmeleri ---------- */
+
+/* mağara arayüzü: ipucu kartı ve bildirimler sahnenin tonuna uysun (krem levha göz almasın) */
+[data-theme="cave"] .hint,
+[data-theme="cave"] #toast:not(.good):not(.warn):not(.teal) {
+  color: var(--ink);
+  background: rgb(var(--paper2-rgb) / 0.96);
+  border: 1.5px solid rgb(var(--ink-rgb) / 0.5);
+}
+[data-theme="cave"] #toast.good {
+  background: #2b4d47;
+}
+[data-theme="cave"] #toast.warn {
+  background: #7a4326;
+}
+[data-theme="cave"] #toast.teal {
+  background: #1f5a63;
+}
+
+.lvl.daily {
+  min-height: 44px;
+}
+.row {
+  flex-wrap: wrap;
+}
+.row em {
+  white-space: nowrap;
+}
+.kbd {
+  font-size: 12px;
+}
+
+/* çentikli telefonlarda çipler yan boşluklara taşmasın */
+.hud-inv {
+  padding-left: max(8px, calc(var(--safe-l) + 8px));
+  padding-right: max(8px, calc(var(--safe-r) + 8px));
+}
+
+/* dikey telefonlarda sezon başlığı ve "yeni öğe" kutusu tanıtım kartını taşırmasın */
+@media (max-height: 700px) {
+  .season-banner .s-story {
+    display: none;
+  }
+  .season-banner {
+    margin-bottom: 8px;
+    padding: 8px 10px;
+  }
+  .newbox {
+    margin-bottom: 8px;
+    padding: 8px 10px;
+  }
+  .hm {
+    margin: 4px 0;
+  }
+}
+
+/* çok kısa dikey ekranlarda (360x500 gibi) çipler iki satıra sarar: bildirim ve ipucu onlara çarpmasın */
+@media (max-height: 520px) and (max-width: 559px) {
+  #toast {
+    top: calc(var(--safe-t) + 154px);
+  }
+  .hint {
+    left: 50%;
+    bottom: calc(var(--safe-b) + 112px);
+    max-width: min(88vw, 440px);
+  }
+  .card {
+    --cpx: 18px;
+    --cpb: 12px;
+    padding: 12px var(--cpx) var(--cpb);
+  }
+}
+@media (max-height: 520px) {
+  .season-banner .s-kicker {
+    font-size: 12px;
+  }
+}
+@media (max-width: 340px) {
+  .lvl.daily .nm {
+    display: none;
+  }
+}
+@media (max-height: 600px) and (min-width: 560px) {
+  .menu-row .btn.small {
+    padding: 9px 6px;
+    font-size: 16px;
+    white-space: nowrap;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  #curtain {
+    display: none;
+  }
   .logo span,
   .round.pulse,
   .stars svg.on,
@@ -1259,6 +1643,11 @@ svg {
     <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.2l2.6 5.5 6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.4 9.5l6-.8L12 3.2z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
     <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2" fill="currentColor"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
     <symbol id="i-swap" viewBox="0 0 24 24"><path d="M4 8h14l-3-3M20 16H6l3 3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-mushroom" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12.5C3.5 7.5 7.2 4 12 4s8.5 3.5 8.5 8.5z"/><path d="M9.3 12.5v5.2a2.7 2.7 0 0 0 5.4 0v-5.2"/><circle cx="8.6" cy="9" r=".9" fill="currentColor"/><circle cx="13.2" cy="7.6" r="1" fill="currentColor"/><circle cx="16.4" cy="10.4" r=".8" fill="currentColor"/></g></symbol>
+    <symbol id="i-crystal" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l4.2 6.3-1.2 12.7H9L7.8 8.8z"/><path d="M7.8 8.8h8.4M12 2.5l-1.1 19"/></g></symbol>
+    <symbol id="i-lantern" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9.2 5a2.8 2.8 0 0 1 5.6 0"/><path d="M8 5.2h8l1.2 3.2v8.4l-1.5 2.2H8.3l-1.5-2.2V8.4z"/><path d="M12 9.5c1.3 1.4 1.8 2.4 1.2 3.7-.3.7-1 1.1-1.2 1.1s-.9-.4-1.2-1.1c-.6-1.3-.1-2.3 1.2-3.7z" fill="currentColor"/></g></symbol>
+    <symbol id="art-forest" viewBox="0 0 64 64"><g fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M32 6c6 4 11 10 7 16 5 1 8 6 5 10-2 3-6 4-12 4s-10-1-12-4c-3-4 0-9 5-10-4-6 1-12 7-16z" fill="currentColor" fill-opacity=".16"/><path d="M32 36v16M32 45l-6-4M32 42l5-4"/><path d="M13 30c5 3 7 7 4 11-2 2-6 2-9 0-3-3-1-8 5-11z" fill="currentColor" fill-opacity=".12"/><path d="M13 41v11"/><path d="M51 28c5 3 7 8 4 12-2 2-6 2-9 0-3-3-1-9 5-12z" fill="currentColor" fill-opacity=".12"/><path d="M51 40v12"/><path d="M4 54h56M19 54c1-3 3-4 5-4M42 54c1-2 3-3 5-3"/></g></symbol>
+    <symbol id="art-cave" viewBox="0 0 64 64"><g fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h56"/><path d="M8 8l5 16 5-16M22 8l4 12 4-12M36 8l5 18 5-18M50 8l3 10 3-10" fill="currentColor" fill-opacity=".14"/><path d="M14 56l5-18 5 6 5-16 6 16 5-8 6 20z" fill="currentColor" fill-opacity=".16"/><path d="M29 40l2 6M38 46l-2 5"/><path d="M4 56h56"/></g></symbol>
     <symbol id="i-controls" viewBox="0 0 24 24"><circle cx="8" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8" cy="12" r="1.8" fill="currentColor"/><circle cx="18" cy="14" r="3" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
   </defs>
 </svg>
@@ -1280,7 +1669,7 @@ svg {
     <div class="chip slots sound" id="slots-sound" aria-label="Ses taşları" hidden></div>
     <div class="chip item" id="chip-key" title="Anahtar"><svg><use href="#i-key"/></svg></div>
     <div class="chip item flower" id="chip-flower" hidden title="Çiçekler"><svg><use href="#i-flower"/></svg><span id="flower-count">0/0</span></div>
-    <div class="chip item wind" id="chip-wind" hidden><svg><use href="#i-wind"/></svg><span>Rüzgâr</span></div>
+    <div class="chip item wind" id="chip-wind" hidden><svg><use href="#i-wind"/></svg><span id="wind-label">Rüzgâr</span></div>
   </div>
   <div id="hint" class="hint" role="status" aria-live="polite"></div>
   <div class="hud-controls">
@@ -1298,6 +1687,7 @@ svg {
 </div>
 
 <div id="toast" role="status" aria-live="polite"></div>
+<div id="curtain" aria-hidden="true"></div>
 
 <main id="screens">
 
@@ -1306,6 +1696,7 @@ svg {
     <div class="title-wrap">
       <h1 class="logo" aria-label="Silik"><span>S</span><span>i</span><span>l</span><span>i</span><span>k</span></h1>
       <div class="pencil-line"></div>
+      <p class="season-tag" id="title-season"><svg><use href="#art-forest"/></svg><span>1. Sezon · Orman</span></p>
       <p class="tag">Gördüğün her yer bir süre sonra hafızandan siliniyor.<br>Çıkışı bulmak için neyi hatırlayacağını <em>sen</em> seç.</p>
       <div class="menu">
         <button class="btn primary" id="btn-play">Oyna</button>
@@ -1327,7 +1718,7 @@ svg {
       <h2>Bölümler</h2>
       <span class="bar-note" id="levels-note"></span>
     </header>
-    <div class="scroll"><div class="grid" id="level-grid"></div></div>
+    <div class="scroll"><div id="level-grid"></div></div>
   </section>
 
   <!-- Nasıl oynanır -->
@@ -1341,10 +1732,11 @@ svg {
         <li><svg><use href="#i-pencil"/></svg><div><h3>Silinen harita</h3><p>Yürüdüğün yerler kâğıda kurşun kalemle çizilir. Yaklaşık 15 saniye sonra silgi izi gibi soluklaşıp kaybolur. Görüş alanın küçük; gerisini hatırlamak sana kalmış.</p></div></li>
         <li><svg><use href="#i-stone"/></svg><div><h3>Hatıra taşı</h3><p>Her bölümde sınırlı sayıda taşın var. Bir taşı bıraktığında çevresindeki küçük alan mürekkeple çizilir ve kalıcı olur. Taşın üstündeyken tekrar basarsan geri alırsın.</p></div></li>
         <li><svg><use href="#i-key"/></svg><div><h3>Anahtar ve kapı</h3><p>Önce anahtarı, sonra kapıyı bul. İkisi genelde birbirinden uzaktır. Taşlarını nereye koyacağın oyunun asıl kararı.</p></div></li>
-        <li><svg><use href="#i-flower"/></svg><div><h3>Çiçekler</h3><p>Her çiçek sana bir taş daha kazandırır. Ama onlara ulaşmak için ana yoldan sapman gerekir.</p></div></li>
-        <li><svg><use href="#i-wind"/></svg><div><h3>Rüzgâr</h3><p>Rüzgârlı bölgelerde harita iki kat hızlı silinir.</p></div></li>
-        <li><svg><use href="#i-mirror"/></svg><div><h3>Ayna duvarlar</h3><p>Haritana yanlış yönü gösteren sahte izler bırakır. Mürekkeple çizilmiş alan ise her zaman doğruyu söyler.</p></div></li>
+        <li><svg><use href="#i-flower"/></svg><div><h3>Çiçekler ve mantarlar</h3><p>Ormandaki çiçekler ve mağaradaki parlayan mantarlar sana birer taş daha kazandırır. Ama onlara ulaşmak için ana yoldan sapman gerekir.</p></div></li>
+        <li><svg><use href="#i-wind"/></svg><div><h3>Rüzgâr ve cereyan</h3><p>Ormandaki rüzgârlı, mağaradaki cereyanlı bölgelerde harita iki kat hızlı silinir.</p></div></li>
+        <li><svg><use href="#i-mirror"/></svg><div><h3>Göletler ve kristaller</h3><p>Ormandaki göletlerin ve mağaradaki kristal duvarların yansıması haritana yanlış yönü gösteren sahte izler bırakır. Mürekkeple çizilmiş alan ise her zaman doğruyu söyler.</p></div></li>
         <li><svg><use href="#i-sound"/></svg><div><h3>Ses taşı</h3><p>Bırakıldığında yakındaki yolun yönünü fısıldar ve bir ok gösterir. Önce anahtarı, anahtar sende olunca kapıyı işaret eder.</p></div></li>
+        <li class="seasons"><svg><use href="#i-lantern"/></svg><div><h3>İki sezon</h3><p>Oyun 12’şer bölümlük iki sezondur: önce sisli bir <b>Orman</b>, sonra kara kâğıt ve tebeşirle çizilmiş bir <b>Mağara</b>. Mağarada fener ışığın daha küçüktür ve hafıza daha kısa sürer.</p></div></li>
         <li class="controls"><svg><use href="#i-controls"/></svg><div><h3>Kontroller</h3>
           <p><b>Dokunmatik:</b> ekranın herhangi bir yerine basıp sürükle, sağ alttaki düğmeyle taş bırak ya da geri al. Ses taşı varsa yanındaki küçük düğmeyle taş türünü değiştir.</p>
           <p><b>Klavye:</b> WASD veya yön tuşları ile yürü · Boşluk: taş bırak / geri al · Q: taş türü · P veya Esc: duraklat · M: sesi kapat.</p></div></li>
@@ -1363,6 +1755,7 @@ svg {
         <label class="row"><span>Ses efektleri</span><input type="checkbox" id="set-sfx"><i class="sw-ui"></i></label>
         <label class="row"><span>Müzik</span><input type="checkbox" id="set-music"><i class="sw-ui"></i></label>
         <label class="row" id="row-vib"><span>Titreşim</span><input type="checkbox" id="set-vib"><i class="sw-ui"></i></label>
+        <label class="row"><span>Tüm bölümleri aç</span><input type="checkbox" id="set-open"><i class="sw-ui"></i></label>
         <button class="row action" id="set-fs" hidden><span>Tam ekran</span><em>aç / kapat</em></button>
         <button class="row action" id="set-install" hidden><span>Uygulamayı yükle</span><em>ana ekrana ekle</em></button>
         <button class="row action danger" id="set-reset"><span>İlerlemeyi sıfırla</span><em>geri alınamaz</em></button>
@@ -1377,6 +1770,10 @@ svg {
       <p class="kicker" id="intro-kicker">Bölüm 1</p>
       <h2 id="intro-name">Uyanış</h2>
       <p class="sub" id="intro-sub"></p>
+      <div class="season-banner" id="intro-season" hidden>
+        <svg class="art"><use href="#art-forest"/></svg>
+        <div><p class="s-kicker" id="intro-season-kicker">1. Sezon</p><h3 id="intro-season-name">Orman</h3><p class="s-story" id="intro-season-story"></p></div>
+      </div>
       <div class="newbox" id="intro-new" hidden>
         <svg><use href="#i-pencil"/></svg>
         <div><h3 id="intro-new-title"></h3><p id="intro-new-text"></p></div>
@@ -1396,6 +1793,7 @@ svg {
       <div class="menu">
         <button class="btn primary" id="btn-resume">Devam Et</button>
         <button class="btn" id="btn-restart">Yeniden Başla</button>
+        <button class="btn" id="btn-hint" hidden>İpucu iste · en çok ★★</button>
         <div class="menu-row">
           <button class="btn small" id="btn-pause-settings">Ayarlar</button>
           <button class="btn small" id="btn-pause-levels">Bölümler</button>
@@ -1720,8 +2118,14 @@ svg {
     if (!keyCands.length) {
       // kapı tek çıkmaz sokaksa: başlangıçtan en uzak zemin hücresini anahtar yap
       var far = -1;
+      var farScore = -1;
       for (var fi = 0; fi < N; fi++) {
-        if (tiles[fi] === 0 && fi !== door && fi !== start && (far < 0 || dS[fi] > dS[far])) far = fi;
+        if (tiles[fi] !== 0 || fi === door || fi === start) continue;
+        var sc2 = Math.min(dS[fi], dD[fi]); // başlangıçtan da kapıdan da uzak
+        if (sc2 > farScore) {
+          farScore = sc2;
+          far = fi;
+        }
       }
       keyCands = [{ c: far, s: 0 }];
     }
@@ -1844,7 +2248,7 @@ svg {
     var windRects = [];
     var zones = p.wind || 0;
     for (var z = 0; z < zones; z++) {
-      for (var attempt = 0; attempt < 120; attempt++) {
+      for (var attempt = 0; attempt < 400; attempt++) {
         var zw = Math.round(w * (0.26 + rand() * 0.14));
         var zh = Math.round(h * (0.26 + rand() * 0.14));
         var zx = 1 + Math.floor(rand() * Math.max(1, w - 2 - zw));
@@ -1895,16 +2299,22 @@ svg {
 
 </script>
 <script>
-/* Silik — bölüm tanımları (tarayıcı + Node uyumlu)
+/* Silik — sezonlar ve bölüm tanımları (tarayıcı + Node uyumlu)
+ *
+ * İki sezon, her biri 12 bölüm:
+ *   1. Sezon · Orman  (bölüm  1–12): sisli bir sabah ormanı, kâğıt + kurşun kalem + yeşil mürekkep
+ *   2. Sezon · Mağara (bölüm 13–24): yer altı, kara kâğıt + tebeşir + fener ışığı
  *
  * Her bölüm tohumlu üretilir; yeni bölüm eklemek için listeye bir satır eklemek yeter.
  *   stones  : bölüm başına hatıra taşı
  *   sound   : ses taşı sayısı (0 ise yok)
- *   flowers : çiçek sayısı (her biri +1 hatıra taşı)
- *   wind    : rüzgâr bölgesi sayısı (harita 2 kat hızlı silinir)
- *   mirrors : ayna duvar sayısı (haritaya sahte izler bırakır)
+ *   flowers : toplanabilir sayısı (ormanda çiçek, mağarada parlayan mantar; her biri +1 hatıra taşı)
+ *   wind    : rüzgâr / cereyan bölgesi sayısı (harita 2 kat hızlı silinir)
+ *   mirrors : ayna sayısı (ormanda göl, mağarada kristal; haritaya sahte izler bırakır)
  *   mem     : haritanın tamamen silinme süresi (sn)
+ *   vision  : görüş yarıçapı (kare); 0 = varsayılan 3.6. Mağarada fener ışığı daha küçüktür
  *   intro   : bölümün başında gösterilen "yeni öğe" kartı
+ *   epilogue: bölümü bitirince gösterilen kapanış yazısı
  */
 (function (root, factory) {
   var m = factory(typeof module === 'object' && module.exports ? require('./util.js') : root.Silik.Util);
@@ -1913,25 +2323,50 @@ svg {
 })(this, function (Util) {
   'use strict';
 
-  var BASE = { stones: 3, sound: 0, flowers: 0, wind: 0, mirrors: 0, mem: 15, braid: 0, straight: 0.5, branch: 0.3 };
+  var PER_SEASON = 12;
+
+  var SEASONS = [
+    {
+      id: 1, key: 'forest', theme: 'forest', name: 'Orman', title: '1. Sezon', tagline: 'Sisli bir sabah ormanı',
+      first: 1, last: 12,
+      story: 'Sisli bir ormanda uyandın. Yapraklar arasında gördüğün her yer bir süre sonra aklından siliniyor.',
+    },
+    {
+      id: 2, key: 'cave', theme: 'cave', name: 'Mağara', title: '2. Sezon', tagline: 'Fener ışığında yer altı',
+      first: 13, last: 24,
+      story: 'Kökler arasındaki mağara ağzından içeri girdin. Elindeki fener yalnızca birkaç adımı aydınlatıyor.',
+    },
+  ];
+
+  /** Temaya göre değişen kelimeler (arayüz metinleri bunları kullanır). */
+  var TEXT = {
+    forest: { pickup: 'çiçek', pickups: 'Çiçekler', pickupIcon: 'flower', wind: 'Rüzgâr', mirror: 'Göl', mirrorPlural: 'Göletler', mirrorIcon: 'mirror' },
+    cave: { pickup: 'mantar', pickups: 'Mantarlar', pickupIcon: 'mushroom', wind: 'Cereyan', mirror: 'Kristal', mirrorPlural: 'Kristaller', mirrorIcon: 'crystal' },
+  };
+
+  var BASE = { stones: 3, sound: 0, flowers: 0, wind: 0, mirrors: 0, mem: 15, braid: 0, straight: 0.5, branch: 0.3, vision: 0 };
 
   function L(o) {
     var r = {};
     for (var k in BASE) r[k] = BASE[k];
     for (var j in o) r[j] = o[j];
+    r.season = o.id <= PER_SEASON ? 1 : 2;
+    r.theme = SEASONS[r.season - 1].theme;
+    r.seasonStart = o.id === SEASONS[r.season - 1].first;
     return r;
   }
 
   var LIST = [
+    /* ---------- 1. SEZON · ORMAN ---------- */
     L({
-      id: 1, name: 'Uyanış', sub: 'Gözlerini sisli bir labirentte açtın.',
+      id: 1, name: 'Uyanış', sub: 'Gözlerini sisli bir ormanda açtın.',
       w: 15, h: 15, seed: 1101, branch: 0.18,
       intro: { icon: 'pencil', title: 'Hatırla ya da unut', text: 'Gördüğün yerler kâğıda çizilir ama yaklaşık 15 saniyede silinir. Taş bırakarak bir yeri kalıcı kıl.' },
     }),
     L({
-      id: 2, name: 'Sis', sub: 'Anahtar ve kapı hiçbir zaman yan yana değildir.',
-      w: 19, h: 19, seed: 2207, braid: 0.05,
-      intro: { icon: 'key', title: 'Anahtar ve kapı', text: 'Önce anahtarı bul, sonra kapıyı. İkisi birbirinden uzaktır; taşlarını bu ikisi için sakla.' },
+      id: 2, name: 'Sis', sub: 'Ağaçların arasında anahtar ve kapı hiç yan yana değildir.',
+      w: 19, h: 19, seed: 49721, braid: 0.05,
+      intro: { icon: 'key', title: 'Anahtar ve kapı', text: 'Önce anahtarı bul, sonra kovuktaki kapıyı. İkisi birbirinden uzaktır; taşlarını bu ikisi için sakla.' },
     }),
     L({
       id: 3, name: 'Çiçek Tarlası', sub: 'Yoldan sapanı bir ödül bekler.',
@@ -1939,65 +2374,129 @@ svg {
       intro: { icon: 'flower', title: 'Çiçekler', text: 'Her çiçek sana bir taş daha kazandırır. Ama onlara ulaşmak için ana yoldan sapman gerekir.' },
     }),
     L({
-      id: 4, name: 'Rüzgâr', sub: 'Bazı yerlerde hatıralar daha çabuk uçar.',
-      w: 21, h: 21, seed: 4409, wind: 2, flowers: 1, braid: 0.08,
+      id: 4, name: 'Rüzgâr', sub: 'Yapraklar uçuşurken hatıralar da uçar.',
+      w: 21, h: 21, seed: 20247, wind: 2, flowers: 1, braid: 0.08,
       intro: { icon: 'wind', title: 'Rüzgâr', text: 'Rüzgârlı bölgelerde harita iki kat hızlı silinir. Oralarda bir taş çok daha değerlidir.' },
     }),
     L({
       id: 5, name: 'Fısıltı', sub: 'Taşlar da konuşabilir.',
-      w: 23, h: 23, seed: 5501, sound: 1, flowers: 1, braid: 0.08,
+      w: 23, h: 23, seed: 29258, sound: 1, flowers: 1, braid: 0.08,
       intro: { icon: 'sound', title: 'Ses taşı', text: 'Düğmeyle taş türünü değiştir. Ses taşı bırakıldığında yakındaki yolun yönünü ok olarak fısıldar. Önce anahtarı, sonra kapıyı gösterir.' },
     }),
     L({
-      id: 6, name: 'Yansıma', sub: 'Her parlayan şey doğruyu söylemez.',
-      w: 23, h: 23, seed: 6607, mirrors: 5, flowers: 1, braid: 0.08,
-      intro: { icon: 'mirror', title: 'Ayna duvarlar', text: 'Ayna duvarlar haritana yanlış yönü gösteren sahte izler bırakır. Mürekkeple çizilmiş alan ise her zaman doğruyu söyler.' },
+      id: 6, name: 'Göl Yansıması', sub: 'Durgun suyun yüzü doğruyu söylemez.',
+      w: 23, h: 23, seed: 14526, mirrors: 5, flowers: 1, braid: 0.08,
+      intro: { icon: 'mirror', title: 'Göletler', text: 'Göletlerin yansıması haritana yanlış yönü gösteren sahte izler bırakır. Mürekkeple çizilmiş alan ise her zaman doğruyu söyler.' },
     }),
     L({
-      id: 7, name: 'Uzun Yol', sub: 'Hatıralar uçuşurken adımların ağırlaşıyor.',
-      w: 27, h: 27, seed: 7703, wind: 2, flowers: 2, braid: 0.1,
+      id: 7, name: 'Eski Patika', sub: 'Yaprakların altında yol uzayıp gidiyor.',
+      w: 27, h: 27, seed: 39379, wind: 2, flowers: 2, braid: 0.1,
     }),
     L({
-      id: 8, name: 'Fısıltılı Rüzgâr', sub: 'Rüzgârın içinde bir ses var.',
-      w: 27, h: 27, seed: 8807, wind: 3, sound: 2, flowers: 1, braid: 0.1,
+      id: 8, name: 'Fısıltılı Rüzgâr', sub: 'Dalların arasında bir ses var.',
+      w: 27, h: 27, seed: 56321, wind: 3, sound: 2, flowers: 1, braid: 0.1,
     }),
     L({
-      id: 9, name: 'Sahte İzler', sub: 'Haritana güvenme.',
-      w: 27, h: 27, seed: 9901, mirrors: 9, flowers: 2, braid: 0.1,
+      id: 9, name: 'Sahte İzler', sub: 'Göletler yanıltır. Haritana güvenme.',
+      w: 27, h: 27, seed: 160362, mirrors: 9, flowers: 2, braid: 0.1,
     }),
     L({
-      id: 10, name: 'Aynalı Rüzgâr', sub: 'Hem unutuyorsun hem yanılıyorsun.',
-      w: 29, h: 29, seed: 10103, wind: 2, mirrors: 8, sound: 1, flowers: 2, braid: 0.1,
+      id: 10, name: 'Gölün Rüzgârı', sub: 'Hem unutuyorsun hem yanılıyorsun.',
+      w: 29, h: 29, seed: 222010, wind: 2, mirrors: 8, sound: 1, flowers: 2, braid: 0.1,
     }),
     L({
-      id: 11, name: 'Unutuş', sub: 'Hafıza daha da kısa.',
-      w: 31, h: 31, seed: 11213, mem: 12, wind: 3, mirrors: 8, sound: 2, flowers: 3, braid: 0.12,
+      id: 11, name: 'Unutuş', sub: 'Orman sıklaştı, hafıza kısaldı.',
+      w: 31, h: 31, seed: 129998, mem: 12, wind: 3, mirrors: 8, sound: 2, flowers: 3, braid: 0.12,
     }),
     L({
-      id: 12, name: 'Silik', sub: 'Son sayfa. Geriye ne hatırladığın kalır.',
-      w: 35, h: 35, seed: 12347, mem: 12, wind: 4, mirrors: 12, sound: 2, flowers: 4, braid: 0.12,
+      id: 12, name: 'Ormanın Kalbi', sub: 'Son sayfa. Geriye ne hatırladığın kalır.',
+      w: 35, h: 35, seed: 51942, mem: 12, wind: 4, mirrors: 12, sound: 2, flowers: 4, braid: 0.12,
+      epilogue: 'Ormanın kalbini geçtin. Ağaçlar aralandı; kökler arasında karanlık bir mağara ağzı açılıyor. Aşağıda daha derin bir unutuş seni bekliyor.',
+    }),
+
+    /* ---------- 2. SEZON · MAĞARA ---------- */
+    L({
+      id: 13, name: 'Mağara Ağzı', sub: 'Gün ışığı geride kaldı. Fener yanıyor.',
+      w: 29, h: 29, seed: 266415, flowers: 2, braid: 0.1, mem: 14, vision: 3.3,
+      intro: { icon: 'lantern', title: 'Karanlık', text: 'Mağarada fener ışığın daha küçük: gördüğün alan daraldı. Harita yine siliniyor; taşlarını daha dikkatli kullan.' },
+    }),
+    L({
+      id: 14, name: 'Damla Sesi', sub: 'Her damla uzaktan bir yankı getiriyor.',
+      w: 31, h: 31, seed: 29849, wind: 2, flowers: 2, braid: 0.1, mem: 14, vision: 3.3,
+      intro: { icon: 'wind', title: 'Cereyan', text: 'Dar geçitlerde soğuk bir hava akımı var. Cereyanlı bölgelerde harita iki kat hızlı silinir.' },
+    }),
+    L({
+      id: 15, name: 'Kristal Duvarlar', sub: 'Işığı yansıtan her yüzey yalan söyleyebilir.',
+      w: 31, h: 31, seed: 244664, mirrors: 6, flowers: 2, braid: 0.1, mem: 14, vision: 3.2,
+      intro: { icon: 'crystal', title: 'Kristaller', text: 'Kristal duvarlar fener ışığını yansıtıp haritana sahte koridorlar çizer. Mürekkeple çizilmiş alan her zaman doğruyu söyler.' },
+    }),
+    L({
+      id: 16, name: 'Yankı Odası', sub: 'Taşın fısıltısı duvarlara çarpıp dönüyor.',
+      w: 33, h: 33, seed: 21281, wind: 2, sound: 2, flowers: 2, braid: 0.1, mem: 14, vision: 3.2,
+    }),
+    L({
+      id: 17, name: 'Parlayan Mantarlar', sub: 'Karanlıkta ışık veren tek şey onlar.',
+      w: 33, h: 33, seed: 64535, wind: 2, mirrors: 4, flowers: 5, braid: 0.12, mem: 13, vision: 3.1,
+      intro: { icon: 'mushroom', title: 'Parlayan mantarlar', text: 'Her mantar sana bir taş daha kazandırır. Işıkları seni yoldan saptırabilir; ama taşlar zordur.' },
+    }),
+    L({
+      id: 18, name: 'Derin Çatlak', sub: 'Kayanın içinde yol ikiye, üçe ayrılıyor.',
+      w: 35, h: 35, seed: 18023, wind: 3, mirrors: 9, sound: 1, flowers: 3, braid: 0.12, mem: 13, vision: 3.1,
+    }),
+    L({
+      id: 19, name: 'Yeraltı Nehri', sub: 'Suyun sesi yönünü şaşırtıyor.',
+      w: 37, h: 37, seed: 539663, wind: 4, mirrors: 6, sound: 2, flowers: 3, braid: 0.12, mem: 13, vision: 3.0,
+    }),
+    L({
+      id: 20, name: 'Fısıltı Galerisi', sub: 'Burada her şey yankılanır, her yankı yanıltır.',
+      w: 39, h: 39, seed: 339931, wind: 3, mirrors: 10, sound: 3, flowers: 4, braid: 0.13, mem: 12, vision: 3.0,
+    }),
+    L({
+      id: 21, name: 'Karanlığın Kalbi', sub: 'Fenerin ışığı sönmeye yaklaşıyor.',
+      w: 41, h: 41, seed: 547764, wind: 4, mirrors: 10, sound: 2, flowers: 4, braid: 0.13, mem: 12, vision: 2.8,
+    }),
+    L({
+      id: 22, name: 'Eski Maden', sub: 'Ray izleri bir yere gidiyor. Ama nereye?',
+      w: 43, h: 43, seed: 222010, wind: 4, mirrors: 12, sound: 3, flowers: 5, braid: 0.14, mem: 11, vision: 2.8,
+    }),
+    L({
+      id: 23, name: 'Sessiz Derinlik', sub: 'Yalnızca kendi adımlarını duyuyorsun.',
+      w: 45, h: 45, seed: 613499, wind: 5, mirrors: 12, sound: 3, flowers: 6, braid: 0.14, mem: 11, vision: 2.7,
+    }),
+    L({
+      id: 24, name: 'Işığa Doğru', sub: 'Son sayfa. Karanlığın ötesinde bir çıkış var.',
+      w: 47, h: 47, seed: 506187, wind: 5, mirrors: 14, sound: 3, flowers: 6, braid: 0.14, mem: 10, vision: 2.6,
+      epilogue: 'Fenerin ışığı gün ışığına karıştı. Hatırladıkların seni buraya getirdi; unuttukların ise zaten yolun bir parçasıydı. Silik’ten çıktın.',
     }),
   ];
 
-  /** Günlük labirent: tarihten türeyen tohum, herkes için aynı. */
+  /** Günlük labirent: tarihten türeyen tohum, herkes için aynı. Tema da tarihe göre seçilir. */
   function daily(key) {
     var seed = Util.hashString('silik-' + key);
     var r = Util.rng(seed);
     var size = 25 + 2 * Math.floor(r() * 3);
-    return L({
+    var wind = 1 + Math.floor(r() * 2);
+    var mirrors = 3 + Math.floor(r() * 4);
+    var cave = r() < 0.5; // diğer değerleri değiştirmeden, sona eklendi
+    var def = L({
       id: 'daily',
       daily: true,
       dateKey: key,
       name: 'Günlük Labirent',
       sub: key,
       w: size, h: size, seed: seed,
-      wind: 1 + Math.floor(r() * 2),
-      mirrors: 3 + Math.floor(r() * 4),
+      wind: wind,
+      mirrors: mirrors,
       sound: 1,
       flowers: 2,
       braid: 0.1,
       mem: 14,
+      vision: cave ? 3.2 : 0,
     });
+    def.season = cave ? 2 : 1;
+    def.theme = cave ? 'cave' : 'forest';
+    def.seasonStart = false;
+    return def;
   }
 
   function byId(id) {
@@ -2005,7 +2504,11 @@ svg {
     return null;
   }
 
-  return { LIST: LIST, daily: daily, byId: byId };
+  function seasonOf(def) {
+    return SEASONS[(def && def.season ? def.season : 1) - 1];
+  }
+
+  return { LIST: LIST, SEASONS: SEASONS, TEXT: TEXT, PER_SEASON: PER_SEASON, daily: daily, byId: byId, seasonOf: seasonOf };
 });
 
 </script>
@@ -2018,11 +2521,11 @@ svg {
 
   function defaults() {
     return {
-      v: 1,
+      v: 2,
       unlocked: 1, // açık olan en yüksek bölüm
       best: {}, // { bölümId: { time, stars, steps } }
       daily: {}, // { 'YYYY-AA-GG': { time, stars } }
-      settings: { sfx: true, music: true, vib: true },
+      settings: { sfx: true, music: true, vib: true, openAll: false }, // openAll: tüm bölümleri listede aç (deneme)
       seen: {}, // bir kez gösterilen ipuçları
     };
   }
@@ -2036,8 +2539,9 @@ svg {
     var out = {};
     if (!plain(src)) return out;
     for (var k in src) {
+      if (k === '__proto__' || !Object.prototype.hasOwnProperty.call(src, k)) continue;
       var r = src[k];
-      if (plain(r) && isFinite(r.time) && r.time >= 0 && isFinite(r.stars)) {
+      if (plain(r) && typeof r.time === 'number' && isFinite(r.time) && r.time > 0 && typeof r.stars === 'number' && isFinite(r.stars)) {
         out[k] = { time: +r.time, stars: Math.max(1, Math.min(3, r.stars | 0)), steps: isFinite(r.steps) ? +r.steps : 0 };
       }
     }
@@ -2054,9 +2558,13 @@ svg {
         if (plain(p)) {
           var u = Number(p.unlocked);
           d.unlocked = isFinite(u) ? Math.max(1, Math.min(999, Math.floor(u))) : 1;
-          d.best = cleanRecords(p.best);
-          d.daily = cleanRecords(p.daily);
+          // v1 kayıtlarındaki süre/yıldızlar bölümlerin eski hâline aittir (2 sezonlu sürümde bölümler yeniden dengelendi):
+          // ilerleme (açık bölümler) ve ayarlar korunur, rekorlar sıfırlanır.
+          var old = !(p.v >= 2);
+          d.best = old ? {} : cleanRecords(p.best);
+          d.daily = old ? {} : cleanRecords(p.daily);
           d.seen = plain(p.seen) ? p.seen : {};
+          if (d.seen.mirror) d.seen['mirror-forest'] = 1; // v1'de tek 'mirror' ipucu vardı: orman göl ipucu olarak sayılır
           if (plain(p.settings)) for (var k in d.settings) if (typeof p.settings[k] === 'boolean') d.settings[k] = p.settings[k];
         }
       }
@@ -2094,7 +2602,8 @@ svg {
         rec = prev && prev.time <= time ? prev : { time: time, stars: stars, steps: steps };
         if (prev && prev.stars > rec.stars) rec.stars = prev.stars;
         data.best[def.id] = rec;
-        if (def.id + 1 > data.unlocked) data.unlocked = def.id + 1;
+        // yalnızca normal yoldan ulaşılabilen bölüm ilerlemeyi açar ("Tüm bölümleri aç" gerçek ilerlemeyi bozmasın)
+        if (def.id <= data.unlocked && def.id + 1 > data.unlocked) data.unlocked = def.id + 1;
       }
       save();
       return { record: !prev || time < prev.time, best: rec };
@@ -2131,7 +2640,25 @@ svg {
   var musicTimer = null;
   var drone = null;
   var wantMusic = false;
-  var NOTES = [220, 261.63, 293.66, 329.63, 392, 440, 523.25];
+  var windFilter = null;
+  var ambTimer = null;
+  var theme = 'forest';
+
+  /* Sezon başına ses kimliği: orman = aydınlık gam, kuş cıvıltısı, hışırtı; mağara = alçak gam, damla yankısı, uğultu */
+  var THEME = {
+    forest: {
+      notes: [261.63, 293.66, 329.63, 392, 440, 523.25, 587.33],
+      drone: [130.81, 196, 0], droneGain: 0.012, windF: 900, windQ: 0.55, windGain: 0.15,
+      step: { f: 2600, spread: 1400, q: 1.3, dur: 0.045, gain: 0.032 },
+      noteEvery: [2200, 3800], ambEvery: [6000, 13000], wet: 0.6,
+    },
+    cave: {
+      notes: [110, 130.81, 146.83, 164.81, 196, 220, 261.63],
+      drone: [55, 82.41, 110], droneGain: 0.022, windF: 280, windQ: 1.1, windGain: 0.2,
+      step: { f: 650, spread: 350, q: 3.5, dur: 0.075, gain: 0.05 },
+      noteEvery: [3200, 5200], ambEvery: [3500, 9000], wet: 1.2,
+    },
+  };
 
   function ensure() {
     if (ctx) return ctx;
@@ -2178,8 +2705,9 @@ svg {
     src.loop = true;
     var bp = ctx.createBiquadFilter();
     bp.type = 'bandpass';
-    bp.frequency.value = 520;
-    bp.Q.value = 0.7;
+    bp.frequency.value = THEME[theme].windF;
+    bp.Q.value = THEME[theme].windQ;
+    windFilter = bp;
     windGain = ctx.createGain();
     windGain.gain.value = 0;
     src.connect(bp);
@@ -2257,7 +2785,24 @@ svg {
 
   var SFX = {
     step: function () {
-      noise({ f: 1700 + Math.random() * 900, q: 1.2, dur: 0.05, gain: 0.035 });
+      var st = THEME[theme].step;
+      noise({ f: st.f + Math.random() * st.spread, q: st.q, dur: st.dur, gain: st.gain, wet: theme === 'cave' ? 0.5 : 0 });
+      if (theme === 'cave') tone({ f: 150 + Math.random() * 30, to: 90, dur: 0.06, gain: 0.04, wet: 0.7 });
+    },
+    // orman: kuş cıvıltısı (kısa, yükselip alçalan tiz notalar)
+    chirp: function () {
+      var base = 2300 + Math.random() * 1500;
+      var n = 2 + Math.floor(Math.random() * 3);
+      for (var i = 0; i < n; i++) {
+        tone({ f: base * (1 + Math.random() * 0.25), to: base * (1.25 + Math.random() * 0.3), dur: 0.07 + Math.random() * 0.04, gain: 0.022, at: i * 0.11, wet: 0.6 });
+      }
+    },
+    // mağara: tavandan düşen damla ve yankısı
+    drip: function () {
+      var f = 900 + Math.random() * 700;
+      tone({ f: f, to: f * 0.45, dur: 0.16, gain: 0.05, wet: 1.4 });
+      tone({ f: f * 0.8, to: f * 0.38, dur: 0.2, gain: 0.02, at: 0.32, wet: 1.6 });
+      tone({ f: f * 0.7, to: f * 0.33, dur: 0.22, gain: 0.01, at: 0.62, wet: 1.8 });
     },
     drop: function () {
       tone({ f: 190, to: 62, dur: 0.22, gain: 0.32, type: 'sine' });
@@ -2318,42 +2863,83 @@ svg {
   /** v: 0..1 — rüzgârlı bölgede yükselir, dışarıda kısılır. */
   function setWind(v) {
     if (!ctx || !windGain) return;
-    windGain.gain.setTargetAtTime(sfxOn ? v * 0.16 : 0, ctx.currentTime, 0.4);
+    windGain.gain.setTargetAtTime(sfxOn ? v * THEME[theme].windGain : 0, ctx.currentTime, 0.4);
   }
 
   function scheduleNote() {
     if (!ctx || !musicOn || !wantMusic) return;
+    var T = THEME[theme];
     if (ctx.state === 'running') {
-      var f = NOTES[Math.floor(Math.random() * NOTES.length)];
-      tone({ f: f, dur: 4.5, gain: 0.05, attack: 0.9, dest: musicBus, wet: 1, type: 'sine' });
-      if (Math.random() < 0.3) tone({ f: f * 2, dur: 3, gain: 0.018, attack: 1.2, dest: musicBus, wet: 1, type: 'triangle' });
+      var f = T.notes[Math.floor(Math.random() * T.notes.length)];
+      tone({ f: f, dur: 4.5, gain: theme === 'cave' ? 0.055 : 0.05, attack: 0.9, dest: musicBus, wet: T.wet, type: theme === 'cave' ? 'triangle' : 'sine' });
+      if (Math.random() < 0.3) tone({ f: f * 2, dur: 3, gain: 0.018, attack: 1.2, dest: musicBus, wet: T.wet, type: 'triangle' });
     }
-    musicTimer = setTimeout(scheduleNote, 2200 + Math.random() * 3800);
+    musicTimer = setTimeout(scheduleNote, T.noteEvery[0] + Math.random() * (T.noteEvery[1] - T.noteEvery[0]));
+  }
+
+  /** Ortam sesleri (kuş / damla): müzik açıkken ara sıra, rastgele aralıklarla. */
+  function scheduleAmbient() {
+    if (!ctx || !musicOn || !wantMusic) return;
+    var T = THEME[theme];
+    if (ctx.state === 'running' && sfxOn) {
+      try {
+        SFX[theme === 'cave' ? 'drip' : 'chirp']();
+      } catch (e) {
+        /* ses asla oyunu bozmasın */
+      }
+    }
+    ambTimer = setTimeout(scheduleAmbient, T.ambEvery[0] + Math.random() * (T.ambEvery[1] - T.ambEvery[0]));
+  }
+
+  function tuneDrone() {
+    if (!drone) return;
+    var T = THEME[theme];
+    drone.forEach(function (d, i) {
+      var f = T.drone[i];
+      d.g.gain.setTargetAtTime(f ? T.droneGain : 0, ctx.currentTime, 1.2);
+      if (f) d.o.frequency.setTargetAtTime(f, ctx.currentTime, 1.2);
+    });
   }
 
   function startMusic() {
     wantMusic = true;
     if (!ctx || !musicOn || musicTimer) return;
     if (!drone) {
-      drone = [110, 164.81].map(function (f) {
+      drone = [0, 1, 2].map(function () {
         var o = ctx.createOscillator();
         var g = ctx.createGain();
         o.type = 'sine';
-        o.frequency.value = f;
-        g.gain.value = 0.014;
+        o.frequency.value = 110;
+        g.gain.value = 0;
         o.connect(g);
         g.connect(musicBus);
         o.start();
-        return g;
+        return { o: o, g: g };
       });
+      tuneDrone();
     }
     scheduleNote();
+    clearTimeout(ambTimer);
+    ambTimer = setTimeout(scheduleAmbient, 2500 + Math.random() * 3000);
+  }
+
+  /** Sezon teması: müzik gamı, drone, rüzgâr rengi ve adım sesi değişir. */
+  function setTheme(name) {
+    if (!THEME[name] || name === theme) return;
+    theme = name;
+    if (ctx && windFilter) {
+      windFilter.frequency.setTargetAtTime(THEME[theme].windF, ctx.currentTime, 0.3);
+      windFilter.Q.setTargetAtTime(THEME[theme].windQ, ctx.currentTime, 0.3);
+    }
+    tuneDrone();
   }
 
   function stopMusic() {
     wantMusic = false;
     clearTimeout(musicTimer);
+    clearTimeout(ambTimer);
     musicTimer = null;
+    ambTimer = null;
   }
 
   function setMusic(on) {
@@ -2367,7 +2953,9 @@ svg {
       }
     } else {
       clearTimeout(musicTimer);
+      clearTimeout(ambTimer);
       musicTimer = null;
+      ambTimer = null;
     }
   }
 
@@ -2383,6 +2971,7 @@ svg {
     startMusic: startMusic,
     stopMusic: stopMusic,
     setMusic: setMusic,
+    setTheme: setTheme,
     setSfx: setSfx,
     suspend: function () {
       if (ctx && ctx.state === 'running') ctx.suspend();
@@ -2595,6 +3184,7 @@ svg {
   const SPEED = 3.9; // kare / sn
   const PR = 0.27; // oyuncu yarıçapı
   const HOLD = 1.5; // silinmeden önceki tam görünürlük süresi (sn)
+  const GHOST_AGE = 2; // ayna hayaletleri gerçek hafızadan 2 kat hızlı silinir (oyuncuyu uzun süre yanıltmasın)
   const DIRS = Maze.DIRS;
 
   class World {
@@ -2611,6 +3201,12 @@ svg {
       this.wind = m.wind;
       this.mirrors = m.mirrors;
       this.mem = def.mem;
+      this.theme = def.theme || 'forest';
+      // bölüm başına görüş: mağarada fener ışığı daha küçüktür
+      this.visR = def.vision || VIS_R;
+      this.stoneR = Math.min(STONE_R, this.visR - 0.4);
+      m.vision = this.visR; // par süresi hesabı da aynı görüşü kullanır
+      m.season = def.season || 1; // yıldız eşikleri sezona göre
       this.doorIdx = m.door.y * m.w + m.door.x;
 
       this.known = new Uint8Array(N);
@@ -2624,10 +3220,13 @@ svg {
       this.visList = [];
       this.dtype = new Uint8Array(N); // 0 yok, 1 zemin, 2 duvar, 3 ayna
       this.dalpha = new Float32Array(N);
+      this.dghost = new Uint8Array(N); // 1: bu hücre bir ayna hayaleti (gerçek nesneleri göstermemeli)
       this.dink = new Uint8Array(N);
 
       this.player = { x: m.start.x + 0.5, y: m.start.y + 0.5, face: Math.PI / 2, moving: false, walk: 0 };
       this.hasKey = false;
+      this.hinted = false; // ipucu istendi: bu bölümde en çok 2 yıldız
+      this.stuckShown = false; // "takıldın mı?" notu en çok bir kez gösterilir
       this.flowers = m.flowers.map((f) => ({ x: f.x, y: f.y, taken: false }));
       this.flowersTaken = 0;
       this.inv = { memory: def.stones, sound: def.sound || 0 };
@@ -2842,7 +3441,7 @@ svg {
       const vis = this.vis;
       for (let k = 0; k < this.visList.length; k++) vis[this.visList[k]] = 0;
       const list = (this.visList = []);
-      this.los(this.player.x, this.player.y, VIS_R, (i) => {
+      this.los(this.player.x, this.player.y, this.visR, (i) => {
         if (!vis[i]) {
           vis[i] = 1;
           list.push(i);
@@ -2940,7 +3539,7 @@ svg {
             this.ptype[i] = 0;
             continue;
           }
-          this.page[i] += dt * (this.wind[i] ? 2 : 1);
+          this.page[i] += dt * (this.wind[i] ? 2 : 1) * GHOST_AGE;
           this.pap[i] = Math.min(1, this.pap[i] + dt * 5);
           if (this.page[i] >= this.mem) {
             this.ptype[i] = 0;
@@ -2966,15 +3565,18 @@ svg {
           this.dtype[i] = this.tiles[i] === 0 ? 1 : this.mirrorMap[i] ? 3 : 2;
           this.dalpha[i] = real * app;
           this.dink[i] = locked ? 1 : 0;
+          this.dghost[i] = 0;
           if (!locked && !this.vis[i] && real < minS) minS = real;
         } else if (ph > 0) {
           this.dtype[i] = this.ptype[i];
           this.dalpha[i] = ph * Math.min(1, this.pap[i]);
           this.dink[i] = 0;
+          this.dghost[i] = 1;
         } else {
           this.dtype[i] = 0;
           this.dalpha[i] = 0;
           this.dink[i] = 0;
+          this.dghost[i] = 0;
         }
       }
       if (!this.fadeSeen && minS < 0.8) {
@@ -2998,6 +3600,16 @@ svg {
 
     get hasSoundType() {
       return this.total.sound > 0;
+    }
+
+    /** Takılan oyuncuya yardım: ses taşı olmayan bölümde 1 ses taşı verir (yön okunu fısıldar). */
+    grantHint() {
+      if (this.state !== 'play' || this.hasSoundType) return false;
+      this.total.sound = 1;
+      this.inv.sound = 1;
+      this.hinted = true;
+      this.cur = 'sound';
+      return true;
     }
 
     switchType() {
@@ -3044,7 +3656,7 @@ svg {
         mask.add(i);
         cells.push(i);
       };
-      this.los(sx, sy, STONE_R, add);
+      this.los(sx, sy, this.stoneR, add);
       // görülen zeminlerin komşu duvarları
       const tmp = cells.slice();
       for (let k = 0; k < tmp.length; k++) {
@@ -3131,7 +3743,9 @@ svg {
     }
 
     confetti(x, y, n) {
-      const colors = ['#b4492f', '#c58b1a', '#2f7f86', '#1e2b4d', '#c25b7a'];
+      const colors = this.theme === 'cave'
+        ? ['#f0a24a', '#5ec3c9', '#e58ab0', '#efe6cf', '#9b8cf0']
+        : ['#b4492f', '#c58b1a', '#6a9a54', '#1d3a2e', '#c25b7a'];
       for (let i = 0; i < n; i++) {
         const a = Math.random() * Math.PI * 2;
         const v = 1.5 + Math.random() * 3.2;
@@ -3176,7 +3790,7 @@ svg {
           if (this.dtype[i] && !this.vis[i] && !this.lock[i] && a > 0.05 && a < 0.7 && Math.random() < 0.3) {
             this.particles.push({
               kind: 'crumb', x: tx + Math.random(), y: ty + Math.random(), vx: 0.25 + Math.random() * 0.4, vy: 0.1,
-              life: 0, max: 1.2 + Math.random(), size: 0.018 + Math.random() * 0.02, color: this.dink[i] ? '#1e2b4d' : '#4a4743',
+              life: 0, max: 1.2 + Math.random(), size: 0.018 + Math.random() * 0.02, color: this.theme === 'cave' ? (this.dink[i] ? '#f0a24a' : '#cfc9b8') : this.dink[i] ? '#1d3a2e' : '#4a4f43',
             });
           }
         }
@@ -3297,7 +3911,7 @@ svg {
     let pos = at(maze.start);
     let cost = 0;
 
-    const see = (i) => World.prototype.los.call(ctx, (i % w) + 0.5, ((i / w) | 0) + 0.5, VIS_R, (j) => { seen[j] = 1; });
+    const see = (i) => World.prototype.los.call(ctx, (i % w) + 0.5, ((i / w) | 0) + 0.5, maze.vision || VIS_R, (j) => { seen[j] = 1; });
     const walk = (to, stopWhen) => {
       const p = Maze.path(tiles, w, h, pos, to);
       for (let k = 1; k < p.length; k++) {
@@ -3343,11 +3957,12 @@ svg {
     return maze._par;
   }
 
-  /** 3 yıldız: ideal gezginin 1.8 katı içinde; 2 yıldız: 3.2 katı içinde. */
+  /** 3 yıldız: ideal gezginin 1.8 katı içinde; 2 yıldız: 3.2 katı içinde (mağarada 2.2 / 3.8: karanlıkta unutmak daha çok zaman alır). */
   function stars(maze, time) {
     const par = parTime(maze);
-    if (time <= par * 1.8) return 3;
-    if (time <= par * 3.2) return 2;
+    const cave = maze.season === 2;
+    if (time <= par * (cave ? 2.2 : 1.8)) return 3;
+    if (time <= par * (cave ? 3.8 : 3.2)) return 2;
     return 1;
   }
 
@@ -3356,47 +3971,30 @@ svg {
 
 </script>
 <script>
-/* Silik — çizim: kâğıt üzerine kurşun kalem. Keşfedilen yerler kalemle çizilir, silinirken
- * silgi izi gibi soluklaşır; hatıra taşlarının kilitlediği alan mürekkeple çizilmiş gibi koyu kalır.
+/* Silik — tema altyapısı: orman ve mağara temalarının ortak çizim yardımcıları.
  *
- * Karo görselleri (duvar / zemin / ayna / silgi / rüzgâr) açılışta ve ekran boyutu değişince
- * bir atlas tuvaline önceden çizilir; kare başına yalnızca drawImage çağrılır.
+ * Her tema (js/theme-forest.js, js/theme-cave.js) Silik.Themes[anahtar] altında şunları sağlar:
+ *   renkler  : paper, grid, pencil, ink, teal, smudge, trail, vignette, speck
+ *   karolar  : paintWall, paintMirror, paintFloor, paintWind   (atlas açılışta bir kez çizer)
+ *   nesneler : drawDoor, drawKey, drawPickup, drawStone, drawArrow, drawGoalMark, drawPlayer
+ *   atmosfer : drawGlow, drawAmbient, drawWindFx, ringRGB
  */
 (function (root) {
   'use strict';
   var S = (root.Silik = root.Silik || {});
-  var Util = S.Util;
-  var Game = S.Game;
 
-  var PAPER = '#f0e8d4';
-  var PENCIL = [58, 54, 50];
-  var INK = [24, 36, 76];
-  var TEAL = [47, 127, 134];
+  var K = {};
 
-  function rgba(c, a) {
+  K.rgba = function (c, a) {
     return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')';
-  }
-  function hash2(x, y) {
+  };
+
+  K.hash2 = function (x, y) {
     return ((Math.imul(x + 1, 73856093) ^ Math.imul(y + 1, 19349663)) >>> 0) % 9973;
-  }
+  };
 
-  /* ---------- atlas ---------- */
-
-  var COLS = 16;
-  var N_SPRITES = 107;
-  function wallIdx(ink, v, mask) {
-    return (ink * 2 + v) * 16 + mask;
-  }
-  function mirrorIdx(ink, mask) {
-    return 64 + ink * 16 + mask;
-  }
-  function floorIdx(ink, v) {
-    return 96 + ink * 3 + v;
-  }
-  var SMUDGE = 102;
-  var WINDG = 105;
-
-  function wobble(ctx, x0, y0, x1, y1, rand, amp, segs) {
+  /** Hafifçe titreyen elle çizilmiş çizgi. */
+  K.wobble = function (ctx, x0, y0, x1, y1, rand, amp, segs) {
     ctx.beginPath();
     ctx.moveTo(x0, y0);
     for (var s = 1; s < segs; s++) {
@@ -3405,252 +4003,20 @@ svg {
     }
     ctx.lineTo(x1, y1);
     ctx.stroke();
-  }
+  };
 
-  function edges(ctx, T, mask, rand, color, lw, alpha) {
-    var i = lw * 0.55;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    for (var pass = 0; pass < 2; pass++) {
-      ctx.strokeStyle = rgba(color, pass ? alpha * 0.5 : alpha);
-      ctx.lineWidth = pass ? lw * 0.6 : lw;
-      var off = pass ? lw * 0.5 : 0;
-      var amp = T * 0.025;
-      if (mask & 1) wobble(ctx, 0, i + off, T, i + off, rand, amp, 4);
-      if (mask & 2) wobble(ctx, T - i - off, 0, T - i - off, T, rand, amp, 4);
-      if (mask & 4) wobble(ctx, 0, T - i - off, T, T - i - off, rand, amp, 4);
-      if (mask & 8) wobble(ctx, i + off, 0, i + off, T, rand, amp, 4);
-    }
-  }
+  /** Dört uçlu parıltı yolu (doldurmak için). */
+  K.star4 = function (ctx, x, y, r) {
+    ctx.beginPath();
+    ctx.moveTo(x, y - r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.quadraticCurveTo(x, y, x, y + r);
+    ctx.quadraticCurveTo(x, y, x - r, y);
+    ctx.quadraticCurveTo(x, y, x, y - r);
+  };
 
-  function paintWall(ctx, T, mask, v, ink, mirror, rand) {
-    var col = ink ? INK : PENCIL;
-    var lw = Math.max(1, T * 0.03);
-    if (mirror) {
-      ctx.fillStyle = 'rgba(86,140,156,' + (ink ? 0.3 : 0.2) + ')';
-      ctx.fillRect(0, 0, T, T);
-      // ince tarama
-      ctx.lineWidth = lw;
-      ctx.strokeStyle = rgba(TEAL, 0.28);
-      for (var k = -T; k < T * 2; k += T / 6) {
-        ctx.beginPath();
-        ctx.moveTo(k, T);
-        ctx.lineTo(k + T, 0);
-        ctx.stroke();
-      }
-      // parıltı
-      ctx.lineCap = 'round';
-      var glints = [
-        [0.18, 0.5, 0.95],
-        [0.36, 0.28, 0.7],
-        [0.5, 0.2, 0.5],
-      ];
-      glints.forEach(function (g, gi) {
-        ctx.strokeStyle = 'rgba(255,255,255,' + g[2] + ')';
-        ctx.lineWidth = T * (gi === 0 ? 0.1 : 0.05);
-        ctx.beginPath();
-        ctx.moveTo(T * g[0], T * (g[0] + g[1] * 0.5 + 0.35));
-        ctx.lineTo(T * (g[0] + g[1] * 0.6), T * (g[0] + 0.12));
-        ctx.stroke();
-      });
-      // yıldız
-      ctx.fillStyle = 'rgba(255,255,255,0.95)';
-      var sx = T * 0.7;
-      var sy = T * 0.3;
-      var r = T * 0.09;
-      ctx.beginPath();
-      ctx.moveTo(sx, sy - r);
-      ctx.quadraticCurveTo(sx, sy, sx + r, sy);
-      ctx.quadraticCurveTo(sx, sy, sx, sy + r);
-      ctx.quadraticCurveTo(sx, sy, sx - r, sy);
-      ctx.quadraticCurveTo(sx, sy, sx, sy - r);
-      ctx.fill();
-      // çerçeve: her zaman 4 kenar
-      edges(ctx, T, 15, rand, TEAL, lw * 2.1, 0.9);
-      return;
-    }
-    ctx.fillStyle = rgba(col, ink ? 0.2 : 0.12);
-    ctx.fillRect(0, 0, T, T);
-    // çapraz tarama: komşu karolarla kesintisiz devam eder
-    var sp = T / 6;
-    ctx.lineCap = 'round';
-    ctx.lineWidth = lw;
-    ctx.strokeStyle = rgba(col, ink ? 0.55 : 0.4);
-    for (var h = -T; h < T * 2; h += sp) {
-      var j = (rand() - 0.5) * T * 0.02;
-      ctx.beginPath();
-      ctx.moveTo(h + j, T);
-      ctx.lineTo(h + T + j, 0);
-      ctx.stroke();
-    }
-    if (v === 1) {
-      ctx.strokeStyle = rgba(col, 0.16);
-      for (var q = -T; q < T * 2; q += sp * 2) {
-        ctx.beginPath();
-        ctx.moveTo(q, 0);
-        ctx.lineTo(q + T, T);
-        ctx.stroke();
-      }
-    }
-    edges(ctx, T, mask, rand, col, Math.max(1.4, T * 0.062), ink ? 0.95 : 0.8);
-  }
-
-  function paintFloor(ctx, T, v, ink, rand) {
-    ctx.fillStyle = ink ? rgba(INK, 0.1) : 'rgba(150,125,85,0.085)';
-    ctx.fillRect(0, 0, T, T);
-    var col = ink ? INK : PENCIL;
-    ctx.lineCap = 'round';
-    ctx.lineWidth = Math.max(1, T * 0.025);
-    ctx.strokeStyle = rgba(col, ink ? 0.16 : 0.1);
-    for (var s = 0; s < 2 + v; s++) {
-      var x = T * (0.15 + rand() * 0.6);
-      var y = T * (0.15 + rand() * 0.6);
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.quadraticCurveTo(x + T * 0.12, y - T * 0.08, x + T * (0.12 + rand() * 0.12), y + T * 0.05);
-      ctx.stroke();
-    }
-    if (ink) {
-      ctx.fillStyle = rgba(INK, 0.22);
-      for (var d = 0; d < 4; d++) {
-        ctx.beginPath();
-        ctx.arc(T * (0.15 + rand() * 0.7), T * (0.15 + rand() * 0.7), Math.max(0.8, T * 0.012), 0, 6.3);
-        ctx.fill();
-      }
-    }
-  }
-
-  function paintSmudge(ctx, T, v, rand) {
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = 'rgba(240,232,212,0.95)';
-    for (var s = 0; s < 3; s++) {
-      ctx.lineWidth = T * (0.22 + rand() * 0.14);
-      var x = T * (0.1 + rand() * 0.5);
-      var y = T * (0.05 + rand() * 0.7);
-      ctx.beginPath();
-      ctx.moveTo(x, y + T * 0.25);
-      ctx.lineTo(x + T * (0.3 + rand() * 0.3), y);
-      ctx.stroke();
-    }
-  }
-
-  function paintWindGlyph(ctx, T, v) {
-    ctx.strokeStyle = 'rgba(70,105,130,0.6)';
-    ctx.lineWidth = Math.max(1.2, T * 0.045);
-    ctx.lineCap = 'round';
-    var y0 = T * (v ? 0.62 : 0.4);
-    for (var l = 0; l < 2; l++) {
-      var y = y0 + l * T * 0.17 * (v ? -1 : 1);
-      ctx.beginPath();
-      ctx.moveTo(T * 0.15, y);
-      ctx.bezierCurveTo(T * 0.3, y - T * 0.14, T * 0.45, y + T * 0.14, T * 0.6, y);
-      ctx.bezierCurveTo(T * 0.7, y - T * 0.08, T * 0.8, y - T * 0.02, T * 0.85, y - T * 0.06);
-      ctx.stroke();
-    }
-  }
-
-  function buildAtlas(Tp) {
-    var rows = Math.ceil(N_SPRITES / COLS);
-    var c = document.createElement('canvas');
-    c.width = COLS * Tp;
-    c.height = rows * Tp;
-    var ctx = c.getContext('2d');
-    function each(i, fn) {
-      ctx.save();
-      ctx.translate((i % COLS) * Tp, Math.floor(i / COLS) * Tp);
-      ctx.beginPath();
-      ctx.rect(0, 0, Tp, Tp);
-      ctx.clip();
-      fn(Util.rng(i * 7919 + 13));
-      ctx.restore();
-    }
-    var ink, v, m;
-    for (ink = 0; ink < 2; ink++) {
-      for (v = 0; v < 2; v++) {
-        for (m = 0; m < 16; m++) {
-          (function (ink, v, m) {
-            each(wallIdx(ink, v, m), function (r) {
-              paintWall(ctx, Tp, m, v, ink, false, r);
-            });
-          })(ink, v, m);
-        }
-      }
-      for (m = 0; m < 16; m++) {
-        (function (ink, m) {
-          each(mirrorIdx(ink, m), function (r) {
-            paintWall(ctx, Tp, m, 0, ink, true, r);
-          });
-        })(ink, m);
-      }
-      for (v = 0; v < 3; v++) {
-        (function (ink, v) {
-          each(floorIdx(ink, v), function (r) {
-            paintFloor(ctx, Tp, v, ink, r);
-          });
-        })(ink, v);
-      }
-    }
-    for (v = 0; v < 3; v++) {
-      (function (v) {
-        each(SMUDGE + v, function (r) {
-          paintSmudge(ctx, Tp, v, r);
-        });
-      })(v);
-    }
-    for (v = 0; v < 2; v++) {
-      (function (v) {
-        each(WINDG + v, function () {
-          paintWindGlyph(ctx, Tp, v);
-        });
-      })(v);
-    }
-    return c;
-  }
-
-  /* ---------- kâğıt dokusu ve vinyet ---------- */
-
-  function buildPaper(size, dpr) {
-    var c = document.createElement('canvas');
-    c.width = c.height = size;
-    var ctx = c.getContext('2d');
-    var r = Util.rng(4242);
-    for (var i = 0; i < size * 1.6; i++) {
-      var x = r() * size;
-      var y = r() * size;
-      var a = 0.03 + r() * 0.07;
-      ctx.fillStyle = r() < 0.5 ? 'rgba(120,95,55,' + a + ')' : 'rgba(255,255,255,' + a * 1.6 + ')';
-      ctx.fillRect(x, y, dpr * (0.6 + r() * 1.4), dpr * (0.6 + r() * 1.4));
-    }
-    ctx.lineCap = 'round';
-    for (var f = 0; f < 70; f++) {
-      var fx = r() * size;
-      var fy = r() * size;
-      ctx.strokeStyle = 'rgba(110,90,60,' + (0.03 + r() * 0.04) + ')';
-      ctx.lineWidth = dpr * 0.7;
-      ctx.beginPath();
-      ctx.moveTo(fx, fy);
-      ctx.quadraticCurveTo(fx + (r() - 0.5) * 24 * dpr, fy + (r() - 0.5) * 24 * dpr, fx + (r() - 0.5) * 40 * dpr, fy + (r() - 0.5) * 40 * dpr);
-      ctx.stroke();
-    }
-    return c;
-  }
-
-  function buildVignette(W, H) {
-    var c = document.createElement('canvas');
-    c.width = W;
-    c.height = H;
-    var ctx = c.getContext('2d');
-    var g = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.hypot(W, H) * 0.56);
-    g.addColorStop(0, 'rgba(90,65,30,0)');
-    g.addColorStop(1, 'rgba(90,65,30,0.34)');
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, W, H);
-    return c;
-  }
-
-  /* ---------- nesneler ---------- */
-
-  function pencilPath(ctx, fill, stroke, lw) {
+  /** Mevcut yolu doldur ve/veya çiz (kalem çizgisi görünümü). */
+  K.pen = function (ctx, fill, stroke, lw) {
     if (fill) {
       ctx.fillStyle = fill;
       ctx.fill();
@@ -3662,7 +4028,325 @@ svg {
       ctx.lineCap = 'round';
       ctx.stroke();
     }
+  };
+
+  /** (x0,y0)->(x1,y1) arasında, (nx,ny) yönüne doğru şişen n adet yay ekler (yaprak/çalı kenarı). */
+  K.scallop = function (ctx, x0, y0, x1, y1, nx, ny, amp, n) {
+    for (var i = 0; i < n; i++) {
+      var ax = x0 + ((x1 - x0) * i) / n;
+      var ay = y0 + ((y1 - y0) * i) / n;
+      var bx = x0 + ((x1 - x0) * (i + 1)) / n;
+      var by = y0 + ((y1 - y0) * (i + 1)) / n;
+      ctx.quadraticCurveTo((ax + bx) / 2 + nx * amp * 2, (ay + by) / 2 + ny * amp * 2, bx, by);
+    }
+  };
+
+  /** (x0,y0)->(x1,y1) arasında kırık (sivri) bir çizgi ekler; kaya kenarı. */
+  K.jagged = function (ctx, x0, y0, x1, y1, nx, ny, amp, n, rand) {
+    for (var i = 1; i <= n; i++) {
+      var t = i / n;
+      var off = i === n ? 0 : (rand() - 0.5) * 2 * amp;
+      ctx.lineTo(x0 + (x1 - x0) * t + nx * off, y0 + (y1 - y0) * t + ny * off);
+    }
+  };
+
+  /** Karenin yalnızca iki komşu kenarı açıkta olan köşelerini yuvarlatan yol (mask: 1 üst, 2 sağ, 4 alt, 8 sol). */
+  K.softCorners = function (ctx, T, mask, r) {
+    var tl = mask & 1 && mask & 8 ? r : 0;
+    var tr = mask & 1 && mask & 2 ? r : 0;
+    var br = mask & 4 && mask & 2 ? r : 0;
+    var bl = mask & 4 && mask & 8 ? r : 0;
+    ctx.beginPath();
+    ctx.moveTo(tl, 0);
+    ctx.lineTo(T - tr, 0);
+    if (tr) ctx.quadraticCurveTo(T, 0, T, tr);
+    ctx.lineTo(T, T - br);
+    if (br) ctx.quadraticCurveTo(T, T, T - br, T);
+    ctx.lineTo(bl, T);
+    if (bl) ctx.quadraticCurveTo(0, T, 0, T - bl);
+    ctx.lineTo(0, tl);
+    if (tl) ctx.quadraticCurveTo(0, 0, tl, 0);
+    ctx.closePath();
+  };
+
+  /** Küçük, yumuşak bir ışık lekesi (ateş böceği, toz, mantar ışığı) için önceden çizilmiş sprite. */
+  K.glowSprite = function (size, rgb) {
+    var c = document.createElement('canvas');
+    c.width = c.height = size;
+    var g = c.getContext('2d');
+    var gr = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    gr.addColorStop(0, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',1)');
+    gr.addColorStop(0.35, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',0.35)');
+    gr.addColorStop(1, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',0)');
+    g.fillStyle = gr;
+    g.fillRect(0, 0, size, size);
+    return c;
+  };
+
+  S.Themes = S.Themes || {};
+  S.ThemeKit = K;
+})(window);
+
+</script>
+<script>
+/* Silik — 1. Sezon · Orman teması.
+ * Sisli bir sabah ormanı: krem kâğıt, zeytin-grafit kurşun kalem, koyu zümrüt mürekkep.
+ * Duvarlar yaprak kümeleri (kenarları yay yay çalı gibi), zemin patika, ayna yerine durgun göl,
+ * kapı bir ağaç kovuğu, havada ateş böcekleri. Kalıcı (mürekkepli) alan zümrüt yeşili çizilir.
+ */
+(function (root) {
+  'use strict';
+  var S = root.Silik;
+  var K = S.ThemeKit;
+  var rgba = K.rgba;
+  var pen = K.pen;
+
+  var PENCIL = [62, 70, 52];
+  var INK = [8, 62, 40];
+  var TEAL = [34, 126, 122];
+
+  function almond(ctx, x, y, len, wid, ang) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(ang);
+    ctx.beginPath();
+    ctx.moveTo(-len / 2, 0);
+    ctx.quadraticCurveTo(0, -wid, len / 2, 0);
+    ctx.quadraticCurveTo(0, wid, -len / 2, 0);
+    ctx.restore();
   }
+
+  /* ---------- karolar ---------- */
+
+  function paintWall(ctx, T, mask, v, ink, rand) {
+    var d = T * 0.085; // çalı kenarının şişme miktarı
+    var col = ink ? INK : PENCIL;
+    var inT = mask & 1 ? d : 0;
+    var inR = mask & 2 ? d : 0;
+    var inB = mask & 4 ? d : 0;
+    var inL = mask & 8 ? d : 0;
+    var x0 = inL;
+    var y0 = inT;
+    var x1 = T - inR;
+    var y1 = T - inB;
+
+    function blob() {
+      ctx.beginPath();
+      ctx.moveTo(x0, y0);
+      if (mask & 1) K.scallop(ctx, x0, y0, x1, y0, 0, -1, d, 3);
+      else ctx.lineTo(x1, y0);
+      if (mask & 2) K.scallop(ctx, x1, y0, x1, y1, 1, 0, d, 3);
+      else ctx.lineTo(x1, y1);
+      if (mask & 4) K.scallop(ctx, x1, y1, x0, y1, 0, 1, d, 3);
+      else ctx.lineTo(x0, y1);
+      if (mask & 8) K.scallop(ctx, x0, y1, x0, y0, -1, 0, d, 3);
+      else ctx.lineTo(x0, y0);
+      ctx.closePath();
+    }
+
+    ctx.save();
+    blob();
+    ctx.clip();
+    // gövde rengi
+    ctx.fillStyle = ink ? 'rgba(14,92,58,0.66)' : 'rgba(104,142,82,0.21)';
+    ctx.fillRect(0, 0, T, T);
+    // yaprak kümelerinin gölge/ışık lekeleri
+    for (var m = 0; m < 4; m++) {
+      ctx.fillStyle = ink ? 'rgba(2,34,20,0.30)' : 'rgba(40,80,44,0.09)';
+      ctx.beginPath();
+      ctx.arc(T * (0.3 + rand() * 0.4), T * (0.3 + rand() * 0.4), T * (0.12 + rand() * 0.09), 0, 6.3); // karo kenarını aşmasın: dikiş izi kalmaz
+      ctx.fill();
+    }
+    // yaprak kıvrımları: küçük "c" kavisleri
+    ctx.lineCap = 'round';
+    ctx.lineWidth = Math.max(1, T * 0.026);
+    for (var i = 0; i < 20; i++) {
+      var cx = T * (0.04 + rand() * 0.92);
+      var cy = T * (0.04 + rand() * 0.92);
+      var r = T * (0.045 + rand() * 0.05);
+      var a0 = rand() * 6.28;
+      ctx.strokeStyle = ink ? 'rgba(170,230,170,' + 0.55 * (0.6 + rand() * 0.6) + ')' : rgba(col, 0.34 * (0.6 + rand() * 0.6));
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, a0, a0 + 2.5 + rand());
+      ctx.stroke();
+    }
+    // tek tük yaprak
+    for (var l = 0; l < 4; l++) {
+      ctx.fillStyle = ink ? 'rgba(90,190,120,0.42)' : 'rgba(104,150,70,0.22)';
+      almond(ctx, T * (0.12 + rand() * 0.76), T * (0.12 + rand() * 0.76), T * 0.2, T * 0.06, rand() * 3.14);
+      ctx.fill();
+    }
+    // bazı karolarda böğürtlen / çiçek
+    if (v === 1) {
+      for (var b = 0; b < 2; b++) {
+        ctx.fillStyle = b === 1 ? 'rgba(208,150,52,0.6)' : 'rgba(176,56,48,0.58)';
+        ctx.beginPath();
+        ctx.arc(T * (0.18 + rand() * 0.64), T * (0.18 + rand() * 0.64), Math.max(1.2, T * 0.032), 0, 6.3);
+        ctx.fill();
+      }
+    }
+    ctx.restore();
+
+    // dış hat: yalnızca açıkta kalan kenarlar, yay yay
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    for (var pass = 0; pass < 2; pass++) {
+      ctx.strokeStyle = rgba(col, pass ? 0.45 : ink ? 1 : 0.72);
+      ctx.lineWidth = pass ? Math.max(1, T * 0.026) : Math.max(1.4, T * (ink ? 0.07 : 0.046));
+      var o = pass ? T * 0.012 : 0;
+      if (mask & 1) {
+        ctx.beginPath();
+        ctx.moveTo(x0, y0 + o);
+        K.scallop(ctx, x0, y0 + o, x1, y0 + o, 0, -1, d, 3);
+        ctx.stroke();
+      }
+      if (mask & 2) {
+        ctx.beginPath();
+        ctx.moveTo(x1 - o, y0);
+        K.scallop(ctx, x1 - o, y0, x1 - o, y1, 1, 0, d, 3);
+        ctx.stroke();
+      }
+      if (mask & 4) {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1 - o);
+        K.scallop(ctx, x1, y1 - o, x0, y1 - o, 0, 1, d, 3);
+        ctx.stroke();
+      }
+      if (mask & 8) {
+        ctx.beginPath();
+        ctx.moveTo(x0 + o, y1);
+        K.scallop(ctx, x0 + o, y1, x0 + o, y0, -1, 0, d, 3);
+        ctx.stroke();
+      }
+    }
+  }
+
+  function paintFloor(ctx, T, v, ink, rand) {
+    ctx.fillStyle = ink ? 'rgba(40,140,90,0.30)' : 'rgba(180,152,92,0.12)';
+    ctx.fillRect(0, 0, T, T);
+    var col = ink ? INK : PENCIL;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    var lw = Math.max(1, T * 0.024);
+    // ot tutamları
+    var tufts = v === 0 ? 1 : 2;
+    for (var k = 0; k < tufts; k++) {
+      var x = T * (0.16 + rand() * 0.68);
+      var y = T * (0.42 + rand() * 0.5);
+      ctx.strokeStyle = rgba(col, ink ? 0.8 : 0.3);
+      ctx.lineWidth = lw;
+      for (var b = -1; b <= 1; b++) {
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.quadraticCurveTo(x + b * T * 0.03, y - T * 0.08, x + b * T * 0.07, y - T * (0.13 + (b === 0 ? 0.03 : 0)));
+        ctx.stroke();
+      }
+    }
+    // düşmüş yaprak
+    if (v === 1) {
+      ctx.fillStyle = ink ? 'rgba(60,150,92,0.35)' : 'rgba(176,128,52,0.26)';
+      almond(ctx, T * (0.3 + rand() * 0.4), T * (0.2 + rand() * 0.3), T * 0.2, T * 0.06, rand() * 3.14);
+      ctx.fill();
+      ctx.strokeStyle = rgba(col, ink ? 0.45 : 0.26);
+      ctx.stroke();
+    }
+    // çakıl
+    if (v === 2) {
+      ctx.strokeStyle = rgba(col, ink ? 0.5 : 0.28);
+      ctx.lineWidth = lw;
+      ctx.beginPath();
+      ctx.ellipse(T * (0.25 + rand() * 0.5), T * (0.25 + rand() * 0.5), T * 0.055, T * 0.038, rand(), 0, 6.3);
+      ctx.stroke();
+    }
+    if (ink) {
+      ctx.fillStyle = 'rgba(30,110,70,0.3)';
+      for (var d = 0; d < 5; d++) {
+        ctx.beginPath();
+        ctx.arc(T * (0.1 + rand() * 0.8), T * (0.1 + rand() * 0.8), Math.max(0.8, T * 0.012), 0, 6.3);
+        ctx.fill();
+      }
+    }
+  }
+
+  /** Ayna = durgun göl: yansıması haritaya sahte izler bırakır. */
+  function paintMirror(ctx, T, mask, ink, rand) {
+    ctx.save();
+    K.softCorners(ctx, T, mask, T * 0.16);
+    ctx.clip();
+    ctx.fillStyle = ink ? 'rgba(52,150,172,0.52)' : 'rgba(92,164,180,0.40)';
+    ctx.fillRect(0, 0, T, T);
+    var g = ctx.createRadialGradient(T * 0.42, T * 0.4, 0, T * 0.42, T * 0.4, T * 0.62);
+    g.addColorStop(0, 'rgba(220,245,248,0.5)');
+    g.addColorStop(1, 'rgba(220,245,248,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, T, T);
+    // dalgacıklar
+    ctx.lineWidth = Math.max(1, T * 0.024);
+    ctx.lineCap = 'round';
+    for (var r = 1; r <= 3; r++) {
+      ctx.strokeStyle = 'rgba(255,255,255,' + (0.7 - r * 0.15) + ')';
+      ctx.beginPath();
+      ctx.ellipse(T * 0.4, T * 0.62, T * 0.07 * r, T * 0.038 * r, 0, 0, 6.3);
+      ctx.stroke();
+    }
+    // yansıma çizgileri
+    ctx.strokeStyle = 'rgba(255,255,255,0.75)';
+    ctx.lineWidth = Math.max(1.2, T * 0.035);
+    [[0.52, 0.2, 0.74], [0.6, 0.3, 0.66], [0.2, 0.18, 0.4]].forEach(function (s) {
+      ctx.beginPath();
+      ctx.moveTo(T * s[0] - T * 0.1, T * s[1] + T * 0.05);
+      ctx.lineTo(T * s[2], T * s[1]);
+      ctx.stroke();
+    });
+    // nilüfer yaprağı
+    ctx.fillStyle = 'rgba(96,160,84,0.9)';
+    ctx.strokeStyle = 'rgba(40,86,44,0.9)';
+    ctx.lineWidth = Math.max(1, T * 0.03);
+    ctx.beginPath();
+    ctx.moveTo(T * 0.72, T * 0.32);
+    ctx.arc(T * 0.72, T * 0.32, T * 0.12, 0.35 * Math.PI, 1.75 * Math.PI);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(232,138,160,0.95)';
+    ctx.beginPath();
+    ctx.arc(T * 0.74, T * 0.3, T * 0.035, 0, 6.3);
+    ctx.fill();
+    // kıyı çizgisi: dört kenar, dalgalı
+    for (var pass = 0; pass < 2; pass++) {
+      ctx.strokeStyle = rgba(TEAL, pass ? 0.4 : 0.92);
+      ctx.lineWidth = pass ? Math.max(1, T * 0.03) : Math.max(1.6, T * 0.06);
+      var i = T * 0.03 + (pass ? T * 0.02 : 0);
+      var a = T * 0.02;
+      if (mask & 1) K.wobble(ctx, 0, i, T, i, rand, a, 5);
+      if (mask & 2) K.wobble(ctx, T - i, 0, T - i, T, rand, a, 5);
+      if (mask & 4) K.wobble(ctx, 0, T - i, T, T - i, rand, a, 5);
+      if (mask & 8) K.wobble(ctx, i, 0, i, T, rand, a, 5);
+    }
+    ctx.restore();
+  }
+
+  function paintWind(ctx, T, v) {
+    ctx.strokeStyle = 'rgba(54,112,92,0.6)';
+    ctx.lineWidth = Math.max(1.2, T * 0.045);
+    ctx.lineCap = 'round';
+    var y = T * (v ? 0.62 : 0.4);
+    ctx.beginPath();
+    ctx.moveTo(T * 0.12, y);
+    ctx.bezierCurveTo(T * 0.3, y - T * 0.16, T * 0.46, y + T * 0.14, T * 0.62, y);
+    ctx.bezierCurveTo(T * 0.72, y - T * 0.08, T * 0.8, y + T * 0.0, T * 0.78, y - T * 0.1);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(T * 0.2, y + T * 0.17);
+    ctx.bezierCurveTo(T * 0.34, y + T * 0.08, T * 0.5, y + T * 0.28, T * 0.64, y + T * 0.16);
+    ctx.stroke();
+    // savrulan yaprak
+    ctx.fillStyle = v ? 'rgba(176,120,48,0.8)' : 'rgba(112,152,64,0.85)';
+    almond(ctx, T * 0.8, y - T * 0.12, T * 0.2, T * 0.065, -0.6);
+    ctx.fill();
+  }
+
+  /* ---------- nesneler ---------- */
 
   function drawKey(ctx, cx, cy, s, t) {
     ctx.save();
@@ -3674,74 +4358,94 @@ svg {
     ctx.fillRect(-s, -s, s * 2, s * 2);
     ctx.rotate(-0.65 + Math.sin(t * 1.7) * 0.08);
     var lw = Math.max(1.5, s * 0.06);
-    // sap
     ctx.beginPath();
     ctx.moveTo(-0.08 * s, 0);
     ctx.lineTo(0.3 * s, 0);
     ctx.lineTo(0.3 * s, 0.1 * s);
     ctx.moveTo(0.2 * s, 0);
     ctx.lineTo(0.2 * s, 0.08 * s);
-    pencilPath(ctx, null, '#7a520b', lw * 1.3);
-    // halka
+    pen(ctx, null, '#6e4a09', lw * 1.3);
     ctx.beginPath();
     ctx.arc(-0.2 * s, 0, 0.14 * s, 0, 6.3);
     ctx.moveTo(-0.1 * s, 0);
     ctx.arc(-0.2 * s, 0, 0.065 * s, 0, 6.3, true);
-    pencilPath(ctx, '#e0a82e', '#7a520b', lw);
+    pen(ctx, '#e0a82e', '#6e4a09', lw);
     ctx.restore();
   }
 
+  /** Kapı: koca bir ağacın kovuğu. Kilitliyken asma kilit, anahtar varken sıcak ışık sızar. */
   function drawDoor(ctx, x, y, s, hasKey, open, t) {
-    var lw = Math.max(1.6, s * 0.06);
+    var cx = x + s / 2;
+    var cy = y + s / 2;
+    var lw = Math.max(1.6, s * 0.05);
     if (hasKey && open < 0.01) {
       var pulse = 0.5 + Math.sin(t * 4) * 0.25;
-      var g = ctx.createRadialGradient(x + s / 2, y + s / 2, s * 0.1, x + s / 2, y + s / 2, s * 0.8);
+      var g = ctx.createRadialGradient(cx, cy, s * 0.1, cx, cy, s * 0.85);
       g.addColorStop(0, 'rgba(255,205,110,' + pulse * 0.55 + ')');
       g.addColorStop(1, 'rgba(255,205,110,0)');
       ctx.fillStyle = g;
-      ctx.fillRect(x - s * 0.4, y - s * 0.4, s * 1.8, s * 1.8);
+      ctx.fillRect(x - s * 0.5, y - s * 0.5, s * 2, s * 2);
     }
-    // kasa
+    // gövde
     ctx.beginPath();
-    ctx.moveTo(x + 0.14 * s, y + 0.92 * s);
-    ctx.lineTo(x + 0.14 * s, y + 0.4 * s);
-    ctx.arc(x + 0.5 * s, y + 0.4 * s, 0.36 * s, Math.PI, 0);
-    ctx.lineTo(x + 0.86 * s, y + 0.92 * s);
-    ctx.closePath();
-    pencilPath(ctx, open > 0.01 ? 'rgba(255,225,150,0.9)' : 'rgba(180,73,47,0.25)', '#8f3a25', lw);
-    // kapı kanadı
-    var leaf = 1 - open * 0.8;
-    ctx.beginPath();
-    ctx.moveTo(x + 0.2 * s, y + 0.92 * s);
-    ctx.lineTo(x + 0.2 * s, y + 0.4 * s);
-    ctx.arc(x + 0.2 * s + 0.3 * s * leaf, y + 0.4 * s, 0.3 * s * leaf, Math.PI, 0);
-    ctx.lineTo(x + 0.2 * s + 0.6 * s * leaf, y + 0.92 * s);
-    ctx.closePath();
-    pencilPath(ctx, 'rgba(172,76,48,0.55)', '#8f3a25', lw * 0.8);
-    ctx.strokeStyle = 'rgba(80,30,15,0.5)';
-    ctx.lineWidth = lw * 0.5;
-    for (var p = 1; p < 3; p++) {
+    ctx.ellipse(cx, cy + s * 0.03, s * 0.47, s * 0.45, 0, 0, 6.3);
+    pen(ctx, 'rgba(126,92,56,0.62)', '#4a3320', lw);
+    // yıllık halkalar / kabuk çizgileri
+    ctx.strokeStyle = 'rgba(70,48,28,0.55)';
+    ctx.lineWidth = lw * 0.6;
+    [[-0.3, 0.2, 0.5], [0.34, 0.55, 1.3], [-0.38, 0.9, 1.4]].forEach(function (a) {
       ctx.beginPath();
-      ctx.moveTo(x + 0.2 * s + 0.2 * s * p * leaf, y + 0.35 * s);
-      ctx.lineTo(x + 0.2 * s + 0.2 * s * p * leaf, y + 0.92 * s);
+      ctx.arc(cx, cy + s * 0.03, s * 0.36, Math.PI * a[0] + 3.4, Math.PI * a[0] + 3.4 + a[1] * 2);
       ctx.stroke();
-    }
+    });
+    // kökler
+    ctx.strokeStyle = '#4a3320';
+    ctx.lineWidth = lw;
+    [[-0.34, 0.36, -0.46, 0.46], [0.3, 0.38, 0.44, 0.47]].forEach(function (r) {
+      ctx.beginPath();
+      ctx.moveTo(cx + r[0] * s, cy + r[1] * s);
+      ctx.quadraticCurveTo(cx + r[0] * s * 1.2, cy + r[3] * s, cx + r[2] * s, cy + r[3] * s);
+      ctx.stroke();
+    });
+    // kovuk (kemerli açıklık)
+    ctx.beginPath();
+    ctx.moveTo(cx - 0.17 * s, cy + 0.36 * s);
+    ctx.lineTo(cx - 0.17 * s, cy - 0.02 * s);
+    ctx.arc(cx, cy - 0.02 * s, 0.17 * s, Math.PI, 0);
+    ctx.lineTo(cx + 0.17 * s, cy + 0.36 * s);
+    ctx.closePath();
+    pen(ctx, open > 0.01 ? 'rgba(255,226,150,0.95)' : 'rgba(28,18,8,0.8)', '#3a2614', lw);
+    // kapı kanadı
+    var leaf = 1 - open * 0.85;
+    ctx.beginPath();
+    ctx.moveTo(cx - 0.17 * s, cy + 0.36 * s);
+    ctx.lineTo(cx - 0.17 * s, cy - 0.02 * s);
+    ctx.arc(cx - 0.17 * s + 0.17 * s * leaf, cy - 0.02 * s, 0.17 * s * leaf, Math.PI, 0);
+    ctx.lineTo(cx - 0.17 * s + 0.34 * s * leaf, cy + 0.36 * s);
+    ctx.closePath();
+    pen(ctx, 'rgba(176,84,52,0.88)', '#6a2e1a', lw * 0.8);
+    ctx.strokeStyle = 'rgba(80,32,16,0.5)';
+    ctx.lineWidth = lw * 0.5;
+    ctx.beginPath();
+    ctx.moveTo(cx - 0.17 * s + 0.17 * s * leaf, cy - 0.12 * s);
+    ctx.lineTo(cx - 0.17 * s + 0.17 * s * leaf, cy + 0.36 * s);
+    ctx.stroke();
     if (!hasKey) {
-      // asma kilit
       ctx.beginPath();
-      ctx.arc(x + 0.5 * s, y + 0.52 * s, 0.07 * s, Math.PI, 0);
-      pencilPath(ctx, null, '#3b2a14', lw * 0.9);
+      ctx.arc(cx, cy + 0.12 * s, 0.06 * s, Math.PI, 0);
+      pen(ctx, null, '#2d2010', lw * 0.9);
       ctx.beginPath();
-      ctx.rect(x + 0.4 * s, y + 0.52 * s, 0.2 * s, 0.16 * s);
-      pencilPath(ctx, '#c58b1a', '#3b2a14', lw * 0.8);
+      ctx.rect(cx - 0.085 * s, cy + 0.12 * s, 0.17 * s, 0.13 * s);
+      pen(ctx, '#c58b1a', '#2d2010', lw * 0.8);
     } else if (open < 0.01) {
       ctx.beginPath();
-      ctx.arc(x + 0.66 * s, y + 0.64 * s, 0.035 * s, 0, 6.3);
-      pencilPath(ctx, '#e0a82e', '#7a520b', lw * 0.6);
+      ctx.arc(cx + 0.09 * s, cy + 0.17 * s, 0.032 * s, 0, 6.3);
+      pen(ctx, '#e0a82e', '#6e4a09', lw * 0.6);
     }
   }
 
-  function drawFlower(ctx, cx, cy, s, t) {
+  /** Toplanabilir: orman çiçeği. */
+  function drawPickup(ctx, cx, cy, s, t) {
     var sway = Math.sin(t * 1.6 + cx * 0.01) * s * 0.04;
     var lw = Math.max(1.4, s * 0.05);
     ctx.save();
@@ -3749,19 +4453,19 @@ svg {
     ctx.beginPath();
     ctx.moveTo(0, 0.36 * s);
     ctx.quadraticCurveTo(sway * 0.5, 0.2 * s, sway, 0.0);
-    pencilPath(ctx, null, '#5c7a4a', lw);
+    pen(ctx, null, '#56764a', lw);
     ctx.beginPath();
     ctx.ellipse(-0.08 * s + sway * 0.4, 0.22 * s, 0.09 * s, 0.045 * s, -0.5, 0, 6.3);
-    pencilPath(ctx, 'rgba(120,160,95,0.7)', '#5c7a4a', lw * 0.7);
+    pen(ctx, 'rgba(120,160,95,0.75)', '#56764a', lw * 0.7);
     for (var i = 0; i < 5; i++) {
       var a = (i / 5) * 6.283 - 1.57;
       ctx.beginPath();
       ctx.arc(sway + Math.cos(a) * 0.1 * s, -0.04 * s + Math.sin(a) * 0.1 * s, 0.085 * s, 0, 6.3);
-      pencilPath(ctx, '#e3a0b4', '#a24a68', lw * 0.7);
+      pen(ctx, '#e8a4b6', '#a24a68', lw * 0.7);
     }
     ctx.beginPath();
     ctx.arc(sway, -0.04 * s, 0.06 * s, 0, 6.3);
-    pencilPath(ctx, '#e9c46a', '#a0771d', lw * 0.6);
+    pen(ctx, '#ecc86a', '#a0771d', lw * 0.6);
     ctx.restore();
   }
 
@@ -3769,21 +4473,24 @@ svg {
     var col = type === 'sound' ? TEAL : INK;
     var lw = Math.max(1.4, s * 0.05);
     var pulse = 0.5 + 0.5 * Math.sin(t * 2.2 + born);
-    // dış halka
     ctx.beginPath();
     ctx.arc(cx, cy, s * (0.3 + pulse * 0.04), 0, 6.3);
     ctx.setLineDash([s * 0.06, s * 0.06]);
-    ctx.strokeStyle = rgba(col, 0.55);
+    ctx.strokeStyle = rgba(col, 0.6);
     ctx.lineWidth = lw * 0.7;
     ctx.stroke();
     ctx.setLineDash([]);
-    // taş
     ctx.beginPath();
     ctx.ellipse(cx, cy + s * 0.02, s * 0.2, s * 0.155, -0.3, 0, 6.3);
-    pencilPath(ctx, type === 'sound' ? '#3f9aa2' : '#2a3a6b', rgba(col, 0.95), lw);
+    pen(ctx, type === 'sound' ? '#3fa0a0' : '#2c6b4d', rgba(col, 0.95), lw);
     ctx.beginPath();
     ctx.arc(cx - s * 0.06, cy - s * 0.04, s * 0.06, 3.6, 5.2);
-    pencilPath(ctx, null, 'rgba(255,255,255,0.55)', lw * 0.8);
+    pen(ctx, null, 'rgba(255,255,255,0.55)', lw * 0.8);
+    // taşın üstünde minik yosun
+    ctx.fillStyle = 'rgba(120,170,80,0.7)';
+    ctx.beginPath();
+    ctx.ellipse(cx + s * 0.07, cy - s * 0.1, s * 0.05, s * 0.025, 0.4, 0, 6.3);
+    ctx.fill();
   }
 
   function drawArrow(ctx, cx, cy, s, dir, t) {
@@ -3811,7 +4518,6 @@ svg {
     ctx.lineTo(hx - dx * s * 0.17 - px * s * 0.11, hy - dy * s * 0.17 - py * s * 0.11);
     ctx.closePath();
     ctx.fill();
-    // fısıltı yayları
     ctx.lineWidth = lw * 0.55;
     for (var i = 0; i < 2; i++) {
       var r = s * (0.36 + i * 0.1 + ((t * 0.9) % 1) * 0.08);
@@ -3836,20 +4542,19 @@ svg {
     }
   }
 
+  /** Yeşil pelerinli küçük gezgin; başlığında bir yaprak. */
   function drawPlayer(ctx, cx, cy, s, p, t, alpha) {
     var bob = p.moving ? Math.sin(p.walk * 7.5) : Math.sin(t * 2) * 0.35;
     var sq = 1 + bob * 0.05;
     ctx.save();
     ctx.globalAlpha = alpha;
-    // gölge
-    ctx.fillStyle = 'rgba(40,30,15,0.2)';
+    ctx.fillStyle = 'rgba(40,30,15,0.22)';
     ctx.beginPath();
     ctx.ellipse(cx, cy + s * 0.2, s * 0.24, s * 0.09, 0, 0, 6.3);
     ctx.fill();
     ctx.translate(cx, cy - s * 0.04 - Math.abs(bob) * s * 0.025);
     ctx.scale(1 / sq, sq);
     var lw = Math.max(1.5, s * 0.05);
-    // gövde: sivri kapüşonlu küçük figür
     ctx.beginPath();
     ctx.moveTo(0, -s * 0.34);
     ctx.bezierCurveTo(s * 0.12, -s * 0.2, s * 0.26, -s * 0.06, s * 0.25, s * 0.1);
@@ -3857,21 +4562,997 @@ svg {
     ctx.bezierCurveTo(-s * 0.1, s * 0.26, -s * 0.24, s * 0.22, -s * 0.25, s * 0.1);
     ctx.bezierCurveTo(-s * 0.26, -s * 0.06, -s * 0.12, -s * 0.2, 0, -s * 0.34);
     ctx.closePath();
-    pencilPath(ctx, '#2b3358', '#141a33', lw);
-    // yüz boşluğu
+    pen(ctx, '#2f6247', '#11291d', lw);
+    // pelerin kıvrımı
+    ctx.strokeStyle = 'rgba(10,36,24,0.45)';
+    ctx.lineWidth = lw * 0.6;
+    ctx.beginPath();
+    ctx.moveTo(-s * 0.12, s * 0.2);
+    ctx.quadraticCurveTo(0, s * 0.1, s * 0.12, s * 0.2);
+    ctx.stroke();
     var fx = Math.cos(p.face) * s * 0.07;
     var fy = Math.sin(p.face) * s * 0.05;
     ctx.beginPath();
     ctx.ellipse(fx, -s * 0.02 + fy, s * 0.15, s * 0.12, 0, 0, 6.3);
-    pencilPath(ctx, '#f6efdc', null, 0);
-    ctx.fillStyle = '#1b2140';
+    pen(ctx, '#f6efdc', null, 0);
+    ctx.fillStyle = '#13271c';
     var ex = Math.cos(p.face) * s * 0.045;
     var ey = Math.sin(p.face) * s * 0.035;
     ctx.beginPath();
     ctx.arc(fx - s * 0.05 + ex, -s * 0.02 + fy + ey, s * 0.024, 0, 6.3);
     ctx.arc(fx + s * 0.05 + ex, -s * 0.02 + fy + ey, s * 0.024, 0, 6.3);
     ctx.fill();
+    // başlığa takılmış yaprak
+    ctx.fillStyle = '#86b25a';
+    almond(ctx, s * 0.05, -s * 0.3, s * 0.2, s * 0.06, -0.7);
+    ctx.fill();
+    ctx.strokeStyle = '#3b6a2a';
+    ctx.lineWidth = lw * 0.5;
+    ctx.stroke();
     ctx.restore();
+  }
+
+  /* ---------- atmosfer ---------- */
+
+  function drawGlow(ctx, x, y, r) {
+    var gl = ctx.createRadialGradient(x, y, r * 0.11, x, y, r);
+    gl.addColorStop(0, 'rgba(255,250,222,0.55)');
+    gl.addColorStop(1, 'rgba(255,250,222,0)');
+    ctx.fillStyle = gl;
+    ctx.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+
+  var fly = null;
+  /** Ateş böcekleri: yavaşça süzülür, sıcak sarı parlayıp söner; birkaç yaprak da düşer. */
+  function drawAmbient(ctx, W, H, t, dpr) {
+    if (!fly) fly = K.glowSprite(48, [255, 200, 40]);
+    ctx.save();
+    for (var i = 0; i < 10; i++) {
+      var u = (i * 0.61803) % 1;
+      var v = (i * 0.41421 + 0.13) % 1;
+      var x = (((u + 0.05 * Math.sin(t * 0.21 + i * 2.1) + t * 0.004 * ((i % 3) - 1)) % 1) + 1) % 1;
+      var y = (((v + 0.05 * Math.sin(t * 0.17 + i * 1.3)) % 1) + 1) % 1;
+      var pulse = Math.pow(0.5 + 0.5 * Math.sin(t * (0.9 + (i % 4) * 0.25) + i * 3.3), 2);
+      var sz = (12 + (i % 3) * 4) * dpr;
+      ctx.globalAlpha = 0.15 + 0.45 * pulse;
+      ctx.drawImage(fly, x * W - sz / 2, y * H - sz / 2, sz, sz);
+      // parlak çekirdek
+      ctx.globalAlpha = 0.25 + 0.7 * pulse;
+      ctx.fillStyle = '#fff6c0';
+      ctx.beginPath();
+      ctx.arc(x * W, y * H, 1.3 * dpr, 0, 6.3);
+      ctx.fill();
+    }
+    ctx.restore();
+    // düşen yapraklar
+    ctx.save();
+    for (var l = 0; l < 6; l++) {
+      var lx = ((l * 0.37 + t * 0.012 * (1 + (l % 3) * 0.4) + 0.1 * Math.sin(t * 0.5 + l)) % 1 + 1) % 1;
+      var ly = ((l * 0.29 + t * 0.02 * (1 + (l % 2) * 0.5)) % 1);
+      ctx.globalAlpha = 0.32;
+      ctx.fillStyle = l % 2 ? 'rgba(168,118,50,1)' : 'rgba(104,148,64,1)';
+      almond(ctx, lx * W, ly * H, 9 * dpr, 3 * dpr, t * 0.8 + l * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  /** Rüzgârlı bölgedeyken ekranı geçen yaprak çizgileri. */
+  function drawWindFx(ctx, W, H, t, dpr, k) {
+    ctx.strokeStyle = 'rgba(58,110,84,' + 0.3 * k + ')';
+    ctx.lineWidth = Math.max(1.2, dpr * 1.3);
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    for (var wi = 0; wi < 16; wi++) {
+      var wy = (((wi * 137.5) % 100) / 100) * H;
+      var len = (60 + ((wi * 53) % 90)) * dpr;
+      var wx = ((wi * 211 + t * (260 + (wi % 5) * 70) * dpr) % (W + len * 2)) - len;
+      ctx.moveTo(wx, wy);
+      ctx.quadraticCurveTo(wx + len * 0.5, wy - 6 * dpr, wx + len, wy + 2 * dpr);
+    }
+    ctx.stroke();
+    for (var li = 0; li < 7; li++) {
+      var ly = (((li * 191.3) % 100) / 100) * H;
+      var lx = ((li * 331 + t * (330 + li * 40) * dpr) % (W + 80 * dpr)) - 40 * dpr;
+      ctx.globalAlpha = 0.55 * k;
+      ctx.fillStyle = li % 2 ? 'rgba(176,120,48,1)' : 'rgba(110,152,64,1)';
+      almond(ctx, lx, ly + Math.sin(t * 3 + li) * 6 * dpr, 12 * dpr, 4 * dpr, 0.4 + Math.sin(t * 2 + li) * 0.6);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  S.Themes.forest = {
+    key: 'forest',
+    name: 'Orman',
+    paper: '#efe8ce',
+    grid: 'rgba(104,148,108,0.16)',
+    speckDark: [112, 100, 56],
+    speckLight: [255, 255, 238],
+    vignette: 'rgba(78,92,40,0.32)',
+    smudge: 'rgba(236,230,204,0.95)',
+    trail: [66, 74, 56],
+    pencil: PENCIL,
+    ink: INK,
+    teal: TEAL,
+    glowComposite: 'source-over',
+    glowScale: 1,
+    ringRGB: function (kind) {
+      return kind === 'sound' ? TEAL : INK;
+    },
+    paintWall: paintWall,
+    paintFloor: paintFloor,
+    paintMirror: paintMirror,
+    paintWind: paintWind,
+    drawKey: drawKey,
+    drawDoor: drawDoor,
+    drawPickup: drawPickup,
+    drawStone: drawStone,
+    drawArrow: drawArrow,
+    drawGoalMark: drawGoalMark,
+    drawPlayer: drawPlayer,
+    drawGlow: drawGlow,
+    drawAmbient: drawAmbient,
+    drawWindFx: drawWindFx,
+  };
+})(window);
+
+</script>
+<script>
+/* Silik — 2. Sezon · Mağara teması.
+ * Yer altı, fener ışığında: kara kâğıt üzerine tebeşirle çizim. Duvarlar sivri kenarlı kaya, zemin toz ve çakıl,
+ * ayna yerine kristal, kapı kilitli bir taş kemer, toplanabilirler parlayan mantar. Kalıcı (mürekkepli) alan
+ * fener gibi kehribar rengiyle parlar. Oyuncunun fenerinin ışığı görüş yarıçapıyla birlikte küçülür.
+ */
+(function (root) {
+  'use strict';
+  var S = root.Silik;
+  var K = S.ThemeKit;
+  var rgba = K.rgba;
+  var pen = K.pen;
+
+  var CHALK = [222, 218, 204];
+  var INK = [255, 186, 84];
+  var TEAL = [96, 204, 212];
+
+  /* ---------- karolar ---------- */
+
+  function tri(ctx, ax, ay, bx, by, cx, cy) {
+    ctx.beginPath();
+    ctx.moveTo(ax, ay);
+    ctx.lineTo(bx, by);
+    ctx.lineTo(cx, cy);
+    ctx.closePath();
+  }
+
+  function paintWall(ctx, T, mask, v, ink, rand) {
+    var col = ink ? INK : CHALK;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, 0, T, T);
+    ctx.clip();
+    ctx.fillStyle = ink ? 'rgba(255,168,60,0.22)' : 'rgba(178,190,208,0.11)';
+    ctx.fillRect(0, 0, T, T);
+    // kaya yüzeyleri: koyu ve açık üçgen kesitler
+    for (var f = 0; f < 4; f++) {
+      var bx = rand() * T;
+      var by = rand() * T;
+      tri(ctx, bx, by, bx + (rand() - 0.3) * T * 0.7, by + (rand() - 0.5) * T * 0.6, bx + (rand() - 0.5) * T * 0.6, by + (rand() * 0.7 + 0.2) * T * 0.7);
+      ctx.fillStyle = f % 2 ? 'rgba(0,0,0,0.20)' : 'rgba(255,255,255,0.045)';
+      ctx.fill();
+    }
+    // kırık çapraz tarama (komşu karolarla aynı ritimde)
+    var sp = T / 5;
+    ctx.lineCap = 'round';
+    ctx.lineWidth = Math.max(1, T * 0.028);
+    for (var h = -T; h < T * 2; h += sp) {
+      ctx.strokeStyle = rgba(col, (ink ? 0.5 : 0.3) * (0.7 + rand() * 0.5));
+      // iki parçaya bölünmüş çizgi: tebeşirin kesik kesik tutması
+      var cut = 0.3 + rand() * 0.4;
+      var jx = (rand() - 0.5) * T * 0.02;
+      ctx.beginPath();
+      ctx.moveTo(h + jx, T);
+      ctx.lineTo(h + T * cut + jx, T * (1 - cut));
+      ctx.moveTo(h + T * (cut + 0.08) + jx, T * (1 - cut - 0.08));
+      ctx.lineTo(h + T + jx, 0);
+      ctx.stroke();
+    }
+    // katman çizgileri
+    ctx.strokeStyle = rgba(col, ink ? 0.45 : 0.22);
+    ctx.lineWidth = Math.max(1, T * 0.022);
+    for (var s = 0; s < 2; s++) {
+      var sy = T * (0.2 + rand() * 0.6);
+      ctx.beginPath();
+      ctx.moveTo(T * rand() * 0.3, sy);
+      ctx.lineTo(T * (0.4 + rand() * 0.2), sy + (rand() - 0.5) * T * 0.15);
+      ctx.lineTo(T * (0.7 + rand() * 0.3), sy + (rand() - 0.5) * T * 0.2);
+      ctx.stroke();
+    }
+    // tebeşir tozu
+    ctx.fillStyle = rgba(col, ink ? 0.55 : 0.4);
+    for (var d = 0; d < 7; d++) {
+      ctx.beginPath();
+      ctx.arc(rand() * T, rand() * T, Math.max(0.7, T * 0.012), 0, 6.3);
+      ctx.fill();
+    }
+    if (v === 1) {
+      // minik parlak damar noktaları
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      K.star4(ctx, T * (0.2 + rand() * 0.6), T * (0.2 + rand() * 0.6), T * 0.045);
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // sivri dış hat: yalnızca açıkta kalan kenarlar
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    var a = T * 0.04;
+    for (var pass = 0; pass < 2; pass++) {
+      ctx.strokeStyle = rgba(col, pass ? 0.38 : ink ? 0.98 : 0.86);
+      ctx.lineWidth = pass ? Math.max(1, T * 0.026) : Math.max(1.4, T * 0.052);
+      var o = pass ? T * 0.022 : T * 0.026;
+      var r2 = pass ? function () { return rand() * 0.7; } : rand;
+      if (mask & 1) {
+        ctx.beginPath();
+        ctx.moveTo(0, o);
+        K.jagged(ctx, 0, o, T, o, 0, 1, a, 6, r2);
+        ctx.stroke();
+      }
+      if (mask & 2) {
+        ctx.beginPath();
+        ctx.moveTo(T - o, 0);
+        K.jagged(ctx, T - o, 0, T - o, T, 1, 0, a, 6, r2);
+        ctx.stroke();
+      }
+      if (mask & 4) {
+        ctx.beginPath();
+        ctx.moveTo(T, T - o);
+        K.jagged(ctx, T, T - o, 0, T - o, 0, 1, a, 6, r2);
+        ctx.stroke();
+      }
+      if (mask & 8) {
+        ctx.beginPath();
+        ctx.moveTo(o, T);
+        K.jagged(ctx, o, T, o, 0, 1, 0, a, 6, r2);
+        ctx.stroke();
+      }
+    }
+  }
+
+  function paintFloor(ctx, T, v, ink, rand) {
+    ctx.fillStyle = ink ? 'rgba(255,176,70,0.14)' : 'rgba(255,255,255,0.07)';
+    ctx.fillRect(0, 0, T, T);
+    var col = ink ? INK : CHALK;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    var lw = Math.max(1, T * 0.022);
+    // çakıllar
+    var n = v === 0 ? 2 : 3;
+    for (var i = 0; i < n; i++) {
+      var x = T * (0.14 + rand() * 0.72);
+      var y = T * (0.14 + rand() * 0.72);
+      ctx.strokeStyle = rgba(col, ink ? 0.5 : 0.24);
+      ctx.lineWidth = lw;
+      ctx.beginPath();
+      ctx.ellipse(x, y, T * (0.03 + rand() * 0.035), T * (0.022 + rand() * 0.025), rand() * 3, 0, 6.3);
+      ctx.stroke();
+    }
+    // çatlak
+    if (v === 1) {
+      ctx.strokeStyle = rgba(col, ink ? 0.45 : 0.18);
+      var cx = T * (0.2 + rand() * 0.3);
+      var cy = T * (0.25 + rand() * 0.5);
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + T * 0.12, cy - T * 0.06);
+      ctx.lineTo(cx + T * 0.2, cy + T * 0.03);
+      ctx.lineTo(cx + T * 0.32, cy - T * 0.04);
+      ctx.stroke();
+    }
+    // toz noktaları
+    ctx.fillStyle = rgba(col, ink ? 0.55 : 0.22);
+    for (var d = 0; d < (ink ? 6 : 4); d++) {
+      ctx.beginPath();
+      ctx.arc(T * (0.08 + rand() * 0.84), T * (0.08 + rand() * 0.84), Math.max(0.7, T * 0.011), 0, 6.3);
+      ctx.fill();
+    }
+  }
+
+  function prism(ctx, x, baseY, w, h, tilt, hi) {
+    ctx.beginPath();
+    ctx.moveTo(x - w / 2, baseY);
+    ctx.lineTo(x - w / 2, baseY - h * 0.7);
+    ctx.lineTo(x + tilt, baseY - h);
+    ctx.lineTo(x + w / 2, baseY - h * 0.7);
+    ctx.lineTo(x + w / 2, baseY);
+    ctx.closePath();
+    var g = ctx.createLinearGradient(x - w / 2, 0, x + w / 2, 0);
+    g.addColorStop(0, 'rgba(120,230,240,0.78)');
+    g.addColorStop(1, hi ? 'rgba(170,150,250,0.78)' : 'rgba(110,170,240,0.78)');
+    ctx.fillStyle = g;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(200,250,255,0.95)';
+    ctx.lineWidth = Math.max(1, w * 0.12);
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x + tilt * 0.3, baseY);
+    ctx.lineTo(x + tilt, baseY - h);
+    ctx.strokeStyle = 'rgba(210,252,255,0.6)';
+    ctx.lineWidth = Math.max(1, w * 0.08);
+    ctx.stroke();
+  }
+
+  /** Ayna = kristal kümesi: ışığı yansıtır, haritaya sahte koridorlar çizer. */
+  function paintMirror(ctx, T, mask, ink, rand) {
+    paintWall(ctx, T, mask, 0, ink, rand); // kristal, kayanın içinden büyür
+    ctx.fillStyle = ink ? 'rgba(110,214,236,0.34)' : 'rgba(100,206,232,0.22)';
+    ctx.fillRect(0, 0, T, T);
+    var g = ctx.createRadialGradient(T * 0.5, T * 0.55, 0, T * 0.5, T * 0.55, T * 0.7);
+    g.addColorStop(0, 'rgba(160,240,255,0.38)');
+    g.addColorStop(1, 'rgba(160,240,255,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, T, T);
+    prism(ctx, T * 0.3, T * 0.9, T * 0.2, T * 0.5, T * 0.02, false);
+    prism(ctx, T * 0.68, T * 0.92, T * 0.22, T * 0.62, -T * 0.02, true);
+    prism(ctx, T * 0.49, T * 0.95, T * 0.26, T * 0.8, T * 0.03, false);
+    ctx.fillStyle = 'rgba(255,255,255,0.95)';
+    K.star4(ctx, T * 0.56, T * 0.26, T * 0.085);
+    ctx.fill();
+    K.star4(ctx, T * 0.22, T * 0.5, T * 0.05);
+    ctx.fill();
+    // çerçeve: dört kenar, parlak
+    for (var pass = 0; pass < 2; pass++) {
+      ctx.strokeStyle = rgba(TEAL, pass ? 0.4 : 0.95);
+      ctx.lineWidth = pass ? Math.max(1, T * 0.03) : Math.max(1.6, T * 0.06);
+      var i = T * 0.03 + (pass ? T * 0.02 : 0);
+      if (mask & 1) K.wobble(ctx, 0, i, T, i, rand, T * 0.015, 5);
+      if (mask & 2) K.wobble(ctx, T - i, 0, T - i, T, rand, T * 0.015, 5);
+      if (mask & 4) K.wobble(ctx, 0, T - i, T, T - i, rand, T * 0.015, 5);
+      if (mask & 8) K.wobble(ctx, i, 0, i, T, rand, T * 0.015, 5);
+    }
+  }
+
+  function paintWind(ctx, T, v) {
+    ctx.strokeStyle = 'rgba(160,200,232,0.62)';
+    ctx.lineWidth = Math.max(1.2, T * 0.04);
+    ctx.lineCap = 'round';
+    var y = T * (v ? 0.62 : 0.4);
+    [[0.12, 0.0], [0.2, 0.17]].forEach(function (l, i) {
+      var yy = y + l[1] * T;
+      ctx.beginPath();
+      ctx.moveTo(T * l[0], yy);
+      ctx.bezierCurveTo(T * (l[0] + 0.16), yy - T * 0.14, T * (l[0] + 0.32), yy + T * 0.12, T * (l[0] + 0.5), yy);
+      if (i === 0) ctx.bezierCurveTo(T * 0.72, yy - T * 0.06, T * 0.8, yy, T * 0.84, yy - T * 0.06);
+      ctx.stroke();
+    });
+    ctx.fillStyle = 'rgba(214,226,240,0.7)';
+    [[0.74, 0.3], [0.82, 0.42], [0.66, 0.22], [0.86, 0.6]].forEach(function (d) {
+      ctx.beginPath();
+      ctx.arc(T * d[0], T * (d[1] + (v ? 0.2 : 0)), Math.max(0.9, T * 0.016), 0, 6.3);
+      ctx.fill();
+    });
+  }
+
+  /* ---------- nesneler ---------- */
+
+  function drawKey(ctx, cx, cy, s, t) {
+    ctx.save();
+    ctx.translate(cx, cy + Math.sin(t * 2.4) * s * 0.04);
+    ctx.globalCompositeOperation = 'lighter';
+    var g = ctx.createRadialGradient(0, 0, 0, 0, 0, s * 0.7);
+    g.addColorStop(0, 'rgba(255,200,100,' + (0.55 + Math.sin(t * 3) * 0.12) + ')');
+    g.addColorStop(1, 'rgba(255,200,100,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(-s, -s, s * 2, s * 2);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.rotate(-0.65 + Math.sin(t * 1.7) * 0.08);
+    var lw = Math.max(1.5, s * 0.06);
+    ctx.beginPath();
+    ctx.moveTo(-0.08 * s, 0);
+    ctx.lineTo(0.3 * s, 0);
+    ctx.lineTo(0.3 * s, 0.1 * s);
+    ctx.moveTo(0.2 * s, 0);
+    ctx.lineTo(0.2 * s, 0.08 * s);
+    pen(ctx, null, '#3a2808', lw * 1.5);
+    ctx.beginPath();
+    ctx.moveTo(-0.08 * s, 0);
+    ctx.lineTo(0.3 * s, 0);
+    ctx.lineTo(0.3 * s, 0.1 * s);
+    ctx.moveTo(0.2 * s, 0);
+    ctx.lineTo(0.2 * s, 0.08 * s);
+    pen(ctx, null, '#ffd36a', lw * 0.9);
+    ctx.beginPath();
+    ctx.arc(-0.2 * s, 0, 0.14 * s, 0, 6.3);
+    ctx.moveTo(-0.1 * s, 0);
+    ctx.arc(-0.2 * s, 0, 0.065 * s, 0, 6.3, true);
+    pen(ctx, '#f4bf46', '#3a2808', lw);
+    ctx.restore();
+  }
+
+  /** Kapı: taş kemer. Kilitliyken demir parmaklık, anahtar varken içerden kehribar ışık sızar. */
+  function drawDoor(ctx, x, y, s, hasKey, open, t) {
+    var cx = x + s / 2;
+    var lw = Math.max(1.6, s * 0.05);
+    var top = y + s * 0.1;
+    var base = y + s * 0.94;
+    if (hasKey) {
+      var pulse = 0.55 + Math.sin(t * 4) * 0.2 + open * 0.5;
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      var g = ctx.createRadialGradient(cx, y + s * 0.55, s * 0.05, cx, y + s * 0.55, s * 1.0);
+      g.addColorStop(0, 'rgba(255,190,90,' + Math.min(0.9, pulse * 0.62) + ')');
+      g.addColorStop(1, 'rgba(255,190,90,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(x - s * 0.6, y - s * 0.5, s * 2.2, s * 2);
+      ctx.restore();
+    }
+    // taş çerçeve
+    ctx.beginPath();
+    ctx.moveTo(x + 0.1 * s, base);
+    ctx.lineTo(x + 0.1 * s, y + 0.42 * s);
+    ctx.arc(cx, y + 0.42 * s, 0.4 * s, Math.PI, 0);
+    ctx.lineTo(x + 0.9 * s, base);
+    ctx.closePath();
+    pen(ctx, 'rgba(150,160,176,0.55)', 'rgba(228,224,210,0.95)', lw);
+    // taş blok çizgileri
+    ctx.strokeStyle = 'rgba(228,224,210,0.45)';
+    ctx.lineWidth = lw * 0.55;
+    for (var b = 0; b < 4; b++) {
+      var ang = Math.PI + (b + 0.5) * (Math.PI / 4);
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(ang) * 0.27 * s, y + 0.42 * s + Math.sin(ang) * 0.27 * s);
+      ctx.lineTo(cx + Math.cos(ang) * 0.4 * s, y + 0.42 * s + Math.sin(ang) * 0.4 * s);
+      ctx.stroke();
+    }
+    // iç açıklık
+    ctx.beginPath();
+    ctx.moveTo(x + 0.24 * s, base);
+    ctx.lineTo(x + 0.24 * s, y + 0.42 * s);
+    ctx.arc(cx, y + 0.42 * s, 0.26 * s, Math.PI, 0);
+    ctx.lineTo(x + 0.76 * s, base);
+    ctx.closePath();
+    var inner = hasKey
+      ? 'rgba(255,' + Math.round(196 + open * 40) + ',' + Math.round(110 + open * 70) + ',' + (0.55 + open * 0.4) + ')'
+      : 'rgba(6,8,12,0.88)';
+    pen(ctx, inner, 'rgba(228,224,210,0.9)', lw * 0.8);
+    // rün: elmas + nokta; anahtar varken parlar
+    ctx.strokeStyle = hasKey ? 'rgba(255,236,170,0.95)' : 'rgba(150,170,196,0.75)';
+    ctx.lineWidth = lw * 0.7;
+    ctx.beginPath();
+    ctx.moveTo(cx, y + 0.22 * s);
+    ctx.lineTo(cx + 0.08 * s, y + 0.32 * s);
+    ctx.lineTo(cx, y + 0.42 * s);
+    ctx.lineTo(cx - 0.08 * s, y + 0.32 * s);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.fillStyle = ctx.strokeStyle;
+    ctx.beginPath();
+    ctx.arc(cx, y + 0.32 * s, 0.018 * s, 0, 6.3);
+    ctx.fill();
+    if (!hasKey) {
+      // demir parmaklık + asma kilit
+      ctx.strokeStyle = 'rgba(200,204,214,0.85)';
+      ctx.lineWidth = lw * 0.9;
+      for (var k = 0; k < 3; k++) {
+        var bx = x + (0.34 + k * 0.16) * s;
+        ctx.beginPath();
+        ctx.moveTo(bx, y + 0.5 * s);
+        ctx.lineTo(bx, base);
+        ctx.stroke();
+      }
+      ctx.beginPath();
+      ctx.arc(cx, y + 0.66 * s, 0.06 * s, Math.PI, 0);
+      pen(ctx, null, '#1a1a1a', lw * 0.9);
+      ctx.beginPath();
+      ctx.rect(cx - 0.085 * s, y + 0.66 * s, 0.17 * s, 0.13 * s);
+      pen(ctx, '#f0b64a', '#1a1a1a', lw * 0.8);
+    }
+    void top;
+  }
+
+  /** Toplanabilir: parlayan mantar kümesi. */
+  function drawPickup(ctx, cx, cy, s, t) {
+    var pulse = 0.5 + 0.5 * Math.sin(t * 2.2 + cx * 0.013);
+    var lw = Math.max(1.3, s * 0.045);
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    var g = ctx.createRadialGradient(cx, cy, 0, cx, cy, s * 0.7);
+    g.addColorStop(0, 'rgba(110,235,225,' + (0.3 + 0.25 * pulse) + ')');
+    g.addColorStop(1, 'rgba(110,235,225,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(cx - s, cy - s, s * 2, s * 2);
+    ctx.restore();
+    function mush(x, y, r, tilt, cap) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(tilt);
+      // sap
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.28, 0);
+      ctx.quadraticCurveTo(-r * 0.2, r * 0.7, -r * 0.34, r * 1.05);
+      ctx.lineTo(r * 0.34, r * 1.05);
+      ctx.quadraticCurveTo(r * 0.2, r * 0.7, r * 0.28, 0);
+      ctx.closePath();
+      pen(ctx, 'rgba(236,240,226,0.95)', 'rgba(40,80,84,0.9)', lw * 0.8);
+      // şapka
+      ctx.beginPath();
+      ctx.moveTo(-r, 0);
+      ctx.bezierCurveTo(-r, -r * 1.05, r, -r * 1.05, r, 0);
+      ctx.quadraticCurveTo(0, r * 0.25, -r, 0);
+      ctx.closePath();
+      pen(ctx, cap, 'rgba(18,70,76,0.95)', lw);
+      ctx.fillStyle = 'rgba(255,255,255,0.8)';
+      [[-0.4, -0.34, 0.14], [0.1, -0.55, 0.17], [0.46, -0.28, 0.12]].forEach(function (d) {
+        ctx.beginPath();
+        ctx.arc(d[0] * r, d[1] * r, d[2] * r, 0, 6.3);
+        ctx.fill();
+      });
+      ctx.restore();
+    }
+    mush(cx - s * 0.2, cy + s * 0.05, s * 0.13, -0.22, 'rgba(236,140,190,0.92)');
+    mush(cx + s * 0.19, cy + s * 0.08, s * 0.11, 0.25, 'rgba(160,150,250,0.92)');
+    mush(cx, cy - s * 0.02, s * 0.19, 0, 'rgba(100,226,218,0.95)');
+  }
+
+  function drawStone(ctx, cx, cy, s, type, t, born) {
+    var lw = Math.max(1.4, s * 0.05);
+    var pulse = 0.5 + 0.5 * Math.sin(t * 2.2 + born);
+    var col = type === 'sound' ? TEAL : INK;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    var g = ctx.createRadialGradient(cx, cy, 0, cx, cy, s * 0.55);
+    g.addColorStop(0, rgba(col, 0.28 + 0.12 * pulse));
+    g.addColorStop(1, rgba(col, 0));
+    ctx.fillStyle = g;
+    ctx.fillRect(cx - s, cy - s, s * 2, s * 2);
+    ctx.restore();
+    ctx.beginPath();
+    ctx.arc(cx, cy, s * (0.3 + pulse * 0.04), 0, 6.3);
+    ctx.setLineDash([s * 0.06, s * 0.06]);
+    ctx.strokeStyle = rgba(col, 0.8);
+    ctx.lineWidth = lw * 0.7;
+    ctx.stroke();
+    ctx.setLineDash([]);
+    if (type === 'sound') {
+      // yankı taşı: kesilmiş kristal
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - s * 0.2);
+      ctx.lineTo(cx + s * 0.15, cy - s * 0.02);
+      ctx.lineTo(cx + s * 0.08, cy + s * 0.17);
+      ctx.lineTo(cx - s * 0.08, cy + s * 0.17);
+      ctx.lineTo(cx - s * 0.15, cy - s * 0.02);
+      ctx.closePath();
+      pen(ctx, 'rgba(110,214,224,0.95)', 'rgba(220,252,255,0.95)', lw);
+      ctx.beginPath();
+      ctx.moveTo(cx - s * 0.15, cy - s * 0.02);
+      ctx.lineTo(cx + s * 0.15, cy - s * 0.02);
+      ctx.moveTo(cx, cy - s * 0.2);
+      ctx.lineTo(cx - s * 0.03, cy + s * 0.17);
+      pen(ctx, null, 'rgba(220,252,255,0.6)', lw * 0.6);
+    } else {
+      ctx.beginPath();
+      ctx.ellipse(cx, cy + s * 0.02, s * 0.2, s * 0.155, -0.3, 0, 6.3);
+      pen(ctx, '#aeb4bf', '#2a2f38', lw);
+      ctx.beginPath();
+      ctx.arc(cx - s * 0.06, cy - s * 0.04, s * 0.06, 3.6, 5.2);
+      pen(ctx, null, 'rgba(255,255,255,0.7)', lw * 0.8);
+    }
+  }
+
+  function drawArrow(ctx, cx, cy, s, dir, t) {
+    var bob = Math.sin(t * 3.2) * s * 0.035;
+    var dx = dir.dx;
+    var dy = dir.dy;
+    var tail = s * 0.26;
+    var tip = s * 0.5 + bob;
+    var lw = Math.max(2, s * 0.075);
+    ctx.save();
+    ctx.shadowColor = 'rgba(96,204,212,0.9)';
+    ctx.shadowBlur = s * 0.2;
+    ctx.strokeStyle = rgba(TEAL, 0.98);
+    ctx.fillStyle = rgba(TEAL, 0.98);
+    ctx.lineWidth = lw;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(cx + dx * tail, cy + dy * tail);
+    ctx.lineTo(cx + dx * (tip - s * 0.08), cy + dy * (tip - s * 0.08));
+    ctx.stroke();
+    var hx = cx + dx * (tip + s * 0.06);
+    var hy = cy + dy * (tip + s * 0.06);
+    var px = -dy;
+    var py = dx;
+    ctx.beginPath();
+    ctx.moveTo(hx, hy);
+    ctx.lineTo(hx - dx * s * 0.17 + px * s * 0.11, hy - dy * s * 0.17 + py * s * 0.11);
+    ctx.lineTo(hx - dx * s * 0.17 - px * s * 0.11, hy - dy * s * 0.17 - py * s * 0.11);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+    ctx.lineWidth = lw * 0.55;
+    ctx.lineCap = 'round';
+    for (var i = 0; i < 2; i++) {
+      var r = s * (0.36 + i * 0.1 + ((t * 0.9) % 1) * 0.08);
+      var a0 = Math.atan2(dy, dx);
+      ctx.strokeStyle = rgba(TEAL, 0.55 - i * 0.2);
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, a0 - 0.5, a0 + 0.5);
+      ctx.stroke();
+    }
+  }
+
+  function drawGoalMark(ctx, cx, cy, s, t) {
+    ctx.strokeStyle = rgba(TEAL, 0.95);
+    ctx.lineWidth = Math.max(2, s * 0.06);
+    ctx.lineCap = 'round';
+    for (var i = 0; i < 8; i++) {
+      var a = (i / 8) * 6.283 + t;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(a) * s * 0.34, cy + Math.sin(a) * s * 0.34);
+      ctx.lineTo(cx + Math.cos(a) * s * 0.46, cy + Math.sin(a) * s * 0.46);
+      ctx.stroke();
+    }
+  }
+
+  /** Soluk mavi pelerinli gezgin; yanında kehribar bir fener taşır. */
+  function drawPlayer(ctx, cx, cy, s, p, t, alpha) {
+    var bob = p.moving ? Math.sin(p.walk * 7.5) : Math.sin(t * 2) * 0.35;
+    var sq = 1 + bob * 0.05;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = 'rgba(0,0,0,0.38)';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + s * 0.2, s * 0.24, s * 0.09, 0, 0, 6.3);
+    ctx.fill();
+    ctx.translate(cx, cy - s * 0.04 - Math.abs(bob) * s * 0.025);
+    ctx.scale(1 / sq, sq);
+    var lw = Math.max(1.5, s * 0.05);
+    ctx.beginPath();
+    ctx.moveTo(0, -s * 0.34);
+    ctx.bezierCurveTo(s * 0.12, -s * 0.2, s * 0.26, -s * 0.06, s * 0.25, s * 0.1);
+    ctx.bezierCurveTo(s * 0.24, s * 0.22, s * 0.1, s * 0.26, 0, s * 0.26);
+    ctx.bezierCurveTo(-s * 0.1, s * 0.26, -s * 0.24, s * 0.22, -s * 0.25, s * 0.1);
+    ctx.bezierCurveTo(-s * 0.26, -s * 0.06, -s * 0.12, -s * 0.2, 0, -s * 0.34);
+    ctx.closePath();
+    pen(ctx, '#aebfd6', '#0a1018', lw * 1.2);
+    ctx.strokeStyle = 'rgba(20,34,52,0.5)';
+    ctx.lineWidth = lw * 0.6;
+    ctx.beginPath();
+    ctx.moveTo(-s * 0.12, s * 0.2);
+    ctx.quadraticCurveTo(0, s * 0.1, s * 0.12, s * 0.2);
+    ctx.stroke();
+    var fx = Math.cos(p.face) * s * 0.07;
+    var fy = Math.sin(p.face) * s * 0.05;
+    ctx.beginPath();
+    ctx.ellipse(fx, -s * 0.02 + fy, s * 0.15, s * 0.12, 0, 0, 6.3);
+    pen(ctx, '#1b2330', null, 0);
+    ctx.fillStyle = '#f4ecd2';
+    var ex = Math.cos(p.face) * s * 0.045;
+    var ey = Math.sin(p.face) * s * 0.035;
+    ctx.beginPath();
+    ctx.arc(fx - s * 0.05 + ex, -s * 0.02 + fy + ey, s * 0.03, 0, 6.3);
+    ctx.arc(fx + s * 0.05 + ex, -s * 0.02 + fy + ey, s * 0.03, 0, 6.3);
+    ctx.fill();
+    // fener
+    var sw = Math.sin(t * 3) * 0.06;
+    ctx.translate(s * 0.27, s * 0.02);
+    ctx.rotate(sw);
+    ctx.strokeStyle = '#0a1018';
+    ctx.lineWidth = lw * 0.7;
+    ctx.beginPath();
+    ctx.moveTo(0, -s * 0.12);
+    ctx.lineTo(0, -s * 0.05);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.rect(-s * 0.05, -s * 0.05, s * 0.1, s * 0.13);
+    pen(ctx, '#ffc866', '#0a1018', lw * 0.8);
+    ctx.restore();
+  }
+
+  /* ---------- atmosfer ---------- */
+
+  var glowCache = {};
+  /** Işık sprite'ı: yumuşak gradyan + alfa kanalına gürültü (dither) -> kademeli halkalar (banding) görünmez. */
+  function glowSprite(R) {
+    var key = Math.round(R);
+    if (glowCache[key]) return glowCache[key];
+    var size = Math.ceil(R * 2);
+    var c = document.createElement('canvas');
+    c.width = c.height = size;
+    var g = c.getContext('2d');
+    var gl = g.createRadialGradient(size / 2, size / 2, R * 0.05, size / 2, size / 2, R);
+    var stops = [0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9, 1];
+    stops.forEach(function (u) {
+      var a = Math.pow(1 - u, 2.2) * 0.55; // yumuşak sönüm
+      gl.addColorStop(u, 'rgba(255,' + Math.round(176 - u * 20) + ',' + Math.round(88 - u * 20) + ',' + a + ')');
+    });
+    g.fillStyle = gl;
+    g.fillRect(0, 0, size, size);
+    var img = g.getImageData(0, 0, size, size);
+    var d = img.data;
+    var seed = 12345;
+    for (var i = 3; i < d.length; i += 4) {
+      if (d[i] === 0) continue;
+      seed = (Math.imul(seed, 1664525) + 1013904223) | 0; // hızlı rastgele sayı
+      var n = ((seed >>> 24) / 255 - 0.5) * 2.6;
+      d[i] = Math.max(0, Math.min(255, d[i] + n));
+    }
+    g.putImageData(img, 0, 0);
+    glowCache = {}; // yalnızca son boyutu tut (bellek)
+    glowCache[key] = c;
+    return c;
+  }
+
+  /** Fener: oyuncunun etrafını sıcak bir ışıkla aydınlatır (hafifçe titrer). */
+  function drawGlow(ctx, x, y, r, t) {
+    var f = 0.94 + 0.06 * Math.sin(t * 9.1) * Math.sin(t * 5.3 + 1.2);
+    var sprite = glowSprite(r);
+    var D = sprite.width * (0.985 + 0.015 * f);
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = f;
+    ctx.drawImage(sprite, x - D / 2, y - D / 2, D, D);
+    ctx.restore();
+  }
+
+  var beaconSprite = null;
+  /** Parlayan mantar: karanlıkta, görüş dışındayken bile soluk pembe bir ışık verir (k: 0..1 yakınlık). */
+  function drawBeacon(ctx, cx, cy, s, t, k) {
+    if (!beaconSprite) beaconSprite = K.glowSprite(64, [238, 147, 184]);
+    var D = s * 2.3;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = Math.min(1, 0.95 * (0.3 + 0.7 * k) * (0.7 + 0.3 * Math.sin(t * 2.1 + cx * 0.013 + cy * 0.017)));
+    ctx.drawImage(beaconSprite, cx - D / 2, cy - D / 2, D, D);
+    ctx.restore();
+  }
+
+  var dust = null;
+  /** Havada süzülen toz zerreleri. */
+  function drawAmbient(ctx, W, H, t, dpr) {
+    if (!dust) dust = K.glowSprite(32, [255, 214, 150]); // fener ışığında uçuşan sıcak toz
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for (var i = 0; i < 14; i++) {
+      var u = (i * 0.61803 + 0.2) % 1;
+      var v = (i * 0.41421 + 0.07) % 1;
+      var x = (((u + 0.03 * Math.sin(t * 0.15 + i * 2.7) + t * 0.003 * ((i % 3) - 1)) % 1) + 1) % 1;
+      var y = (((v - t * 0.012 * (1 + (i % 4) * 0.4) + 0.02 * Math.sin(t * 0.2 + i)) % 1) + 1) % 1;
+      var a = 0.06 + 0.14 * Math.pow(0.5 + 0.5 * Math.sin(t * (0.5 + (i % 5) * 0.15) + i * 2.1), 2);
+      var sz = (3 + (i % 4) * 1.7) * dpr;
+      ctx.globalAlpha = a;
+      ctx.drawImage(dust, x * W - sz / 2, y * H - sz / 2, sz, sz);
+    }
+    ctx.restore();
+  }
+
+  /** Cereyan: ekranı geçen soluk toz çizgileri. */
+  function drawWindFx(ctx, W, H, t, dpr, k) {
+    ctx.strokeStyle = 'rgba(170,205,235,' + 0.26 * k + ')';
+    ctx.lineWidth = Math.max(1.2, dpr * 1.3);
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    for (var wi = 0; wi < 18; wi++) {
+      var wy = (((wi * 137.5) % 100) / 100) * H;
+      var len = (60 + ((wi * 53) % 90)) * dpr;
+      var wx = ((wi * 211 + t * (260 + (wi % 5) * 70) * dpr) % (W + len * 2)) - len;
+      ctx.moveTo(wx, wy);
+      ctx.quadraticCurveTo(wx + len * 0.5, wy - 6 * dpr, wx + len, wy + 2 * dpr);
+    }
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(214,226,240,' + 0.5 * k + ')';
+    for (var di = 0; di < 22; di++) {
+      var dy = (((di * 97.7) % 100) / 100) * H;
+      var dx = ((di * 173 + t * (300 + (di % 4) * 60) * dpr) % (W + 40 * dpr)) - 20 * dpr;
+      ctx.beginPath();
+      ctx.arc(dx, dy, (1 + (di % 3) * 0.6) * dpr, 0, 6.3);
+      ctx.fill();
+    }
+  }
+
+  S.Themes.cave = {
+    key: 'cave',
+    name: 'Mağara',
+    paper: '#1f232a',
+    grid: 'rgba(160,184,214,0.07)',
+    speckDark: [0, 0, 0],
+    speckLight: [200, 212, 232],
+    vignette: 'rgba(0,0,0,0.66)',
+    smudge: 'rgba(31,35,42,0.96)',
+    trail: [232, 228, 214],
+    pencil: CHALK,
+    ink: INK,
+    teal: TEAL,
+    glowComposite: 'lighter',
+    glowScale: 1.12,
+    glowAbove: true,
+    ringRGB: function (kind) {
+      return kind === 'sound' ? TEAL : INK;
+    },
+    paintWall: paintWall,
+    paintFloor: paintFloor,
+    paintMirror: paintMirror,
+    paintWind: paintWind,
+    drawKey: drawKey,
+    drawDoor: drawDoor,
+    drawPickup: drawPickup,
+    drawBeacon: drawBeacon,
+    drawStone: drawStone,
+    drawArrow: drawArrow,
+    drawGoalMark: drawGoalMark,
+    drawPlayer: drawPlayer,
+    drawGlow: drawGlow,
+    drawAmbient: drawAmbient,
+    drawWindFx: drawWindFx,
+  };
+})(window);
+
+</script>
+<script>
+/* Silik — çizim motoru (tema bağımsız).
+ *
+ * Görünüm, seçili temadan (Silik.Themes.forest / .cave) gelir: kâğıt, kalem, mürekkep renkleri,
+ * duvar/zemin/ayna karoları, anahtar-kapı-toplanabilir-taş-oyuncu çizimleri, fener ışığı, atmosfer.
+ * Bu dosya kamerayı, karo döngüsünü, izi, parçacıkları ve atlası yönetir.
+ *
+ * Karo görselleri (duvar / zemin / ayna / silgi / rüzgâr) tema başına açılışta ve ekran boyutu
+ * değişince bir atlas tuvaline önceden çizilir; kare başına yalnızca drawImage çağrılır.
+ */
+(function (root) {
+  'use strict';
+  var S = (root.Silik = root.Silik || {});
+  var Util = S.Util;
+  var K = S.ThemeKit;
+  var rgba = K.rgba;
+  var hash2 = K.hash2;
+
+  /* ---------- atlas ---------- */
+
+  var COLS = 16;
+  var N_SPRITES = 107;
+  function wallIdx(ink, v, mask) {
+    return (ink * 2 + v) * 16 + mask;
+  }
+  function mirrorIdx(ink, mask) {
+    return 64 + ink * 16 + mask;
+  }
+  function floorIdx(ink, v) {
+    return 96 + ink * 3 + v;
+  }
+  var SMUDGE = 102;
+  var WINDG = 105;
+
+  function paintSmudge(ctx, T, theme, rand) {
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = theme.smudge;
+    for (var s = 0; s < 3; s++) {
+      ctx.lineWidth = T * (0.22 + rand() * 0.14);
+      var x = T * (0.1 + rand() * 0.5);
+      var y = T * (0.05 + rand() * 0.7);
+      ctx.beginPath();
+      ctx.moveTo(x, y + T * 0.25);
+      ctx.lineTo(x + T * (0.3 + rand() * 0.3), y);
+      ctx.stroke();
+    }
+  }
+
+  function buildAtlas(Tp, theme) {
+    var rows = Math.ceil(N_SPRITES / COLS);
+    var c = document.createElement('canvas');
+    c.width = COLS * Tp;
+    c.height = rows * Tp;
+    var ctx = c.getContext('2d');
+    function each(i, fn) {
+      ctx.save();
+      ctx.translate((i % COLS) * Tp, Math.floor(i / COLS) * Tp);
+      ctx.beginPath();
+      ctx.rect(0, 0, Tp, Tp);
+      ctx.clip();
+      // her sprite için kalıcı bir tohum: tema değişse de aynı görünür
+      fn(Util.rng(i * 7919 + 13 + (theme.key === 'cave' ? 5000 : 0)));
+      ctx.restore();
+    }
+    var ink, v, m;
+    for (ink = 0; ink < 2; ink++) {
+      for (v = 0; v < 2; v++) {
+        for (m = 0; m < 16; m++) {
+          (function (ink, v, m) {
+            each(wallIdx(ink, v, m), function (r) {
+              theme.paintWall(ctx, Tp, m, v, ink, r);
+            });
+          })(ink, v, m);
+        }
+      }
+      for (m = 0; m < 16; m++) {
+        (function (ink, m) {
+          each(mirrorIdx(ink, m), function (r) {
+            theme.paintMirror(ctx, Tp, m, ink, r);
+          });
+        })(ink, m);
+      }
+      for (v = 0; v < 3; v++) {
+        (function (ink, v) {
+          each(floorIdx(ink, v), function (r) {
+            theme.paintFloor(ctx, Tp, v, ink, r);
+          });
+        })(ink, v);
+      }
+    }
+    for (v = 0; v < 3; v++) {
+      each(SMUDGE + v, function (r) {
+        paintSmudge(ctx, Tp, theme, r);
+      });
+    }
+    for (v = 0; v < 2; v++) {
+      (function (v) {
+        each(WINDG + v, function () {
+          theme.paintWind(ctx, Tp, v);
+        });
+      })(v);
+    }
+    return c;
+  }
+
+  /* ---------- kâğıt dokusu ve vinyet ---------- */
+
+  function buildPaper(size, dpr, theme) {
+    var c = document.createElement('canvas');
+    c.width = c.height = size;
+    var ctx = c.getContext('2d');
+    var r = Util.rng(4242);
+    var dk = theme.speckDark;
+    var lt = theme.speckLight;
+    var dark = theme.key === 'cave';
+    for (var i = 0; i < size * 1.6; i++) {
+      var x = r() * size;
+      var y = r() * size;
+      var a = (dark ? 0.02 : 0.03) + r() * (dark ? 0.06 : 0.07);
+      ctx.fillStyle = r() < 0.5 ? rgba(dk, a) : rgba(lt, a * (dark ? 1 : 1.6));
+      ctx.fillRect(x, y, dpr * (0.6 + r() * 1.4), dpr * (0.6 + r() * 1.4));
+    }
+    ctx.lineCap = 'round';
+    for (var f = 0; f < 70; f++) {
+      var fx = r() * size;
+      var fy = r() * size;
+      ctx.strokeStyle = rgba(dark ? lt : dk, (dark ? 0.025 : 0.03) + r() * 0.04);
+      ctx.lineWidth = dpr * 0.7;
+      ctx.beginPath();
+      ctx.moveTo(fx, fy);
+      ctx.quadraticCurveTo(fx + (r() - 0.5) * 24 * dpr, fy + (r() - 0.5) * 24 * dpr, fx + (r() - 0.5) * 40 * dpr, fy + (r() - 0.5) * 40 * dpr);
+      ctx.stroke();
+    }
+    return c;
+  }
+
+  function buildVignette(W, H, theme) {
+    var c = document.createElement('canvas');
+    c.width = W;
+    c.height = H;
+    var ctx = c.getContext('2d');
+    var m = /rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/.exec(theme.vignette);
+    var edge = theme.vignette;
+    var clear = 'rgba(' + m[1] + ',' + m[2] + ',' + m[3] + ',0)';
+    var start = theme.key === 'cave' ? 0.2 : 0.35;
+    var g = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * start, W / 2, H / 2, Math.hypot(W, H) * 0.56);
+    g.addColorStop(0, clear);
+    g.addColorStop(1, edge);
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+    // koyu ekranda kademe halkaları görünmesin: alfaya çok hafif gürültü (ışık sprite'ındakiyle aynı yöntem)
+    try {
+      var img = ctx.getImageData(0, 0, W, H);
+      var d = img.data;
+      var seed = 777;
+      for (var i = 3; i < d.length; i += 4) {
+        if (d[i] === 0) continue;
+        seed = (Math.imul(seed, 1664525) + 1013904223) | 0;
+        d[i] = Math.max(0, Math.min(255, d[i] + ((seed >>> 24) / 255 - 0.5) * 2.6));
+      }
+      ctx.putImageData(img, 0, 0);
+    } catch (e) {
+      /* canvas okunamıyorsa düz vinyet kalır */
+    }
+    return c;
   }
 
   /* ---------- Renderer ---------- */
@@ -3888,11 +5569,27 @@ svg {
     this.cam = { x: 0, y: 0 };
     this.t = 0;
     this.windFx = 0;
-    this.atlas = null;
-    this.atlasTp = 0;
+    this.atlases = {};
+    this.theme = S.Themes.forest;
     this.slowFrames = 0;
+    this.reduceMotion = !!(root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)').matches);
     this.resize();
   }
+
+  Renderer.prototype.themeAssets = function () {
+    var th = this.theme;
+    this.atlas = this.atlases[th.key] || (this.atlases[th.key] = buildAtlas(this.Tp, th));
+    this.paper = buildPaper(this.paperSize, this.dpr, th);
+    this.paperPat = this.ctx.createPattern(this.paper, 'repeat');
+    this.vignette = buildVignette(this.W, this.H, th);
+  };
+
+  Renderer.prototype.setTheme = function (key) {
+    var th = S.Themes[key] || S.Themes.forest;
+    if (th === this.theme) return;
+    this.theme = th;
+    this.themeAssets();
+  };
 
   Renderer.prototype.resize = function () {
     var w = Math.max(1, root.innerWidth);
@@ -3907,16 +5604,13 @@ svg {
     this.canvas.height = this.H;
     this.canvas.style.width = w + 'px';
     this.canvas.style.height = h + 'px';
-    this.T = Util.clamp(Math.round(Math.min(w, h) / 10.5), 30, 58);
-    this.Tp = Math.max(16, Math.round(this.T * dpr));
-    if (this.atlasTp !== this.Tp) {
-      this.atlas = buildAtlas(this.Tp);
-      this.atlasTp = this.Tp;
-    }
+    var T = Util.clamp(Math.round(Math.min(w, h) / 10.5), 30, 58);
+    var Tp = Math.max(16, Math.round(T * dpr));
+    if (Tp !== this.Tp) this.atlases = {}; // karo boyutu değişti: tüm temaların atlası yeniden çizilir
+    this.T = T;
+    this.Tp = Tp;
     this.paperSize = Math.round(240 * dpr);
-    this.paper = buildPaper(this.paperSize, dpr);
-    this.paperPat = this.ctx.createPattern(this.paper, 'repeat');
-    this.vignette = buildVignette(this.W, this.H);
+    this.themeAssets();
   };
 
   /** Çok yavaş cihazlarda çözünürlüğü otomatik düşür. */
@@ -3936,6 +5630,8 @@ svg {
   };
 
   Renderer.prototype.frame = function (world, dt) {
+    if (world.theme && world.theme !== this.theme.key) this.setTheme(world.theme);
+    var th = this.theme;
     var ctx = this.ctx;
     var W = this.W;
     var H = this.H;
@@ -3956,7 +5652,8 @@ svg {
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalAlpha = 1;
-    ctx.fillStyle = PAPER;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = th.paper;
     ctx.fillRect(0, 0, W, H);
 
     // kâğıt dokusu (haritayla birlikte kayar)
@@ -3981,7 +5678,7 @@ svg {
     var ty1 = Math.ceil(camY + (H - cy0) / Tp) + 1;
 
     // kareli defter çizgileri
-    ctx.strokeStyle = 'rgba(105,140,170,0.16)';
+    ctx.strokeStyle = th.grid;
     ctx.lineWidth = Math.max(1, Math.round(dpr * 0.7));
     ctx.beginPath();
     for (var gxi = tx0; gxi <= tx1; gxi++) {
@@ -3996,14 +5693,10 @@ svg {
     }
     ctx.stroke();
 
-    // fener: görüş alanını aydınlatır
+    // fener / aydınlık: görüş alanını vurgular
     var psx = cx0 + (p.x - camX) * Tp;
     var psy = cy0 + (p.y - camY) * Tp;
-    var gl = ctx.createRadialGradient(psx, psy, Tp * 0.4, psx, psy, Game.VIS_R * Tp);
-    gl.addColorStop(0, 'rgba(255,250,232,0.55)');
-    gl.addColorStop(1, 'rgba(255,250,232,0)');
-    ctx.fillStyle = gl;
-    ctx.fillRect(psx - Game.VIS_R * Tp, psy - Game.VIS_R * Tp, Game.VIS_R * Tp * 2, Game.VIS_R * Tp * 2);
+    if (!th.glowAbove) th.drawGlow(ctx, psx, psy, (world.visR || 3.6) * Tp * th.glowScale, t);
 
     // karolar
     var w = world.w;
@@ -4054,7 +5747,10 @@ svg {
     }
     ctx.globalAlpha = 1;
 
-    // iz (kurşun kalemle çizilmiş yürüyüş yolu)
+    // mağarada fener ışığı karoların üstüne biner: silinme lekeleri ışıkta siyah kir gibi görünmesin
+    if (th.glowAbove) th.drawGlow(ctx, psx, psy, (world.visR || 3.6) * Tp * th.glowScale, t);
+
+    // iz (kalemle/tebeşirle çizilmiş yürüyüş yolu)
     var trail = world.trail;
     if (trail.length > 1) {
       var buckets = [[], [], [], [], [], []];
@@ -4071,7 +5767,7 @@ svg {
       ctx.setLineDash([Tp * 0.1, Tp * 0.09]);
       for (var b = 0; b < 6; b++) {
         if (!buckets[b].length) continue;
-        ctx.strokeStyle = 'rgba(70,66,62,' + (0.12 + (b + 0.5) * 0.065) + ')';
+        ctx.strokeStyle = rgba(th.trail, 0.12 + (b + 0.5) * 0.065);
         ctx.beginPath();
         for (var bi = 0; bi < buckets[b].length; bi++) {
           var qq = buckets[b][bi];
@@ -4086,13 +5782,13 @@ svg {
     // nesneler (yalnızca haritada görünür olan hücrelerde)
     var visibleAt = function (cx, cy) {
       var j = cy * w + cx;
-      return dtype[j] === 1 ? Math.min(1, dalpha[j]) : 0;
+      return dtype[j] === 1 && !world.dghost[j] ? Math.min(1, dalpha[j]) : 0; // ayna hayaleti gerçek nesneyi göstermez
     };
     var door = world.maze.door;
     var da = visibleAt(door.x, door.y);
     if (da > 0.02) {
       ctx.globalAlpha = da;
-      drawDoor(ctx, gx(door.x), gy(door.y), Tp, world.hasKey, world.state === 'play' ? 0 : Math.min(1, world.exitT * 1.6), t);
+      th.drawDoor(ctx, gx(door.x), gy(door.y), Tp, world.hasKey, world.state === 'play' ? 0 : Math.min(1, world.exitT * 1.6), t);
       ctx.globalAlpha = 1;
     }
     if (!world.hasKey) {
@@ -4100,7 +5796,7 @@ svg {
       var ka = visibleAt(ky.x, ky.y);
       if (ka > 0.02) {
         ctx.globalAlpha = ka;
-        drawKey(ctx, gx(ky.x) + Tp / 2, gy(ky.y) + Tp / 2, Tp, t);
+        th.drawKey(ctx, gx(ky.x) + Tp / 2, gy(ky.y) + Tp / 2, Tp, t);
         ctx.globalAlpha = 1;
       }
     }
@@ -4108,9 +5804,17 @@ svg {
       var fl = world.flowers[fi];
       if (fl.taken) continue;
       var fa = visibleAt(fl.x, fl.y);
-      if (fa < 0.02) continue;
+      if (fa < 0.02) {
+        // mağarada mantarlar karanlıkta bile hafifçe parlar: yakındaysa ışığı seçilir
+        if (th.drawBeacon) {
+          var bd = Math.hypot(fl.x + 0.5 - p.x, fl.y + 0.5 - p.y);
+          var br = (world.visR || 3.6) * 2.3;
+          if (bd < br) th.drawBeacon(ctx, gx(fl.x) + Tp / 2, gy(fl.y) + Tp / 2, Tp, t, 1 - bd / br);
+        }
+        continue;
+      }
       ctx.globalAlpha = fa;
-      drawFlower(ctx, gx(fl.x) + Tp / 2, gy(fl.y) + Tp / 2, Tp, t);
+      th.drawPickup(ctx, gx(fl.x) + Tp / 2, gy(fl.y) + Tp / 2, Tp, t);
       ctx.globalAlpha = 1;
     }
     for (var si = 0; si < world.stones.length; si++) {
@@ -4119,16 +5823,16 @@ svg {
       var scy = gy(st.cy) + Tp / 2;
       var grow = Math.min(1, (world.t - st.born) * 5);
       ctx.globalAlpha = grow;
-      drawStone(ctx, scx, scy, Tp, st.type, t, st.born);
+      th.drawStone(ctx, scx, scy, Tp, st.type, t, st.born);
       if (st.type === 'sound') {
-        if (st.dir) drawArrow(ctx, scx, scy, Tp, st.dir, t);
-        if (st.atGoal) drawGoalMark(ctx, scx, scy, Tp, t);
+        if (st.dir) th.drawArrow(ctx, scx, scy, Tp, st.dir, t);
+        if (st.atGoal) th.drawGoalMark(ctx, scx, scy, Tp, t);
       }
       ctx.globalAlpha = 1;
     }
 
     // oyuncu
-    drawPlayer(ctx, psx, psy, Tp, p, t, world.state === 'play' ? 1 : Math.max(0, 1 - world.exitT * 0.9));
+    th.drawPlayer(ctx, psx, psy, Tp, p, t, world.state === 'play' ? 1 : Math.max(0, 1 - world.exitT * 0.9));
 
     // parçacıklar
     var parts = world.particles;
@@ -4139,7 +5843,7 @@ svg {
       var sy = cy0 + (pt.y - camY) * Tp;
       if (pt.kind === 'ring') {
         var rr = (0.35 + 2.7 * (1 - Math.pow(1 - u, 3))) * Tp;
-        ctx.strokeStyle = rgba(pt.color === 'sound' ? TEAL : INK, (1 - u) * 0.65);
+        ctx.strokeStyle = rgba(th.ringRGB(pt.color), (1 - u) * 0.7);
         ctx.lineWidth = Math.max(1.5, Tp * 0.06 * (1 - u));
         ctx.beginPath();
         ctx.arc(sx, sy, rr, 0, 6.3);
@@ -4162,22 +5866,12 @@ svg {
     }
     ctx.globalAlpha = 1;
 
-    // rüzgâr çizgileri (ekran uzayı)
+    // atmosfer: ateş böcekleri / toz
+    if (!this.reduceMotion) th.drawAmbient(ctx, W, H, t, dpr);
+
+    // rüzgâr / cereyan çizgileri (ekran uzayı)
     this.windFx += ((world.inWind ? 1 : 0) - this.windFx) * Math.min(1, dt * 3);
-    if (this.windFx > 0.02) {
-      ctx.strokeStyle = 'rgba(70,105,130,' + 0.26 * this.windFx + ')';
-      ctx.lineWidth = Math.max(1.2, dpr * 1.3);
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      for (var wi = 0; wi < 18; wi++) {
-        var wy = ((wi * 137.5) % 100) / 100 * H;
-        var len = (60 + (wi * 53) % 90) * dpr;
-        var wx = ((wi * 211 + t * (260 + (wi % 5) * 70) * dpr) % (W + len * 2)) - len;
-        ctx.moveTo(wx, wy);
-        ctx.quadraticCurveTo(wx + len * 0.5, wy - 6 * dpr, wx + len, wy + 2 * dpr);
-      }
-      ctx.stroke();
-    }
+    if (this.windFx > 0.02) th.drawWindFx(ctx, W, H, t, dpr, this.windFx);
 
     // vinyet
     ctx.drawImage(this.vignette, 0, 0);
@@ -4327,15 +6021,61 @@ svg {
     setScreen(prev);
   }
 
+  /* ---------- tema (orman / mağara) ---------- */
+
+  var THEME_COLOR = { forest: '#efe8ce', cave: '#1f232a' };
+
+  /** Sezon değişirken eski temanın rengi perde gibi örtülür, sonra yeni sahneye açılır. */
+  function seasonCurtain(prev) {
+    var c = $('#curtain');
+    if (!c) return;
+    c.style.transition = 'none';
+    c.style.background = THEME_COLOR[prev];
+    c.style.opacity = '1';
+    void c.offsetWidth;
+    root.requestAnimationFrame(function () {
+      c.style.transition = 'opacity 0.8s ease';
+      c.style.opacity = '0';
+    });
+  }
+
+  /** Tüm arayüzü, çizimi ve sesi seçili temaya geçirir. */
+  function applyTheme(key) {
+    key = THEME_COLOR[key] ? key : 'forest';
+    if (App.theme === key) return;
+    var prev = App.theme;
+    App.theme = key;
+    if (prev) seasonCurtain(prev);
+    document.documentElement.setAttribute('data-theme', key);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', THEME_COLOR[key]);
+    var tx = Levels.TEXT[key];
+    if (hud.chipFlower) {
+      hud.chipFlower.querySelector('use').setAttribute('href', '#i-' + tx.pickupIcon);
+      hud.chipFlower.title = tx.pickups;
+    }
+    if (hud.windLabel) hud.windLabel.textContent = tx.wind;
+    App.renderer.setTheme(key);
+    Audio.setTheme(key);
+  }
+
+  /** Oyuncunun kaldığı bölümün sezonu: ana menü ve demo bu temada açılır. */
+  function progressDef() {
+    return Levels.byId(Math.min(Save.data.unlocked, Levels.LIST.length));
+  }
+
   /* ---------- demo (ana menü arkasında kendi kendine gezen karakter) ---------- */
 
   var ai = { path: [], nextDrop: 6, born: 0 };
 
   function startDemo() {
     var seed = ((Date.now() / 1000) | 0) % 100000;
+    var theme = progressDef().theme;
+    applyTheme(theme);
     var def = {
       id: 'demo', name: 'Demo', w: 25, h: 25, seed: seed, stones: 3, sound: 0, flowers: 0,
       wind: 2, mirrors: 3, mem: 15, braid: 0.1, straight: 0.5, branch: 0.3,
+      theme: theme, vision: theme === 'cave' ? 3.3 : 0,
     };
     var w = new Game.World(def, { demo: true });
     w.maze.key = { x: -9, y: -9 }; // demoda anahtar alınmasın
@@ -4389,6 +6129,7 @@ svg {
   function startLevel(def, skipIntro) {
     App.def = def;
     App.stack = [];
+    applyTheme(def.theme);
     var w = new Game.World(def);
     w.onEvent = onEvent;
     App.world = w;
@@ -4419,7 +6160,17 @@ svg {
   }
 
   function fillIntro(def) {
-    $('#intro-kicker').textContent = def.daily ? 'Günlük · ' + def.dateKey : 'Bölüm ' + def.id;
+    var season = Levels.seasonOf(def);
+    $('#intro-kicker').textContent = def.daily ? 'Günlük · ' + def.dateKey + ' · ' + season.name : season.title + ' · Bölüm ' + def.id;
+    // sezonun ilk bölümünde sezon başlığı ve hikâyesi
+    var sb = $('#intro-season');
+    sb.hidden = !def.seasonStart;
+    if (def.seasonStart) {
+      sb.querySelector('use').setAttribute('href', '#art-' + season.key);
+      $('#intro-season-kicker').textContent = season.title;
+      $('#intro-season-name').textContent = season.name;
+      $('#intro-season-story').textContent = season.story;
+    }
     $('#intro-name').textContent = def.name;
     $('#intro-sub').textContent = def.daily ? 'Bugünün labirenti herkes için aynı.' : def.sub;
     var nb = $('#intro-new');
@@ -4463,6 +6214,10 @@ svg {
       hint(isTouch() ? 'Yürümek için ekranda parmağını sürükle.' : 'WASD veya yön tuşlarıyla yürü.', 7000);
     }
     updateHud(w, true);
+    // yıldız hesabındaki par süresini oyun sırasında hazırla: bitiş ekranında takılma olmasın
+    setTimeout(function () {
+      if (App.world === w) Game.parTime(w.maze);
+    }, 2500);
   }
 
   function pause() {
@@ -4473,6 +6228,7 @@ svg {
     hud.btnStone.classList.remove('pulse');
     Audio.setWind(0);
     unlockScreen();
+    $('#btn-hint').hidden = App.world.hasSoundType; // ses taşı zaten varsa ipucu düğmesi gerekmez
     setScreen('pause');
   }
 
@@ -4484,6 +6240,14 @@ svg {
     Input.setEnabled(true);
     lockScreen();
     if (App.world.inWind && App.world.state === 'play') Audio.setWind(1);
+  }
+
+  /** Anahtarı uzun süre bulamayan oyuncuya, duraklat menüsündeki ipucunu bir kez hatırlat. */
+  function nudgeStuck(w) {
+    if (w.stuckShown || w.hasKey || w.hasSoundType) return;
+    if (w.time < Math.min(240, Math.max(120, 2 * Game.parTime(w.maze)))) return;
+    w.stuckShown = true;
+    toast('Takıldın mı? Duraklat menüsünde ipucu var.', 'teal', 5200);
   }
 
   function exitToMenu() {
@@ -4582,7 +6346,9 @@ svg {
         Audio.setWind(data ? 1 : 0);
         break;
       case 'mirror':
-        if (Save.markSeen('mirror')) toast('Ayna duvar! Haritana sahte izler bırakabilir.', 'teal', 3200);
+        if (Save.markSeen('mirror-' + App.theme)) {
+          toast((App.theme === 'cave' ? 'Kristal duvar! ' : 'Göl! ') + 'Yansıması haritana sahte izler bırakabilir.', 'teal', 3400);
+        }
         break;
       case 'phantom':
         Audio.sfx('mirror');
@@ -4606,6 +6372,7 @@ svg {
     vib([40, 60, 40, 60, 140]);
     var time = w.time;
     var stars = Game.stars(w.maze, time);
+    if (w.hinted) stars = Math.min(stars, 2); // ipucu alınan bölümde en çok 2 yıldız
     var res;
     try {
       res = Save.record(def, time, stars, Math.round(w.steps));
@@ -4614,7 +6381,7 @@ svg {
     }
     App.mode = 'win';
 
-    $('#win-kicker').textContent = def.daily ? 'Günlük Labirent' : 'Bölüm ' + def.id + ' · ' + def.name;
+    $('#win-kicker').textContent = def.daily ? 'Günlük Labirent' : Levels.seasonOf(def).title + ' · Bölüm ' + def.id + ' · ' + def.name;
     $('#win-title').textContent = stars === 3 ? 'Kusursuz hafıza!' : stars === 2 ? 'Çıkışı buldun!' : 'Çıktın!';
     $$('#win-stars svg').forEach(function (s, i) {
       s.classList.toggle('on', i < stars);
@@ -4626,12 +6393,11 @@ svg {
     $('#win-best').textContent = Util.fmtTime(res.best.time);
 
     var nx = nextDef();
-    var finished = !def.daily && !nx;
     var ep = $('#win-epilogue');
-    ep.hidden = !finished;
-    if (finished) ep.textContent = 'Silik’ten çıktın. Hatırladıkların seni buraya getirdi; unuttukların ise zaten yolun bir parçasıydı.';
-    $('#btn-next').textContent = nx ? 'Sonraki Bölüm' : 'Bölümler';
-    $('#btn-win-levels').hidden = !nx && !def.daily; // son bölümde aynı düğme iki kez görünmesin
+    ep.hidden = !def.epilogue;
+    if (def.epilogue) ep.textContent = def.epilogue;
+    $('#btn-next').textContent = nx ? (nx.seasonStart ? nx.season + '. Sezon’a Geç' : 'Sonraki Bölüm') : 'Bölümler';
+    $('#btn-win-levels').hidden = !nx; // son bölümde / günlükte aynı düğme iki kez görünmesin
     $('#btn-share').hidden = !(navigator.share || (navigator.clipboard && navigator.clipboard.writeText));
     setScreen('win');
   }
@@ -4701,13 +6467,17 @@ svg {
   }
 
   function buildLevels() {
-    var grid = $('#level-grid');
-    grid.innerHTML = '';
-    var unlocked = Save.data.unlocked;
-    var total = 0;
+    var wrap = $('#level-grid');
+    wrap.innerHTML = '';
+    var unlocked = Save.data.settings.openAll || App.forceOpen ? Levels.LIST.length : Save.data.unlocked;
+    var allStars = 0;
 
+    // günlük labirent
     var dKey = Util.todayKey();
     var dRec = Save.data.daily[dKey];
+    var dGrid = document.createElement('div');
+    dGrid.className = 'grid';
+    dGrid.style.marginBottom = '18px';
     var d = document.createElement('button');
     d.className = 'lvl daily';
     d.innerHTML =
@@ -4715,32 +6485,68 @@ svg {
     d.addEventListener('click', function () {
       startLevel(Levels.daily(dKey));
     });
-    grid.appendChild(d);
+    dGrid.appendChild(d);
+    wrap.appendChild(dGrid);
 
-    Levels.LIST.forEach(function (def) {
-      var rec = Save.data.best[def.id];
-      var locked = def.id > unlocked;
-      if (rec) total += rec.stars;
-      var b = document.createElement('button');
-      b.className = 'lvl' + (locked ? ' locked' : '');
-      b.setAttribute('aria-label', 'Bölüm ' + def.id + ' ' + def.name + (locked ? ' (kilitli)' : ''));
-      b.innerHTML =
-        '<span class="num">' + def.id + '</span><span class="nm">' + def.name + '</span>' +
-        '<span class="st">' + starsHtml(rec ? rec.stars : 0) + '</span>' +
-        (locked ? '<svg class="lock"><use href="#i-lock"/></svg>' : '');
-      if (!locked) {
-        b.addEventListener('click', function () {
-          startLevel(def);
-        });
+    // sezon panelleri: her biri kendi paletiyle (orman açık, mağara koyu)
+    Levels.SEASONS.forEach(function (se) {
+      var sec = document.createElement('section');
+      var seasonLocked = se.first > unlocked;
+      sec.className = 'season' + (seasonLocked ? ' locked' : '');
+      sec.setAttribute('data-theme', se.theme);
+      var seStars = 0;
+      var cards = [];
+      Levels.LIST.forEach(function (def) {
+        if (def.season !== se.id) return;
+        var rec = Save.data.best[def.id];
+        var locked = def.id > unlocked;
+        if (rec) seStars += rec.stars;
+        var b = document.createElement('button');
+        b.className = 'lvl' + (locked ? ' locked' : '');
+        b.setAttribute('aria-label', se.title + ' Bölüm ' + def.id + ' ' + def.name + (locked ? ' (kilitli)' : ''));
+        b.innerHTML =
+          '<span class="num">' + def.id + '</span><span class="nm">' + def.name + '</span>' +
+          '<span class="st">' + starsHtml(rec ? rec.stars : 0) + '</span>' +
+          (locked ? '<svg class="lock"><use href="#i-lock"/></svg>' : '');
+        if (!locked) {
+          b.addEventListener('click', function () {
+            startLevel(def);
+          });
+        }
+        cards.push(b);
+      });
+      allStars += seStars;
+      var head = document.createElement('div');
+      head.className = 'season-head';
+      head.innerHTML =
+        '<svg class="art"><use href="#art-' + se.key + '"/></svg>' +
+        '<div><h3>' + se.title + ' · ' + se.name + '</h3><p>' + se.tagline + '</p></div>' +
+        '<span class="prog">' + seStars + ' / ' + Levels.PER_SEASON * 3 + ' ★</span>';
+      sec.appendChild(head);
+      if (seasonLocked) {
+        var lk = document.createElement('p');
+        lk.className = 'season-lock';
+        lk.innerHTML = '<svg><use href="#i-lock"/></svg><span>' + (se.id > 1 ? Levels.SEASONS[se.id - 2].name + ' sezonunu bitirince açılır.' : '') + '</span>';
+        sec.appendChild(lk);
       }
-      grid.appendChild(b);
+      var grid = document.createElement('div');
+      grid.className = 'grid';
+      cards.forEach(function (c) {
+        grid.appendChild(c);
+      });
+      sec.appendChild(grid);
+      wrap.appendChild(sec);
     });
-    $('#levels-note').textContent = total + ' / ' + Levels.LIST.length * 3 + ' ★';
+    $('#levels-note').textContent = allStars + ' / ' + Levels.LIST.length * 3 + ' ★';
   }
 
   function syncTitle() {
     var u = Save.data.unlocked;
-    $('#btn-play').textContent = u > 1 ? 'Devam Et · Bölüm ' + Math.min(u, Levels.LIST.length) : 'Oyna';
+    var cur = progressDef();
+    var se = Levels.seasonOf(cur);
+    $('#btn-play').textContent = u > Levels.LIST.length ? 'Tekrar Oyna · Bölüm ' + cur.id : u > 1 ? 'Devam Et · Bölüm ' + cur.id : 'Oyna';
+    $('#title-season').querySelector('use').setAttribute('href', '#art-' + se.key);
+    $('#title-season').querySelector('span').textContent = se.title + ' · ' + se.name;
   }
 
   function syncSettings() {
@@ -4748,6 +6554,7 @@ svg {
     $('#set-sfx').checked = s.sfx;
     $('#set-music').checked = s.music;
     $('#set-vib').checked = s.vib;
+    $('#set-open').checked = s.openAll;
     $('#row-vib').hidden = !(navigator.vibrate && root.matchMedia && root.matchMedia('(pointer: coarse)').matches);
     $('#set-fs').hidden = !(document.fullscreenEnabled || document.webkitFullscreenEnabled);
     $('#set-install').hidden = !installEvent;
@@ -4772,7 +6579,7 @@ svg {
     hud = {
       root: $('#hud'), toast: $('#toast'), hint: $('#hint'), time: $('#hud-time'), num: $('#hud-num'), name: $('#hud-name'),
       slotsMemory: $('#slots-memory'), slotsSound: $('#slots-sound'), chipKey: $('#chip-key'), chipFlower: $('#chip-flower'),
-      chipWind: $('#chip-wind'), flowerCount: $('#flower-count'), btnStone: $('#btn-stone'), btnSwitch: $('#btn-switch'),
+      chipWind: $('#chip-wind'), windLabel: $('#wind-label'), flowerCount: $('#flower-count'), btnStone: $('#btn-stone'), btnSwitch: $('#btn-switch'),
       stoneLbl: $('#stone-lbl'), stoneCount: $('#stone-count'),
     };
 
@@ -4831,6 +6638,14 @@ svg {
     $('#btn-start').addEventListener('click', begin);
     $('#btn-intro-back').addEventListener('click', openLevels);
     $('#btn-resume').addEventListener('click', resume);
+    $('#btn-hint').addEventListener('click', function () {
+      var w = App.world;
+      if (!w || !w.grantHint()) return;
+      resume();
+      Audio.sfx('whisper');
+      hint('Ses taşı hazır. Taş düğmesiyle bırak, oku izle. Bu bölümde en çok ★★.', 8000);
+      updateHud(w, true);
+    });
     $('#btn-restart').addEventListener('click', function () {
       startLevel(App.def, true);
     });
@@ -4851,7 +6666,7 @@ svg {
     $('#btn-share').addEventListener('click', function () {
       var d = App.def;
       var st = $$('#win-stars svg.on').length;
-      var text = 'Silik · ' + (d.daily ? 'Günlük Labirent ' + d.dateKey : 'Bölüm ' + d.id + ' ' + d.name) + ' ' + $('#win-time').textContent + ' ' + '★'.repeat(st) + '☆'.repeat(3 - st);
+      var text = 'Silik · ' + (d.daily ? 'Günlük Labirent ' + d.dateKey : Levels.seasonOf(d).title + ' Bölüm ' + d.id + ' ' + d.name) + ' ' + $('#win-time').textContent + ' ' + '★'.repeat(st) + '☆'.repeat(3 - st);
       var url = /^https?:$/.test(location.protocol) ? location.href : ''; // file:// yolu paylaşılmaz
       if (navigator.share) {
         navigator.share(url ? { title: 'Silik', text: text, url: url } : { title: 'Silik', text: text }).catch(function () {});
@@ -4882,6 +6697,11 @@ svg {
       Save.save();
       vib(30);
     });
+    $('#set-open').addEventListener('change', function (e) {
+      Save.data.settings.openAll = e.target.checked;
+      Save.save();
+      toast(e.target.checked ? 'Tüm bölümler açık' : 'Bölümler sırayla açılır', '', 1400);
+    });
     $('#set-fs').addEventListener('click', function () {
       var d = document;
       if (d.fullscreenElement || d.webkitFullscreenElement) (d.exitFullscreen || d.webkitExitFullscreen).call(d);
@@ -4901,6 +6721,9 @@ svg {
         b.dataset.armed = '';
         b.querySelector('span').textContent = 'İlerlemeyi sıfırla';
         toast('İlerleme sıfırlandı', 'warn', 1600);
+        // duraklatılmış bölümün içinden sıfırlanırsa oyun menüye döner (demo dünyası oynanan bölümün yerini almasın)
+        if (App.mode === 'menu') startDemo();
+        else exitToMenu();
         syncTitle();
       } else {
         b.dataset.armed = '1';
@@ -4938,7 +6761,7 @@ svg {
 
     // Enter: ekrandaki ana düğmeye bas
     root.addEventListener('keydown', function (e) {
-      if (e.key !== 'Enter' || document.activeElement !== document.body) return;
+      if (e.key !== 'Enter' || e.repeat || document.activeElement !== document.body) return;
       var b = App.screen && $('#s-' + App.screen + ' .btn.primary');
       if (b) {
         e.preventDefault();
@@ -4969,6 +6792,9 @@ svg {
       installEvent = e;
     });
 
+    // ?unlock (ya da #unlock) ile açılırsa bölümlerin hepsi listede açık gelir (deneme)
+    if (/[?&#]unlock\b/.test(String(root.location.search) + String(root.location.hash))) App.forceOpen = true; // yalnızca bu oturum
+
     applySettings();
     startDemo();
     setScreen('title');
@@ -4990,7 +6816,10 @@ svg {
           rem -= step;
           if (App.mode !== 'play' || App.world !== w) break;
         }
-        if (App.mode === 'play' && App.world === w) updateHud(w, false);
+        if (App.mode === 'play' && App.world === w) {
+          updateHud(w, false);
+          nudgeStuck(w);
+        }
       } else if (App.mode === 'menu') {
         var dv = demoVec(w);
         if (App.world !== w) return; // demo yeniden başladı; eski dünyayı çizme

@@ -11,7 +11,25 @@
   var musicTimer = null;
   var drone = null;
   var wantMusic = false;
-  var NOTES = [220, 261.63, 293.66, 329.63, 392, 440, 523.25];
+  var windFilter = null;
+  var ambTimer = null;
+  var theme = 'forest';
+
+  /* Sezon başına ses kimliği: orman = aydınlık gam, kuş cıvıltısı, hışırtı; mağara = alçak gam, damla yankısı, uğultu */
+  var THEME = {
+    forest: {
+      notes: [261.63, 293.66, 329.63, 392, 440, 523.25, 587.33],
+      drone: [130.81, 196, 0], droneGain: 0.012, windF: 900, windQ: 0.55, windGain: 0.15,
+      step: { f: 2600, spread: 1400, q: 1.3, dur: 0.045, gain: 0.032 },
+      noteEvery: [2200, 3800], ambEvery: [6000, 13000], wet: 0.6,
+    },
+    cave: {
+      notes: [110, 130.81, 146.83, 164.81, 196, 220, 261.63],
+      drone: [55, 82.41, 110], droneGain: 0.022, windF: 280, windQ: 1.1, windGain: 0.2,
+      step: { f: 650, spread: 350, q: 3.5, dur: 0.075, gain: 0.05 },
+      noteEvery: [3200, 5200], ambEvery: [3500, 9000], wet: 1.2,
+    },
+  };
 
   function ensure() {
     if (ctx) return ctx;
@@ -58,8 +76,9 @@
     src.loop = true;
     var bp = ctx.createBiquadFilter();
     bp.type = 'bandpass';
-    bp.frequency.value = 520;
-    bp.Q.value = 0.7;
+    bp.frequency.value = THEME[theme].windF;
+    bp.Q.value = THEME[theme].windQ;
+    windFilter = bp;
     windGain = ctx.createGain();
     windGain.gain.value = 0;
     src.connect(bp);
@@ -137,7 +156,24 @@
 
   var SFX = {
     step: function () {
-      noise({ f: 1700 + Math.random() * 900, q: 1.2, dur: 0.05, gain: 0.035 });
+      var st = THEME[theme].step;
+      noise({ f: st.f + Math.random() * st.spread, q: st.q, dur: st.dur, gain: st.gain, wet: theme === 'cave' ? 0.5 : 0 });
+      if (theme === 'cave') tone({ f: 150 + Math.random() * 30, to: 90, dur: 0.06, gain: 0.04, wet: 0.7 });
+    },
+    // orman: kuş cıvıltısı (kısa, yükselip alçalan tiz notalar)
+    chirp: function () {
+      var base = 2300 + Math.random() * 1500;
+      var n = 2 + Math.floor(Math.random() * 3);
+      for (var i = 0; i < n; i++) {
+        tone({ f: base * (1 + Math.random() * 0.25), to: base * (1.25 + Math.random() * 0.3), dur: 0.07 + Math.random() * 0.04, gain: 0.022, at: i * 0.11, wet: 0.6 });
+      }
+    },
+    // mağara: tavandan düşen damla ve yankısı
+    drip: function () {
+      var f = 900 + Math.random() * 700;
+      tone({ f: f, to: f * 0.45, dur: 0.16, gain: 0.05, wet: 1.4 });
+      tone({ f: f * 0.8, to: f * 0.38, dur: 0.2, gain: 0.02, at: 0.32, wet: 1.6 });
+      tone({ f: f * 0.7, to: f * 0.33, dur: 0.22, gain: 0.01, at: 0.62, wet: 1.8 });
     },
     drop: function () {
       tone({ f: 190, to: 62, dur: 0.22, gain: 0.32, type: 'sine' });
@@ -198,42 +234,83 @@
   /** v: 0..1 — rüzgârlı bölgede yükselir, dışarıda kısılır. */
   function setWind(v) {
     if (!ctx || !windGain) return;
-    windGain.gain.setTargetAtTime(sfxOn ? v * 0.16 : 0, ctx.currentTime, 0.4);
+    windGain.gain.setTargetAtTime(sfxOn ? v * THEME[theme].windGain : 0, ctx.currentTime, 0.4);
   }
 
   function scheduleNote() {
     if (!ctx || !musicOn || !wantMusic) return;
+    var T = THEME[theme];
     if (ctx.state === 'running') {
-      var f = NOTES[Math.floor(Math.random() * NOTES.length)];
-      tone({ f: f, dur: 4.5, gain: 0.05, attack: 0.9, dest: musicBus, wet: 1, type: 'sine' });
-      if (Math.random() < 0.3) tone({ f: f * 2, dur: 3, gain: 0.018, attack: 1.2, dest: musicBus, wet: 1, type: 'triangle' });
+      var f = T.notes[Math.floor(Math.random() * T.notes.length)];
+      tone({ f: f, dur: 4.5, gain: theme === 'cave' ? 0.055 : 0.05, attack: 0.9, dest: musicBus, wet: T.wet, type: theme === 'cave' ? 'triangle' : 'sine' });
+      if (Math.random() < 0.3) tone({ f: f * 2, dur: 3, gain: 0.018, attack: 1.2, dest: musicBus, wet: T.wet, type: 'triangle' });
     }
-    musicTimer = setTimeout(scheduleNote, 2200 + Math.random() * 3800);
+    musicTimer = setTimeout(scheduleNote, T.noteEvery[0] + Math.random() * (T.noteEvery[1] - T.noteEvery[0]));
+  }
+
+  /** Ortam sesleri (kuş / damla): müzik açıkken ara sıra, rastgele aralıklarla. */
+  function scheduleAmbient() {
+    if (!ctx || !musicOn || !wantMusic) return;
+    var T = THEME[theme];
+    if (ctx.state === 'running' && sfxOn) {
+      try {
+        SFX[theme === 'cave' ? 'drip' : 'chirp']();
+      } catch (e) {
+        /* ses asla oyunu bozmasın */
+      }
+    }
+    ambTimer = setTimeout(scheduleAmbient, T.ambEvery[0] + Math.random() * (T.ambEvery[1] - T.ambEvery[0]));
+  }
+
+  function tuneDrone() {
+    if (!drone) return;
+    var T = THEME[theme];
+    drone.forEach(function (d, i) {
+      var f = T.drone[i];
+      d.g.gain.setTargetAtTime(f ? T.droneGain : 0, ctx.currentTime, 1.2);
+      if (f) d.o.frequency.setTargetAtTime(f, ctx.currentTime, 1.2);
+    });
   }
 
   function startMusic() {
     wantMusic = true;
     if (!ctx || !musicOn || musicTimer) return;
     if (!drone) {
-      drone = [110, 164.81].map(function (f) {
+      drone = [0, 1, 2].map(function () {
         var o = ctx.createOscillator();
         var g = ctx.createGain();
         o.type = 'sine';
-        o.frequency.value = f;
-        g.gain.value = 0.014;
+        o.frequency.value = 110;
+        g.gain.value = 0;
         o.connect(g);
         g.connect(musicBus);
         o.start();
-        return g;
+        return { o: o, g: g };
       });
+      tuneDrone();
     }
     scheduleNote();
+    clearTimeout(ambTimer);
+    ambTimer = setTimeout(scheduleAmbient, 2500 + Math.random() * 3000);
+  }
+
+  /** Sezon teması: müzik gamı, drone, rüzgâr rengi ve adım sesi değişir. */
+  function setTheme(name) {
+    if (!THEME[name] || name === theme) return;
+    theme = name;
+    if (ctx && windFilter) {
+      windFilter.frequency.setTargetAtTime(THEME[theme].windF, ctx.currentTime, 0.3);
+      windFilter.Q.setTargetAtTime(THEME[theme].windQ, ctx.currentTime, 0.3);
+    }
+    tuneDrone();
   }
 
   function stopMusic() {
     wantMusic = false;
     clearTimeout(musicTimer);
+    clearTimeout(ambTimer);
     musicTimer = null;
+    ambTimer = null;
   }
 
   function setMusic(on) {
@@ -247,7 +324,9 @@
       }
     } else {
       clearTimeout(musicTimer);
+      clearTimeout(ambTimer);
       musicTimer = null;
+      ambTimer = null;
     }
   }
 
@@ -263,6 +342,7 @@
     startMusic: startMusic,
     stopMusic: stopMusic,
     setMusic: setMusic,
+    setTheme: setTheme,
     setSfx: setSfx,
     suspend: function () {
       if (ctx && ctx.state === 'running') ctx.suspend();

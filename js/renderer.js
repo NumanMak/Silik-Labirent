@@ -1,26 +1,19 @@
-/* Silik — çizim: kâğıt üzerine kurşun kalem. Keşfedilen yerler kalemle çizilir, silinirken
- * silgi izi gibi soluklaşır; hatıra taşlarının kilitlediği alan mürekkeple çizilmiş gibi koyu kalır.
+/* Silik — çizim motoru (tema bağımsız).
  *
- * Karo görselleri (duvar / zemin / ayna / silgi / rüzgâr) açılışta ve ekran boyutu değişince
- * bir atlas tuvaline önceden çizilir; kare başına yalnızca drawImage çağrılır.
+ * Görünüm, seçili temadan (Silik.Themes.forest / .cave) gelir: kâğıt, kalem, mürekkep renkleri,
+ * duvar/zemin/ayna karoları, anahtar-kapı-toplanabilir-taş-oyuncu çizimleri, fener ışığı, atmosfer.
+ * Bu dosya kamerayı, karo döngüsünü, izi, parçacıkları ve atlası yönetir.
+ *
+ * Karo görselleri (duvar / zemin / ayna / silgi / rüzgâr) tema başına açılışta ve ekran boyutu
+ * değişince bir atlas tuvaline önceden çizilir; kare başına yalnızca drawImage çağrılır.
  */
 (function (root) {
   'use strict';
   var S = (root.Silik = root.Silik || {});
   var Util = S.Util;
-  var Game = S.Game;
-
-  var PAPER = '#f0e8d4';
-  var PENCIL = [58, 54, 50];
-  var INK = [24, 36, 76];
-  var TEAL = [47, 127, 134];
-
-  function rgba(c, a) {
-    return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')';
-  }
-  function hash2(x, y) {
-    return ((Math.imul(x + 1, 73856093) ^ Math.imul(y + 1, 19349663)) >>> 0) % 9973;
-  }
+  var K = S.ThemeKit;
+  var rgba = K.rgba;
+  var hash2 = K.hash2;
 
   /* ---------- atlas ---------- */
 
@@ -38,133 +31,9 @@
   var SMUDGE = 102;
   var WINDG = 105;
 
-  function wobble(ctx, x0, y0, x1, y1, rand, amp, segs) {
-    ctx.beginPath();
-    ctx.moveTo(x0, y0);
-    for (var s = 1; s < segs; s++) {
-      var t = s / segs;
-      ctx.lineTo(x0 + (x1 - x0) * t + (rand() - 0.5) * amp, y0 + (y1 - y0) * t + (rand() - 0.5) * amp);
-    }
-    ctx.lineTo(x1, y1);
-    ctx.stroke();
-  }
-
-  function edges(ctx, T, mask, rand, color, lw, alpha) {
-    var i = lw * 0.55;
+  function paintSmudge(ctx, T, theme, rand) {
     ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    for (var pass = 0; pass < 2; pass++) {
-      ctx.strokeStyle = rgba(color, pass ? alpha * 0.5 : alpha);
-      ctx.lineWidth = pass ? lw * 0.6 : lw;
-      var off = pass ? lw * 0.5 : 0;
-      var amp = T * 0.025;
-      if (mask & 1) wobble(ctx, 0, i + off, T, i + off, rand, amp, 4);
-      if (mask & 2) wobble(ctx, T - i - off, 0, T - i - off, T, rand, amp, 4);
-      if (mask & 4) wobble(ctx, 0, T - i - off, T, T - i - off, rand, amp, 4);
-      if (mask & 8) wobble(ctx, i + off, 0, i + off, T, rand, amp, 4);
-    }
-  }
-
-  function paintWall(ctx, T, mask, v, ink, mirror, rand) {
-    var col = ink ? INK : PENCIL;
-    var lw = Math.max(1, T * 0.03);
-    if (mirror) {
-      ctx.fillStyle = 'rgba(86,140,156,' + (ink ? 0.3 : 0.2) + ')';
-      ctx.fillRect(0, 0, T, T);
-      // ince tarama
-      ctx.lineWidth = lw;
-      ctx.strokeStyle = rgba(TEAL, 0.28);
-      for (var k = -T; k < T * 2; k += T / 6) {
-        ctx.beginPath();
-        ctx.moveTo(k, T);
-        ctx.lineTo(k + T, 0);
-        ctx.stroke();
-      }
-      // parıltı
-      ctx.lineCap = 'round';
-      var glints = [
-        [0.18, 0.5, 0.95],
-        [0.36, 0.28, 0.7],
-        [0.5, 0.2, 0.5],
-      ];
-      glints.forEach(function (g, gi) {
-        ctx.strokeStyle = 'rgba(255,255,255,' + g[2] + ')';
-        ctx.lineWidth = T * (gi === 0 ? 0.1 : 0.05);
-        ctx.beginPath();
-        ctx.moveTo(T * g[0], T * (g[0] + g[1] * 0.5 + 0.35));
-        ctx.lineTo(T * (g[0] + g[1] * 0.6), T * (g[0] + 0.12));
-        ctx.stroke();
-      });
-      // yıldız
-      ctx.fillStyle = 'rgba(255,255,255,0.95)';
-      var sx = T * 0.7;
-      var sy = T * 0.3;
-      var r = T * 0.09;
-      ctx.beginPath();
-      ctx.moveTo(sx, sy - r);
-      ctx.quadraticCurveTo(sx, sy, sx + r, sy);
-      ctx.quadraticCurveTo(sx, sy, sx, sy + r);
-      ctx.quadraticCurveTo(sx, sy, sx - r, sy);
-      ctx.quadraticCurveTo(sx, sy, sx, sy - r);
-      ctx.fill();
-      // çerçeve: her zaman 4 kenar
-      edges(ctx, T, 15, rand, TEAL, lw * 2.1, 0.9);
-      return;
-    }
-    ctx.fillStyle = rgba(col, ink ? 0.2 : 0.12);
-    ctx.fillRect(0, 0, T, T);
-    // çapraz tarama: komşu karolarla kesintisiz devam eder
-    var sp = T / 6;
-    ctx.lineCap = 'round';
-    ctx.lineWidth = lw;
-    ctx.strokeStyle = rgba(col, ink ? 0.55 : 0.4);
-    for (var h = -T; h < T * 2; h += sp) {
-      var j = (rand() - 0.5) * T * 0.02;
-      ctx.beginPath();
-      ctx.moveTo(h + j, T);
-      ctx.lineTo(h + T + j, 0);
-      ctx.stroke();
-    }
-    if (v === 1) {
-      ctx.strokeStyle = rgba(col, 0.16);
-      for (var q = -T; q < T * 2; q += sp * 2) {
-        ctx.beginPath();
-        ctx.moveTo(q, 0);
-        ctx.lineTo(q + T, T);
-        ctx.stroke();
-      }
-    }
-    edges(ctx, T, mask, rand, col, Math.max(1.4, T * 0.062), ink ? 0.95 : 0.8);
-  }
-
-  function paintFloor(ctx, T, v, ink, rand) {
-    ctx.fillStyle = ink ? rgba(INK, 0.1) : 'rgba(150,125,85,0.085)';
-    ctx.fillRect(0, 0, T, T);
-    var col = ink ? INK : PENCIL;
-    ctx.lineCap = 'round';
-    ctx.lineWidth = Math.max(1, T * 0.025);
-    ctx.strokeStyle = rgba(col, ink ? 0.16 : 0.1);
-    for (var s = 0; s < 2 + v; s++) {
-      var x = T * (0.15 + rand() * 0.6);
-      var y = T * (0.15 + rand() * 0.6);
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.quadraticCurveTo(x + T * 0.12, y - T * 0.08, x + T * (0.12 + rand() * 0.12), y + T * 0.05);
-      ctx.stroke();
-    }
-    if (ink) {
-      ctx.fillStyle = rgba(INK, 0.22);
-      for (var d = 0; d < 4; d++) {
-        ctx.beginPath();
-        ctx.arc(T * (0.15 + rand() * 0.7), T * (0.15 + rand() * 0.7), Math.max(0.8, T * 0.012), 0, 6.3);
-        ctx.fill();
-      }
-    }
-  }
-
-  function paintSmudge(ctx, T, v, rand) {
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = 'rgba(240,232,212,0.95)';
+    ctx.strokeStyle = theme.smudge;
     for (var s = 0; s < 3; s++) {
       ctx.lineWidth = T * (0.22 + rand() * 0.14);
       var x = T * (0.1 + rand() * 0.5);
@@ -176,22 +45,7 @@
     }
   }
 
-  function paintWindGlyph(ctx, T, v) {
-    ctx.strokeStyle = 'rgba(70,105,130,0.6)';
-    ctx.lineWidth = Math.max(1.2, T * 0.045);
-    ctx.lineCap = 'round';
-    var y0 = T * (v ? 0.62 : 0.4);
-    for (var l = 0; l < 2; l++) {
-      var y = y0 + l * T * 0.17 * (v ? -1 : 1);
-      ctx.beginPath();
-      ctx.moveTo(T * 0.15, y);
-      ctx.bezierCurveTo(T * 0.3, y - T * 0.14, T * 0.45, y + T * 0.14, T * 0.6, y);
-      ctx.bezierCurveTo(T * 0.7, y - T * 0.08, T * 0.8, y - T * 0.02, T * 0.85, y - T * 0.06);
-      ctx.stroke();
-    }
-  }
-
-  function buildAtlas(Tp) {
+  function buildAtlas(Tp, theme) {
     var rows = Math.ceil(N_SPRITES / COLS);
     var c = document.createElement('canvas');
     c.width = COLS * Tp;
@@ -203,7 +57,8 @@
       ctx.beginPath();
       ctx.rect(0, 0, Tp, Tp);
       ctx.clip();
-      fn(Util.rng(i * 7919 + 13));
+      // her sprite için kalıcı bir tohum: tema değişse de aynı görünür
+      fn(Util.rng(i * 7919 + 13 + (theme.key === 'cave' ? 5000 : 0)));
       ctx.restore();
     }
     var ink, v, m;
@@ -212,7 +67,7 @@
         for (m = 0; m < 16; m++) {
           (function (ink, v, m) {
             each(wallIdx(ink, v, m), function (r) {
-              paintWall(ctx, Tp, m, v, ink, false, r);
+              theme.paintWall(ctx, Tp, m, v, ink, r);
             });
           })(ink, v, m);
         }
@@ -220,29 +75,27 @@
       for (m = 0; m < 16; m++) {
         (function (ink, m) {
           each(mirrorIdx(ink, m), function (r) {
-            paintWall(ctx, Tp, m, 0, ink, true, r);
+            theme.paintMirror(ctx, Tp, m, ink, r);
           });
         })(ink, m);
       }
       for (v = 0; v < 3; v++) {
         (function (ink, v) {
           each(floorIdx(ink, v), function (r) {
-            paintFloor(ctx, Tp, v, ink, r);
+            theme.paintFloor(ctx, Tp, v, ink, r);
           });
         })(ink, v);
       }
     }
     for (v = 0; v < 3; v++) {
-      (function (v) {
-        each(SMUDGE + v, function (r) {
-          paintSmudge(ctx, Tp, v, r);
-        });
-      })(v);
+      each(SMUDGE + v, function (r) {
+        paintSmudge(ctx, Tp, theme, r);
+      });
     }
     for (v = 0; v < 2; v++) {
       (function (v) {
         each(WINDG + v, function () {
-          paintWindGlyph(ctx, Tp, v);
+          theme.paintWind(ctx, Tp, v);
         });
       })(v);
     }
@@ -251,23 +104,26 @@
 
   /* ---------- kâğıt dokusu ve vinyet ---------- */
 
-  function buildPaper(size, dpr) {
+  function buildPaper(size, dpr, theme) {
     var c = document.createElement('canvas');
     c.width = c.height = size;
     var ctx = c.getContext('2d');
     var r = Util.rng(4242);
+    var dk = theme.speckDark;
+    var lt = theme.speckLight;
+    var dark = theme.key === 'cave';
     for (var i = 0; i < size * 1.6; i++) {
       var x = r() * size;
       var y = r() * size;
-      var a = 0.03 + r() * 0.07;
-      ctx.fillStyle = r() < 0.5 ? 'rgba(120,95,55,' + a + ')' : 'rgba(255,255,255,' + a * 1.6 + ')';
+      var a = (dark ? 0.02 : 0.03) + r() * (dark ? 0.06 : 0.07);
+      ctx.fillStyle = r() < 0.5 ? rgba(dk, a) : rgba(lt, a * (dark ? 1 : 1.6));
       ctx.fillRect(x, y, dpr * (0.6 + r() * 1.4), dpr * (0.6 + r() * 1.4));
     }
     ctx.lineCap = 'round';
     for (var f = 0; f < 70; f++) {
       var fx = r() * size;
       var fy = r() * size;
-      ctx.strokeStyle = 'rgba(110,90,60,' + (0.03 + r() * 0.04) + ')';
+      ctx.strokeStyle = rgba(dark ? lt : dk, (dark ? 0.025 : 0.03) + r() * 0.04);
       ctx.lineWidth = dpr * 0.7;
       ctx.beginPath();
       ctx.moveTo(fx, fy);
@@ -277,243 +133,35 @@
     return c;
   }
 
-  function buildVignette(W, H) {
+  function buildVignette(W, H, theme) {
     var c = document.createElement('canvas');
     c.width = W;
     c.height = H;
     var ctx = c.getContext('2d');
-    var g = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.hypot(W, H) * 0.56);
-    g.addColorStop(0, 'rgba(90,65,30,0)');
-    g.addColorStop(1, 'rgba(90,65,30,0.34)');
+    var m = /rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/.exec(theme.vignette);
+    var edge = theme.vignette;
+    var clear = 'rgba(' + m[1] + ',' + m[2] + ',' + m[3] + ',0)';
+    var start = theme.key === 'cave' ? 0.2 : 0.35;
+    var g = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * start, W / 2, H / 2, Math.hypot(W, H) * 0.56);
+    g.addColorStop(0, clear);
+    g.addColorStop(1, edge);
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, W, H);
+    // koyu ekranda kademe halkaları görünmesin: alfaya çok hafif gürültü (ışık sprite'ındakiyle aynı yöntem)
+    try {
+      var img = ctx.getImageData(0, 0, W, H);
+      var d = img.data;
+      var seed = 777;
+      for (var i = 3; i < d.length; i += 4) {
+        if (d[i] === 0) continue;
+        seed = (Math.imul(seed, 1664525) + 1013904223) | 0;
+        d[i] = Math.max(0, Math.min(255, d[i] + ((seed >>> 24) / 255 - 0.5) * 2.6));
+      }
+      ctx.putImageData(img, 0, 0);
+    } catch (e) {
+      /* canvas okunamıyorsa düz vinyet kalır */
+    }
     return c;
-  }
-
-  /* ---------- nesneler ---------- */
-
-  function pencilPath(ctx, fill, stroke, lw) {
-    if (fill) {
-      ctx.fillStyle = fill;
-      ctx.fill();
-    }
-    if (stroke) {
-      ctx.strokeStyle = stroke;
-      ctx.lineWidth = lw;
-      ctx.lineJoin = 'round';
-      ctx.lineCap = 'round';
-      ctx.stroke();
-    }
-  }
-
-  function drawKey(ctx, cx, cy, s, t) {
-    ctx.save();
-    ctx.translate(cx, cy + Math.sin(t * 2.4) * s * 0.04);
-    var g = ctx.createRadialGradient(0, 0, 0, 0, 0, s * 0.62);
-    g.addColorStop(0, 'rgba(255,214,120,' + (0.5 + Math.sin(t * 3) * 0.12) + ')');
-    g.addColorStop(1, 'rgba(255,214,120,0)');
-    ctx.fillStyle = g;
-    ctx.fillRect(-s, -s, s * 2, s * 2);
-    ctx.rotate(-0.65 + Math.sin(t * 1.7) * 0.08);
-    var lw = Math.max(1.5, s * 0.06);
-    // sap
-    ctx.beginPath();
-    ctx.moveTo(-0.08 * s, 0);
-    ctx.lineTo(0.3 * s, 0);
-    ctx.lineTo(0.3 * s, 0.1 * s);
-    ctx.moveTo(0.2 * s, 0);
-    ctx.lineTo(0.2 * s, 0.08 * s);
-    pencilPath(ctx, null, '#7a520b', lw * 1.3);
-    // halka
-    ctx.beginPath();
-    ctx.arc(-0.2 * s, 0, 0.14 * s, 0, 6.3);
-    ctx.moveTo(-0.1 * s, 0);
-    ctx.arc(-0.2 * s, 0, 0.065 * s, 0, 6.3, true);
-    pencilPath(ctx, '#e0a82e', '#7a520b', lw);
-    ctx.restore();
-  }
-
-  function drawDoor(ctx, x, y, s, hasKey, open, t) {
-    var lw = Math.max(1.6, s * 0.06);
-    if (hasKey && open < 0.01) {
-      var pulse = 0.5 + Math.sin(t * 4) * 0.25;
-      var g = ctx.createRadialGradient(x + s / 2, y + s / 2, s * 0.1, x + s / 2, y + s / 2, s * 0.8);
-      g.addColorStop(0, 'rgba(255,205,110,' + pulse * 0.55 + ')');
-      g.addColorStop(1, 'rgba(255,205,110,0)');
-      ctx.fillStyle = g;
-      ctx.fillRect(x - s * 0.4, y - s * 0.4, s * 1.8, s * 1.8);
-    }
-    // kasa
-    ctx.beginPath();
-    ctx.moveTo(x + 0.14 * s, y + 0.92 * s);
-    ctx.lineTo(x + 0.14 * s, y + 0.4 * s);
-    ctx.arc(x + 0.5 * s, y + 0.4 * s, 0.36 * s, Math.PI, 0);
-    ctx.lineTo(x + 0.86 * s, y + 0.92 * s);
-    ctx.closePath();
-    pencilPath(ctx, open > 0.01 ? 'rgba(255,225,150,0.9)' : 'rgba(180,73,47,0.25)', '#8f3a25', lw);
-    // kapı kanadı
-    var leaf = 1 - open * 0.8;
-    ctx.beginPath();
-    ctx.moveTo(x + 0.2 * s, y + 0.92 * s);
-    ctx.lineTo(x + 0.2 * s, y + 0.4 * s);
-    ctx.arc(x + 0.2 * s + 0.3 * s * leaf, y + 0.4 * s, 0.3 * s * leaf, Math.PI, 0);
-    ctx.lineTo(x + 0.2 * s + 0.6 * s * leaf, y + 0.92 * s);
-    ctx.closePath();
-    pencilPath(ctx, 'rgba(172,76,48,0.55)', '#8f3a25', lw * 0.8);
-    ctx.strokeStyle = 'rgba(80,30,15,0.5)';
-    ctx.lineWidth = lw * 0.5;
-    for (var p = 1; p < 3; p++) {
-      ctx.beginPath();
-      ctx.moveTo(x + 0.2 * s + 0.2 * s * p * leaf, y + 0.35 * s);
-      ctx.lineTo(x + 0.2 * s + 0.2 * s * p * leaf, y + 0.92 * s);
-      ctx.stroke();
-    }
-    if (!hasKey) {
-      // asma kilit
-      ctx.beginPath();
-      ctx.arc(x + 0.5 * s, y + 0.52 * s, 0.07 * s, Math.PI, 0);
-      pencilPath(ctx, null, '#3b2a14', lw * 0.9);
-      ctx.beginPath();
-      ctx.rect(x + 0.4 * s, y + 0.52 * s, 0.2 * s, 0.16 * s);
-      pencilPath(ctx, '#c58b1a', '#3b2a14', lw * 0.8);
-    } else if (open < 0.01) {
-      ctx.beginPath();
-      ctx.arc(x + 0.66 * s, y + 0.64 * s, 0.035 * s, 0, 6.3);
-      pencilPath(ctx, '#e0a82e', '#7a520b', lw * 0.6);
-    }
-  }
-
-  function drawFlower(ctx, cx, cy, s, t) {
-    var sway = Math.sin(t * 1.6 + cx * 0.01) * s * 0.04;
-    var lw = Math.max(1.4, s * 0.05);
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.beginPath();
-    ctx.moveTo(0, 0.36 * s);
-    ctx.quadraticCurveTo(sway * 0.5, 0.2 * s, sway, 0.0);
-    pencilPath(ctx, null, '#5c7a4a', lw);
-    ctx.beginPath();
-    ctx.ellipse(-0.08 * s + sway * 0.4, 0.22 * s, 0.09 * s, 0.045 * s, -0.5, 0, 6.3);
-    pencilPath(ctx, 'rgba(120,160,95,0.7)', '#5c7a4a', lw * 0.7);
-    for (var i = 0; i < 5; i++) {
-      var a = (i / 5) * 6.283 - 1.57;
-      ctx.beginPath();
-      ctx.arc(sway + Math.cos(a) * 0.1 * s, -0.04 * s + Math.sin(a) * 0.1 * s, 0.085 * s, 0, 6.3);
-      pencilPath(ctx, '#e3a0b4', '#a24a68', lw * 0.7);
-    }
-    ctx.beginPath();
-    ctx.arc(sway, -0.04 * s, 0.06 * s, 0, 6.3);
-    pencilPath(ctx, '#e9c46a', '#a0771d', lw * 0.6);
-    ctx.restore();
-  }
-
-  function drawStone(ctx, cx, cy, s, type, t, born) {
-    var col = type === 'sound' ? TEAL : INK;
-    var lw = Math.max(1.4, s * 0.05);
-    var pulse = 0.5 + 0.5 * Math.sin(t * 2.2 + born);
-    // dış halka
-    ctx.beginPath();
-    ctx.arc(cx, cy, s * (0.3 + pulse * 0.04), 0, 6.3);
-    ctx.setLineDash([s * 0.06, s * 0.06]);
-    ctx.strokeStyle = rgba(col, 0.55);
-    ctx.lineWidth = lw * 0.7;
-    ctx.stroke();
-    ctx.setLineDash([]);
-    // taş
-    ctx.beginPath();
-    ctx.ellipse(cx, cy + s * 0.02, s * 0.2, s * 0.155, -0.3, 0, 6.3);
-    pencilPath(ctx, type === 'sound' ? '#3f9aa2' : '#2a3a6b', rgba(col, 0.95), lw);
-    ctx.beginPath();
-    ctx.arc(cx - s * 0.06, cy - s * 0.04, s * 0.06, 3.6, 5.2);
-    pencilPath(ctx, null, 'rgba(255,255,255,0.55)', lw * 0.8);
-  }
-
-  function drawArrow(ctx, cx, cy, s, dir, t) {
-    var bob = Math.sin(t * 3.2) * s * 0.035;
-    var dx = dir.dx;
-    var dy = dir.dy;
-    var tail = s * 0.26;
-    var tip = s * 0.5 + bob;
-    var lw = Math.max(2, s * 0.075);
-    ctx.strokeStyle = rgba(TEAL, 0.95);
-    ctx.fillStyle = rgba(TEAL, 0.95);
-    ctx.lineWidth = lw;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(cx + dx * tail, cy + dy * tail);
-    ctx.lineTo(cx + dx * (tip - s * 0.08), cy + dy * (tip - s * 0.08));
-    ctx.stroke();
-    var hx = cx + dx * (tip + s * 0.06);
-    var hy = cy + dy * (tip + s * 0.06);
-    var px = -dy;
-    var py = dx;
-    ctx.beginPath();
-    ctx.moveTo(hx, hy);
-    ctx.lineTo(hx - dx * s * 0.17 + px * s * 0.11, hy - dy * s * 0.17 + py * s * 0.11);
-    ctx.lineTo(hx - dx * s * 0.17 - px * s * 0.11, hy - dy * s * 0.17 - py * s * 0.11);
-    ctx.closePath();
-    ctx.fill();
-    // fısıltı yayları
-    ctx.lineWidth = lw * 0.55;
-    for (var i = 0; i < 2; i++) {
-      var r = s * (0.36 + i * 0.1 + ((t * 0.9) % 1) * 0.08);
-      var a0 = Math.atan2(dy, dx);
-      ctx.strokeStyle = rgba(TEAL, 0.45 - i * 0.18);
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, a0 - 0.5, a0 + 0.5);
-      ctx.stroke();
-    }
-  }
-
-  function drawGoalMark(ctx, cx, cy, s, t) {
-    ctx.strokeStyle = rgba(TEAL, 0.9);
-    ctx.lineWidth = Math.max(2, s * 0.06);
-    ctx.lineCap = 'round';
-    for (var i = 0; i < 8; i++) {
-      var a = (i / 8) * 6.283 + t;
-      ctx.beginPath();
-      ctx.moveTo(cx + Math.cos(a) * s * 0.34, cy + Math.sin(a) * s * 0.34);
-      ctx.lineTo(cx + Math.cos(a) * s * 0.46, cy + Math.sin(a) * s * 0.46);
-      ctx.stroke();
-    }
-  }
-
-  function drawPlayer(ctx, cx, cy, s, p, t, alpha) {
-    var bob = p.moving ? Math.sin(p.walk * 7.5) : Math.sin(t * 2) * 0.35;
-    var sq = 1 + bob * 0.05;
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    // gölge
-    ctx.fillStyle = 'rgba(40,30,15,0.2)';
-    ctx.beginPath();
-    ctx.ellipse(cx, cy + s * 0.2, s * 0.24, s * 0.09, 0, 0, 6.3);
-    ctx.fill();
-    ctx.translate(cx, cy - s * 0.04 - Math.abs(bob) * s * 0.025);
-    ctx.scale(1 / sq, sq);
-    var lw = Math.max(1.5, s * 0.05);
-    // gövde: sivri kapüşonlu küçük figür
-    ctx.beginPath();
-    ctx.moveTo(0, -s * 0.34);
-    ctx.bezierCurveTo(s * 0.12, -s * 0.2, s * 0.26, -s * 0.06, s * 0.25, s * 0.1);
-    ctx.bezierCurveTo(s * 0.24, s * 0.22, s * 0.1, s * 0.26, 0, s * 0.26);
-    ctx.bezierCurveTo(-s * 0.1, s * 0.26, -s * 0.24, s * 0.22, -s * 0.25, s * 0.1);
-    ctx.bezierCurveTo(-s * 0.26, -s * 0.06, -s * 0.12, -s * 0.2, 0, -s * 0.34);
-    ctx.closePath();
-    pencilPath(ctx, '#2b3358', '#141a33', lw);
-    // yüz boşluğu
-    var fx = Math.cos(p.face) * s * 0.07;
-    var fy = Math.sin(p.face) * s * 0.05;
-    ctx.beginPath();
-    ctx.ellipse(fx, -s * 0.02 + fy, s * 0.15, s * 0.12, 0, 0, 6.3);
-    pencilPath(ctx, '#f6efdc', null, 0);
-    ctx.fillStyle = '#1b2140';
-    var ex = Math.cos(p.face) * s * 0.045;
-    var ey = Math.sin(p.face) * s * 0.035;
-    ctx.beginPath();
-    ctx.arc(fx - s * 0.05 + ex, -s * 0.02 + fy + ey, s * 0.024, 0, 6.3);
-    ctx.arc(fx + s * 0.05 + ex, -s * 0.02 + fy + ey, s * 0.024, 0, 6.3);
-    ctx.fill();
-    ctx.restore();
   }
 
   /* ---------- Renderer ---------- */
@@ -530,11 +178,27 @@
     this.cam = { x: 0, y: 0 };
     this.t = 0;
     this.windFx = 0;
-    this.atlas = null;
-    this.atlasTp = 0;
+    this.atlases = {};
+    this.theme = S.Themes.forest;
     this.slowFrames = 0;
+    this.reduceMotion = !!(root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)').matches);
     this.resize();
   }
+
+  Renderer.prototype.themeAssets = function () {
+    var th = this.theme;
+    this.atlas = this.atlases[th.key] || (this.atlases[th.key] = buildAtlas(this.Tp, th));
+    this.paper = buildPaper(this.paperSize, this.dpr, th);
+    this.paperPat = this.ctx.createPattern(this.paper, 'repeat');
+    this.vignette = buildVignette(this.W, this.H, th);
+  };
+
+  Renderer.prototype.setTheme = function (key) {
+    var th = S.Themes[key] || S.Themes.forest;
+    if (th === this.theme) return;
+    this.theme = th;
+    this.themeAssets();
+  };
 
   Renderer.prototype.resize = function () {
     var w = Math.max(1, root.innerWidth);
@@ -549,16 +213,13 @@
     this.canvas.height = this.H;
     this.canvas.style.width = w + 'px';
     this.canvas.style.height = h + 'px';
-    this.T = Util.clamp(Math.round(Math.min(w, h) / 10.5), 30, 58);
-    this.Tp = Math.max(16, Math.round(this.T * dpr));
-    if (this.atlasTp !== this.Tp) {
-      this.atlas = buildAtlas(this.Tp);
-      this.atlasTp = this.Tp;
-    }
+    var T = Util.clamp(Math.round(Math.min(w, h) / 10.5), 30, 58);
+    var Tp = Math.max(16, Math.round(T * dpr));
+    if (Tp !== this.Tp) this.atlases = {}; // karo boyutu değişti: tüm temaların atlası yeniden çizilir
+    this.T = T;
+    this.Tp = Tp;
     this.paperSize = Math.round(240 * dpr);
-    this.paper = buildPaper(this.paperSize, dpr);
-    this.paperPat = this.ctx.createPattern(this.paper, 'repeat');
-    this.vignette = buildVignette(this.W, this.H);
+    this.themeAssets();
   };
 
   /** Çok yavaş cihazlarda çözünürlüğü otomatik düşür. */
@@ -578,6 +239,8 @@
   };
 
   Renderer.prototype.frame = function (world, dt) {
+    if (world.theme && world.theme !== this.theme.key) this.setTheme(world.theme);
+    var th = this.theme;
     var ctx = this.ctx;
     var W = this.W;
     var H = this.H;
@@ -598,7 +261,8 @@
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalAlpha = 1;
-    ctx.fillStyle = PAPER;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = th.paper;
     ctx.fillRect(0, 0, W, H);
 
     // kâğıt dokusu (haritayla birlikte kayar)
@@ -623,7 +287,7 @@
     var ty1 = Math.ceil(camY + (H - cy0) / Tp) + 1;
 
     // kareli defter çizgileri
-    ctx.strokeStyle = 'rgba(105,140,170,0.16)';
+    ctx.strokeStyle = th.grid;
     ctx.lineWidth = Math.max(1, Math.round(dpr * 0.7));
     ctx.beginPath();
     for (var gxi = tx0; gxi <= tx1; gxi++) {
@@ -638,14 +302,10 @@
     }
     ctx.stroke();
 
-    // fener: görüş alanını aydınlatır
+    // fener / aydınlık: görüş alanını vurgular
     var psx = cx0 + (p.x - camX) * Tp;
     var psy = cy0 + (p.y - camY) * Tp;
-    var gl = ctx.createRadialGradient(psx, psy, Tp * 0.4, psx, psy, Game.VIS_R * Tp);
-    gl.addColorStop(0, 'rgba(255,250,232,0.55)');
-    gl.addColorStop(1, 'rgba(255,250,232,0)');
-    ctx.fillStyle = gl;
-    ctx.fillRect(psx - Game.VIS_R * Tp, psy - Game.VIS_R * Tp, Game.VIS_R * Tp * 2, Game.VIS_R * Tp * 2);
+    if (!th.glowAbove) th.drawGlow(ctx, psx, psy, (world.visR || 3.6) * Tp * th.glowScale, t);
 
     // karolar
     var w = world.w;
@@ -696,7 +356,10 @@
     }
     ctx.globalAlpha = 1;
 
-    // iz (kurşun kalemle çizilmiş yürüyüş yolu)
+    // mağarada fener ışığı karoların üstüne biner: silinme lekeleri ışıkta siyah kir gibi görünmesin
+    if (th.glowAbove) th.drawGlow(ctx, psx, psy, (world.visR || 3.6) * Tp * th.glowScale, t);
+
+    // iz (kalemle/tebeşirle çizilmiş yürüyüş yolu)
     var trail = world.trail;
     if (trail.length > 1) {
       var buckets = [[], [], [], [], [], []];
@@ -713,7 +376,7 @@
       ctx.setLineDash([Tp * 0.1, Tp * 0.09]);
       for (var b = 0; b < 6; b++) {
         if (!buckets[b].length) continue;
-        ctx.strokeStyle = 'rgba(70,66,62,' + (0.12 + (b + 0.5) * 0.065) + ')';
+        ctx.strokeStyle = rgba(th.trail, 0.12 + (b + 0.5) * 0.065);
         ctx.beginPath();
         for (var bi = 0; bi < buckets[b].length; bi++) {
           var qq = buckets[b][bi];
@@ -728,13 +391,13 @@
     // nesneler (yalnızca haritada görünür olan hücrelerde)
     var visibleAt = function (cx, cy) {
       var j = cy * w + cx;
-      return dtype[j] === 1 ? Math.min(1, dalpha[j]) : 0;
+      return dtype[j] === 1 && !world.dghost[j] ? Math.min(1, dalpha[j]) : 0; // ayna hayaleti gerçek nesneyi göstermez
     };
     var door = world.maze.door;
     var da = visibleAt(door.x, door.y);
     if (da > 0.02) {
       ctx.globalAlpha = da;
-      drawDoor(ctx, gx(door.x), gy(door.y), Tp, world.hasKey, world.state === 'play' ? 0 : Math.min(1, world.exitT * 1.6), t);
+      th.drawDoor(ctx, gx(door.x), gy(door.y), Tp, world.hasKey, world.state === 'play' ? 0 : Math.min(1, world.exitT * 1.6), t);
       ctx.globalAlpha = 1;
     }
     if (!world.hasKey) {
@@ -742,7 +405,7 @@
       var ka = visibleAt(ky.x, ky.y);
       if (ka > 0.02) {
         ctx.globalAlpha = ka;
-        drawKey(ctx, gx(ky.x) + Tp / 2, gy(ky.y) + Tp / 2, Tp, t);
+        th.drawKey(ctx, gx(ky.x) + Tp / 2, gy(ky.y) + Tp / 2, Tp, t);
         ctx.globalAlpha = 1;
       }
     }
@@ -750,9 +413,17 @@
       var fl = world.flowers[fi];
       if (fl.taken) continue;
       var fa = visibleAt(fl.x, fl.y);
-      if (fa < 0.02) continue;
+      if (fa < 0.02) {
+        // mağarada mantarlar karanlıkta bile hafifçe parlar: yakındaysa ışığı seçilir
+        if (th.drawBeacon) {
+          var bd = Math.hypot(fl.x + 0.5 - p.x, fl.y + 0.5 - p.y);
+          var br = (world.visR || 3.6) * 2.3;
+          if (bd < br) th.drawBeacon(ctx, gx(fl.x) + Tp / 2, gy(fl.y) + Tp / 2, Tp, t, 1 - bd / br);
+        }
+        continue;
+      }
       ctx.globalAlpha = fa;
-      drawFlower(ctx, gx(fl.x) + Tp / 2, gy(fl.y) + Tp / 2, Tp, t);
+      th.drawPickup(ctx, gx(fl.x) + Tp / 2, gy(fl.y) + Tp / 2, Tp, t);
       ctx.globalAlpha = 1;
     }
     for (var si = 0; si < world.stones.length; si++) {
@@ -761,16 +432,16 @@
       var scy = gy(st.cy) + Tp / 2;
       var grow = Math.min(1, (world.t - st.born) * 5);
       ctx.globalAlpha = grow;
-      drawStone(ctx, scx, scy, Tp, st.type, t, st.born);
+      th.drawStone(ctx, scx, scy, Tp, st.type, t, st.born);
       if (st.type === 'sound') {
-        if (st.dir) drawArrow(ctx, scx, scy, Tp, st.dir, t);
-        if (st.atGoal) drawGoalMark(ctx, scx, scy, Tp, t);
+        if (st.dir) th.drawArrow(ctx, scx, scy, Tp, st.dir, t);
+        if (st.atGoal) th.drawGoalMark(ctx, scx, scy, Tp, t);
       }
       ctx.globalAlpha = 1;
     }
 
     // oyuncu
-    drawPlayer(ctx, psx, psy, Tp, p, t, world.state === 'play' ? 1 : Math.max(0, 1 - world.exitT * 0.9));
+    th.drawPlayer(ctx, psx, psy, Tp, p, t, world.state === 'play' ? 1 : Math.max(0, 1 - world.exitT * 0.9));
 
     // parçacıklar
     var parts = world.particles;
@@ -781,7 +452,7 @@
       var sy = cy0 + (pt.y - camY) * Tp;
       if (pt.kind === 'ring') {
         var rr = (0.35 + 2.7 * (1 - Math.pow(1 - u, 3))) * Tp;
-        ctx.strokeStyle = rgba(pt.color === 'sound' ? TEAL : INK, (1 - u) * 0.65);
+        ctx.strokeStyle = rgba(th.ringRGB(pt.color), (1 - u) * 0.7);
         ctx.lineWidth = Math.max(1.5, Tp * 0.06 * (1 - u));
         ctx.beginPath();
         ctx.arc(sx, sy, rr, 0, 6.3);
@@ -804,22 +475,12 @@
     }
     ctx.globalAlpha = 1;
 
-    // rüzgâr çizgileri (ekran uzayı)
+    // atmosfer: ateş böcekleri / toz
+    if (!this.reduceMotion) th.drawAmbient(ctx, W, H, t, dpr);
+
+    // rüzgâr / cereyan çizgileri (ekran uzayı)
     this.windFx += ((world.inWind ? 1 : 0) - this.windFx) * Math.min(1, dt * 3);
-    if (this.windFx > 0.02) {
-      ctx.strokeStyle = 'rgba(70,105,130,' + 0.26 * this.windFx + ')';
-      ctx.lineWidth = Math.max(1.2, dpr * 1.3);
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      for (var wi = 0; wi < 18; wi++) {
-        var wy = ((wi * 137.5) % 100) / 100 * H;
-        var len = (60 + (wi * 53) % 90) * dpr;
-        var wx = ((wi * 211 + t * (260 + (wi % 5) * 70) * dpr) % (W + len * 2)) - len;
-        ctx.moveTo(wx, wy);
-        ctx.quadraticCurveTo(wx + len * 0.5, wy - 6 * dpr, wx + len, wy + 2 * dpr);
-      }
-      ctx.stroke();
-    }
+    if (this.windFx > 0.02) th.drawWindFx(ctx, W, H, t, dpr, this.windFx);
 
     // vinyet
     ctx.drawImage(this.vignette, 0, 0);

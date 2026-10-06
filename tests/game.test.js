@@ -157,6 +157,26 @@ check('ses taşı: ok anahtara, anahtardan sonra kapıya bakar', () => {
   assert.ok(w8.distDoor[(s.cy + s.dir.dy) * w8.w + s.cx + s.dir.dx] < w8.distDoor[s.cy * w8.w + s.cx], 'ok kapıya dönmeli');
 });
 
+check('ipucu: ses taşı olmayan bölümde 1 ses taşı verir, ok anahtara bakar; ses taşı olan bölümde vermez', () => {
+  const w = new Game.World(Levels.byId(7));
+  assert.equal(w.hasSoundType, false);
+  assert.equal(w.hinted, false);
+  assert.equal(w.grantHint(), true);
+  assert.equal(w.hinted, true);
+  assert.equal(w.total.sound, 1);
+  assert.equal(w.inv.sound, 1);
+  assert.equal(w.cur, 'sound');
+  assert.equal(w.grantHint(), false, 'ikinci kez verilmemeli');
+  w.toggleStone();
+  const s = w.stones[0];
+  assert.equal(s.type, 'sound');
+  assert.ok(s.dir, 'ok yönü yok');
+  assert.ok(w.distKey[(s.cy + s.dir.dy) * w.w + s.cx + s.dir.dx] < w.distKey[s.cy * w.w + s.cx], 'ok anahtara yaklaştırmıyor');
+  const native = new Game.World(Levels.byId(5));
+  assert.equal(native.grantHint(), false);
+  assert.equal(native.hinted, false);
+});
+
 check('ayna: görüşteki ayna hayalet hücre üretir, mürekkep alanında üretmez', () => {
   const w9 = new Game.World(Levels.byId(6));
   const m = w9.mirrors[0];
@@ -173,6 +193,62 @@ check('ayna: görüşteki ayna hayalet hücre üretir, mürekkep alanında üret
   let ph = 0;
   for (let i = 0; i < w9.N; i++) if (w9.ptype[i]) ph++;
   assert.ok(ph > 0, 'hayalet hücre oluşmadı');
+});
+
+check('ayna hayaleti gerçek hafızadan hızlı silinir ve gerçek nesneyi göstermez (dghost)', () => {
+  const w = new Game.World(Levels.byId(6));
+  // bir hayalet hücre yarat: bilinmeyen bir zemin hücresini hayalet olarak işaretle
+  let gi = -1;
+  for (let i = 0; i < w.N && gi < 0; i++) if (w.tiles[i] === 0 && !w.known[i] && !w.vis[i]) gi = i;
+  assert.ok(gi >= 0);
+  w.ptype[gi] = 1; w.page[gi] = 0; w.pap[gi] = 1;
+  w.buildDisplay();
+  assert.equal(w.dtype[gi], 1);
+  assert.equal(w.dghost[gi], 1, 'hayalet işaretlenmeli');
+  // hayalet, anahtar hücresinde de gerçek anahtarı ifşa etmemeli: renderer dghost'a bakar
+  const k = w.maze.key; const ki = k.y * w.w + k.x;
+  w.known[ki] = 0; w.ptype[ki] = 1; w.page[ki] = 0; w.pap[ki] = 1;
+  w.buildDisplay();
+  assert.equal(w.dghost[ki], 1);
+  // gerçek hafıza (15 sn) dolmadan hayalet silinir: 2 kat hızlı
+  const t = w.mem / 2 + 0.5;
+  for (let s = 0; s < Math.ceil(t * 60); s++) { w.updateMemory(1 / 60); }
+  assert.equal(w.ptype[gi], 0, 'hayalet ' + t.toFixed(1) + ' sn içinde silinmeli');
+  // gerçek bilinen hücre aynı sürede hâlâ duruyor
+  const real = w.idx(w.maze.start.x, w.maze.start.y);
+  w.known[real] = 1; w.age[real] = 0;
+  for (let s = 0; s < Math.ceil(t * 60); s++) { w.updateMemory(1 / 60); }
+  assert.equal(w.known[real], 1, 'gerçek hafıza ayna hayaletinden yavaş silinir');
+});
+
+check('yıldız eşikleri: mağarada (2. sezon) daha toleranslı', () => {
+  const forest = new Game.World(Levels.byId(12));
+  const cave = new Game.World(Levels.byId(20));
+  const pf = Game.parTime(forest.maze), pc = Game.parTime(cave.maze);
+  assert.equal(Game.stars(forest.maze, pf * 2.0), 2, 'orman: 2.0×par = 2 yıldız');
+  assert.equal(Game.stars(cave.maze, pc * 2.0), 3, 'mağara: 2.0×par = 3 yıldız');
+  assert.equal(Game.stars(cave.maze, pc * 4.0), 1);
+});
+
+check('mağarada görüş yarıçapı küçük: görüş ve taş alanı buna uyar', () => {
+  const w = new Game.World(Levels.byId(24));
+  assert.equal(w.theme, 'cave');
+  assert.equal(w.visR, 2.6);
+  assert.ok(w.stoneR <= 2.2 + 1e-9, 'taş alanı görüşten küçük olmalı: ' + w.stoneR);
+  const px = w.player.x, py = w.player.y;
+  w.visList.forEach((i) => {
+    if (w.tiles[i] !== 0) return; // duvarlar, görülen zeminlerin komşusu olarak biraz öteden gelebilir
+    const d = Math.hypot((i % w.w) + 0.5 - px, ((i / w.w) | 0) + 0.5 - py);
+    assert.ok(d <= Math.max(w.visR, 1.5) + 1e-6, 'görüş yarıçapı aşıldı: ' + d.toFixed(2));
+  });
+  w.toggleStone();
+  assert.ok(w.stones[0].cells.length >= 8, 'kilitli hücre sayısı ' + w.stones[0].cells.length);
+});
+
+check('orman bölümleri varsayılan görüş (3.6) ve orman temasını kullanır', () => {
+  const w = new Game.World(Levels.byId(12));
+  assert.equal(w.theme, 'forest');
+  assert.equal(w.visR, 3.6);
 });
 
 check('tüm bölümler ve günlük için bot kapıya ulaşır', () => {

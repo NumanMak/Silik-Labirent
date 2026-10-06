@@ -45,12 +45,47 @@ BAD.forEach((raw) => {
   });
 });
 
+check('v1 kaydı: ilerleme ve ayarlar korunur, eski rekorlar sıfırlanır', () => {
+  const { Save } = load(JSON.stringify({ v: 1, unlocked: 5, best: { 1: { time: 20, stars: 3, steps: 50 } }, daily: { '2026-01-01': { time: 9, stars: 2 } }, settings: { sfx: false, music: true, vib: true }, seen: { move: 1 } }));
+  assert.equal(Save.data.unlocked, 5);
+  assert.deepStrictEqual(Object.keys(Save.data.best), []);
+  assert.deepStrictEqual(Object.keys(Save.data.daily), []);
+  assert.equal(Save.data.settings.sfx, false);
+});
+
+check('null süre/yıldız ve __proto__ anahtarı reddedilir', () => {
+  const { Save } = load('{"v":2,"best":{"1":{"time":null,"stars":2},"__proto__":{"time":1,"stars":3},"2":{"time":12,"stars":3}}}');
+  assert.deepStrictEqual(Object.keys(Save.data.best), ['2']);
+  assert.equal(Object.getPrototypeOf(Save.data.best), Object.prototype);
+  assert.equal(Save.data.best[2].time, 12);
+});
+
 check('geçerli kayıt korunur', () => {
-  const { Save } = load(JSON.stringify({ v: 1, unlocked: 4, best: { 1: { time: 20, stars: 3, steps: 50 } }, daily: {}, settings: { sfx: false, music: true, vib: false }, seen: { move: 1 } }));
+  const { Save } = load(JSON.stringify({ v: 2, unlocked: 4, best: { 1: { time: 20, stars: 3, steps: 50 } }, daily: {}, settings: { sfx: false, music: true, vib: false }, seen: { move: 1 } }));
   assert.equal(Save.data.unlocked, 4);
   assert.equal(Save.data.best[1].stars, 3);
   assert.equal(Save.data.settings.sfx, false);
   assert.equal(Save.data.seen.move, 1);
+});
+
+check('openAll ayarı yalnızca boolean olarak okunur', () => {
+  assert.equal(load(null).Save.data.settings.openAll, false);
+  assert.equal(load(JSON.stringify({ v: 2, settings: { openAll: true } })).Save.data.settings.openAll, true);
+  assert.equal(load(JSON.stringify({ v: 2, settings: { openAll: 'evet' } })).Save.data.settings.openAll, false);
+});
+
+check('"Tüm bölümleri aç" ile açılan bölümü bitirmek gerçek ilerlemeyi ilerletmez', () => {
+  const { Save } = load(JSON.stringify({ v: 2, unlocked: 1, settings: { openAll: true } }));
+  Save.record({ id: 20 }, 100, 2, 300);
+  assert.equal(Save.data.unlocked, 1, 'ilerleme değişmemeli');
+  assert.equal(Save.data.best[20].stars, 2, 'yine de rekor/yıldız kaydedilir');
+  Save.record({ id: 1 }, 30, 3, 80);
+  assert.equal(Save.data.unlocked, 2, 'normal ilerleme sürer');
+});
+
+check('v1 kaydındaki "mirror" ipucu bayrağı orman göl ipucuna taşınır', () => {
+  const { Save } = load(JSON.stringify({ v: 1, unlocked: 6, seen: { mirror: 1 } }));
+  assert.equal(Save.data.seen['mirror-forest'], 1);
 });
 
 check('localStorage erişilemezse bellekte çalışır', () => {
